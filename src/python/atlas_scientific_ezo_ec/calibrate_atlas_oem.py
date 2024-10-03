@@ -3,6 +3,8 @@
 import atlas_oem
 import datetime
 import time
+import datetime
+import time
 
 probe = atlas_oem.AtlasOEM()
 probe.setActiveHibernate(1)
@@ -18,6 +20,11 @@ def presentMenu(menu):
     done = False
     while not done:
         clearScreen()
+        print(datetime.datetime.now())
+        probe.dump()
+        print()
+        print()
+        print()
         print(datetime.datetime.now())
         probe.dump()
         print()
@@ -45,18 +52,26 @@ def presentMenu(menu):
             print('Invalid choice.')
             input()
 
+
 def pollEC():
     print('Getting 10 seconds of data...')
     ec_old = None
-    for i in range(0, 10):
-        ec = probe.EC()
-        if ec_old:
-            delta_percent = abs(ec - ec_old) / ec_old * 100
-        else:
-            delta_percent = 0.0
-        print(f'time: {datetime.datetime.now()}  EC: {ec: 6.0f}  delta: {delta_percent: 3.2f}%')
-        ec_old = ec
-        time.sleep(1)
+    with open(f'{datetime.datetime.now()}.csv', 'w') as file:
+        while True:
+         try:
+          ec = probe.EC()
+          if ec_old:
+              delta_percent = abs(ec - ec_old) / ec_old * 100
+          else:
+              delta_percent = 0.0
+          temp = f'{datetime.datetime.now()}, {ec: 6.0f}, {delta_percent: 3.2f}% \n'
+          print(temp)
+          file.write(temp)
+          ec_old = ec
+          time.sleep(1)
+         except KeyboardInterrupt:
+           print("User interrupted")
+           break
 
 def setProbeType():
     value = input('Enter probe type value (K value) > ')
@@ -66,8 +81,9 @@ def setProbeType():
     except ValueError:
         input('K value must be a number [press enter to continue]')
 
+
 def setTemperatureCompensation():
-    value = input('Enter temperature of solution (deg C) > ')
+    value = input('Enter temperature (deg C) > ')
 
     try:
         probe.setTemperatureCompensation(float(value))
@@ -76,6 +92,13 @@ def setTemperatureCompensation():
 
 
 def printProbeStatus():
+    try:
+        clearScreen()
+        print(datetime.datetime.now())
+        probe.dump()
+        input('Press enter to continue')
+    except Exception as e:
+        print(f'Error: {e}')
     try:
         clearScreen()
         print(datetime.datetime.now())
@@ -97,19 +120,23 @@ def doCalibration(description: str, type: int):
         value = 0
 
     while True:
-        print('Getting 10 seconds of data...')
-        ec_old = None
-        for i in range(0, 10):
-            ec = probe.EC()
-            if ec_old:
-                delta_percent = abs(ec - ec_old) / ec_old * 100
-            else:
-                delta_percent = 0.0
-            print(f'time:{datetime.datetime.now()}  EC: {ec: 6.0f}  delta: {delta_percent: 3.2f}%')
-            ec_old = ec
-            time.sleep(1)
-        if input('Calibrate now (Y/n)?').lower() in ['', 'y']:
-            break
+        try:
+          print('Getting 10 seconds of data...')
+          ec_old = None
+          for i in range(0, 10):
+              ec = probe.EC()
+              if ec_old:
+                  delta_percent = abs(ec - ec_old) / ec_old * 100
+              else:
+                  delta_percent = 0.0
+              print(f'time:{datetime.datetime.now()}  EC: {ec: 6.0f}  delta: {delta_percent: 3.2f}%')
+              ec_old = ec
+              time.sleep(1)
+          if input('Calibrate now (Y/n)?').lower() in ['', 'y']:
+              break
+        except KeyboardInterrupt:
+          print("User interrupted")
+          return
 
     try:
         probe.setCalibration(float(value))
@@ -177,11 +204,9 @@ def singlePointCalibration():
 
 def highCalibration():
     doCalibration('DUAL POINT HIGH', 5)
-    doCalibration('DUAL POINT HIGH', 5)
 
 
 def lowCalibration():
-    doCalibration('DUAL POINT LOW', 4)
     doCalibration('DUAL POINT LOW', 4)
 
 
@@ -215,6 +240,11 @@ def calibrate():
                 'func': lowCalibration
             },
             {
+                'description': 'Dual Point Low Calibration',
+                'key': 'l',
+                'func': lowCalibration
+            },
+            {
                 'description': 'Dual Point High Calibration',
                 'key': 'h',
                 'func': highCalibration
@@ -234,8 +264,12 @@ presentMenu({
         {
             'description': 'Print probe status',
             'key': 's',
-            'key': 's',
             'func': printProbeStatus
+        },
+        {
+            'description': 'Poll EC for 10 seconds',
+            'key': 'l',
+            'func': pollEC
         },
         {
             'description': 'Poll EC for 10 seconds',
@@ -245,13 +279,7 @@ presentMenu({
         {
             'description': 'Set probe type',
             'key': 'p',
-            'key': 'p',
             'func': setProbeType
-        },
-        {
-            'description': 'Set temperature compensation',
-            'key': 't',
-            'func': setTemperatureCompensation
         },
         {
             'description': 'Set temperature compensation',
