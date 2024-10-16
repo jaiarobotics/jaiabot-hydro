@@ -72,6 +72,99 @@ def doCalibration(description: str, type: int):
     except ValueError:
         input('Value must be a number.  Press enter.')
 
+def doJaiaCalibration(description: str, type: int, value: int):
+    repetitions = 0
+    while True: 
+        print(f"Running {description} calibration at {value} μS/cm.")
+        ec_old = None
+        delta_list = []
+        for i in range(0,10):
+            ec = probe.EC()
+            if ec_old:
+                delta_percent = abs(ec - ec_old) / ec_old * 100
+            else:
+                delta_percent = 0.0
+            delta_list.append(delta_percent)
+            ec_old = ec
+            print(ec, ', ', delta_percent)
+
+            # Wait 1 second between taking readings
+            time.sleep(1)
+        
+        repetitions += 1
+
+        if max(delta_list) < 0.10 or repetitions == 3:
+            break
+    
+    input(f"{description} calibration at {value} μS/cm complete. Press enter")
+    probe.setCalibration(value)
+    probe.setCalibrationRequest(type)
+
+
+def jaiaCalibration():
+    # Give countdown for user to prepare for calibration to begin
+    countdown = 5
+    while countdown != -1:
+        print(f"Starting calibration procedure... {countdown}")
+        countdown -= 1
+        time.sleep(1)
+        clearScreen()
+
+    # Start from a fresh calibration state
+    clearCalibration()
+
+    # Set the probe type to the Jaia default
+    # This must be changed if the probe ever changes from K 1.0
+    probe.setProbeType(1.0)
+
+    # Dry calibration (0)
+    print("\n==========\nTo begin calibrating, the probe must be completely dry.\n")
+    time.sleep(1)
+    input("Once you've ensured the probe is completely dry, press enter.\n")
+    doJaiaCalibration('DRY', 2, 0)
+
+    # Get temperature of solution from user
+    setTemperatureCompensation()
+
+    # Rough calibration
+    print("==========\nBeginning the rough calibration portion.\n")
+    time.sleep(1)
+
+    # Dual Point Low calibration (12,880)
+    print("\n==========\nWe will now begin the DUAL POINT LOW calibration. Submerge the probe in the 12,880 μS/cm solution and ensure the sampling window is fully submerged and has no bubbles stuck inside.")
+    time.sleep(1)
+    input("When you're ready to begin the calibration procedure, press enter.\n")
+    doJaiaCalibration('DUAL POINT LOW', 4, 12880)
+
+    # Dual Point High calibration (80,000)
+    print("\n==========\nWe will now begin the DUAL POINT HIGH calibration. Rinse and dry the probe, then put the probe in the 80,000 μS/cm solution. Ensure the sampling window is fully submerged and has no bubbles stuck inside.")
+    time.sleep(1)
+    input("When you're ready to begin the calibration procedure, press enter.\n")
+    doJaiaCalibration('DUAL POINT HIGH', 4, 80000)
+
+    
+    # Fine calibration 
+    print("\n==========\nRough calibration procedure complete. Beginning the fine calibration procedure")
+
+    # Dual Point Low calibration (12,880)
+    print("\n==========\nWe will now begin the DUAL POINT LOW calibration. Submerge the probe in the 12,880 μS/cm solution and ensure the sampling window is fully submerged and has no bubbles stuck inside.")
+    time.sleep(1)
+    input("When you're ready to begin the calibration procedure, press enter.\n")
+    doJaiaCalibration('DUAL POINT LOW', 4, 12880)
+
+    # Dual Point High calibration (80,000)
+    print("\n==========\nWe will now begin the DUAL POINT HIGH calibration. Rinse and dry the probe, then put the probe in the 80,000 μS/cm solution. Ensure the sampling window is fully submerged and has no bubbles stuck inside.")
+    time.sleep(1)
+    input("When you're ready to begin the calibration procedure, press enter.\n")
+    doJaiaCalibration('DUAL POINT HIGH', 4, 80000)
+
+    # Reset temperature calibration to its default
+    probe.setTemperatureCompensation(25)
+
+    # Calibration complete
+    input("Calibration procedure complete. Press enter to exit.")
+
+    return 0
 
 def dryCalibration():
     doCalibration('DRY', 2)
