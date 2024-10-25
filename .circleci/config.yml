@@ -647,7 +647,7 @@ jobs:
               "Key=jaiabot_version_when_built,Value=${JAIABOT_VERSION}" \
               "Key=goby_version_when_built,Value=${GOBY_VERSION}"
   docker-sim:
-    working_directory: /root/jaiabot
+    working_directory: /tmp/docker/jaiabot
     docker:
       - image: cimg/base:current
         auth:
