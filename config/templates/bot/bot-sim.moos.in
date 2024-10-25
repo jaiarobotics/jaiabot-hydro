@@ -33,7 +33,7 @@ ProcessConfig = uSimMarine
   start_speed   = 0
 
   drift_x       = 0
-  drift_y       = 0
+  drift_y       = -0.25
   
   prefix        = NAV
 
