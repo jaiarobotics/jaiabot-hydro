@@ -186,7 +186,6 @@ filter-template-debian-builds: &filter-template-debian-builds
     branches:
       only:
         - "1.y"
-        - "task/add-simulator-docker-container-to-circleci/jaia-1731"
 
 # which branches to run the normal source build
 filter-template-normal-builds: &filter-template-normal-builds
@@ -221,7 +220,6 @@ filter-template-docker-sim-builds: &filter-template-docker-sim-builds
     branches:
       only:
         - "1.y"
-        - "task/add-simulator-docker-container-to-circleci/jaia-1731"
 
 ## Begin actual config
 version: 2.1
