@@ -1,19 +1,31 @@
 FROM ubuntu:@JAIA_VERSION_UBUNTU_CODENAME@
+ARG use_apt=false
+ARG repo=release
+ARG version=@JAIA_VERSION_RELEASE_BRANCH@
+SHELL ["/bin/bash", "-c"]
 ENV jaia_log_dir=/var/log/jaiabot
 ENV jaia_mode=simulation
 ENV USER=root
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
-RUN apt-get install -y sudo git gnupg lsb-release apt-utils vim
+RUN apt-get install -y sudo git gnupg lsb-release apt-utils vim build-essential
 #items below must be installed here because ENV is not passed through sudo in the scripts below
 RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata keyboard-configuration
-RUN git clone https://github.com/jaiarobotics/jaiabot.git
+RUN if [[ "$use_apt" = "false" ]]; \
+    then git clone https://github.com/jaiarobotics/jaiabot.git; \
+    git switch @JAIABOT_BRANCH_FOR_DOCKER@; \
+    /jaiabot/scripts/setup-tools-build-nodocker.sh; \
+    else echo -e "deb http://packages.jaia.tech/ubuntu/${repo}/${version}/ @JAIA_VERSION_UBUNTU_CODENAME@/\ndeb http://packages.jaia.tech/ubuntu/gobysoft/${repo}/${version}/ @JAIA_VERSION_UBUNTU_CODENAME@/" >> /etc/apt/sources.list.d/jaiabot_${repo}_${version}.list && \
+    apt-key adv --recv-key --keyserver keyserver.ubuntu.com 954A004CD5D8CF32 && \
+    apt-key adv --recv-key --keyserver keyserver.ubuntu.com 19478082E2F8D3FE && \
+    apt-get update && \
+    apt-get -y upgrade && \
+    apt-get -y install jaiabot-apps jaiabot-python jaiabot-web jaiabot-config goby3-apps goby3-moos goby3-gui moos-ivp-apps moosdb10 libmoos-ivp gpsd; \
+    fi;
 WORKDIR /jaiabot/scripts
-RUN git switch @JAIABOT_BRANCH_FOR_DOCKER@
-RUN /jaiabot/scripts/setup-tools-build-nodocker.sh
 RUN /jaiabot/scripts/setup-tools-runtime.sh
 WORKDIR /jaiabot
-RUN /jaiabot/build.sh
+RUN if [[ "$use_apt" = "false" ]]; then /jaiabot/build.sh; fi
 WORKDIR /jaiabot/src/python/
-RUN ./build_venv.sh /jaiabot/build/web_dev/python
+RUN if [[ "$use_apt" = "false" ]]; then ./build_venv.sh /jaiabot/build/web_dev/python; fi
 COPY ./entrypoint.sh /entrypoint.sh
