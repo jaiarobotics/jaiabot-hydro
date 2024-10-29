@@ -24,7 +24,7 @@ _All commands should be executed in the `jaiabot/scripts/sim-docker directory` f
         - This will build the Docker image needed to run the simulator.
         - This will take a while.
 
-2. **Windows users only**:  copy the `entrypoint.sh` script and `sim_env_vars.txt` config file from the jaiabot repository (`jaiabot/scripts/sim-docker`) into your working directory.
+2. **Windows users only**:  copy the `sim_env_vars.txt` config file from the jaiabot repository (`jaiabot/scripts/sim-docker`) into your working directory.
 
 2.  **Edit sim_env_vars.txt**
     
