@@ -2,12 +2,12 @@ import Stroke from "ol/style/Stroke";
 import { Feature } from "ol";
 import { Goal, HubStatus, TaskType, ContactStatus } from "./JAIAProtobuf";
 import { LineString, Point, Circle } from "ol/geom";
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat } from "ol/proj";
 import { Circle as CircleStyle, Fill, Icon, Style, Text } from "ol/style";
 import { Coordinate } from "ol/coordinate";
 import { PortalBotStatus } from "./PortalStatus";
 import { colorNameToHex } from "./Color";
-import * as turf from '@turf/turf';
+import * as turf from "@turf/turf";
 
 // We use "require" here, so we can use the "as" keyword to tell TypeScript the types of these resource variables
 const driftMapIcon = require("./driftMapIcon.svg") as string;
@@ -16,7 +16,7 @@ const start = require("./start.svg") as string;
 const end = require("./end.svg") as string;
 const botIcon = require("./bot.svg") as string;
 const hubIcon = require("./hub.svg") as string;
-const contactIcon = require('./pacman-contact.svg') as string
+const contactIcon = require("./pacman-contact.svg") as string;
 const rallyPoint = require("./rally.svg") as string;
 const runFlag = require("./run-flag.svg") as string;
 const botCourseOverGround = require("./botCourseOverGround.svg") as string;
@@ -72,6 +72,7 @@ const editColor = "gold";
 const remoteControlledColor = "mediumpurple";
 const driftArrowColor = "darkorange";
 const disconnectedColor = "gray";
+const errorColor = "red";
 
 const DEG = Math.PI / 180;
 const SELECTED_Z_INDEX = 990; // Needs to be larger than the number of runs created in a session (determines increment) otherwise unselected features would have a higher z-index than selected features
@@ -208,22 +209,22 @@ export function hubMarker(feature: Feature<Point>): Style[] {
  */
 export function contactMarker(feature: Feature): Style[] {
     function angleToXY(angle: number): XYCoordinate {
-        return { x: Math.cos(Math.PI / 2 - angle), y: -Math.sin(Math.PI / 2 - angle) }
+        return { x: Math.cos(Math.PI / 2 - angle), y: -Math.sin(Math.PI / 2 - angle) };
     }
 
-    const contactStatus = feature.get('contact') as ContactStatus
+    const contactStatus = feature.get("contact") as ContactStatus;
 
-    const heading = (contactStatus?.heading_or_cog ?? 0.0) * DEG
+    const heading = (contactStatus?.heading_or_cog ?? 0.0) * DEG;
 
-    const headingDelta = angleToXY(heading)
+    const headingDelta = angleToXY(heading);
 
-    const textOffsetRadius = 11
+    const textOffsetRadius = 11;
 
-    let color = defaultColor as string
+    let color = defaultColor as string;
 
-    const text = String(contactStatus?.contact ?? "")
+    const text = String(contactStatus?.contact ?? "");
 
-    var style = [ 
+    var style = [
         // Contact body marker
         new Style({
             image: new Icon({
@@ -232,24 +233,22 @@ export function contactMarker(feature: Feature): Style[] {
                 anchor: [0.5, 0.5],
                 rotation: heading,
                 rotateWithView: true,
-                scale: 0.8
+                scale: 0.8,
             }),
             text: new Text({
                 text: text,
-                font: 'bold 11pt sans-serif',
+                font: "bold 11pt sans-serif",
                 fill: new Fill({
-                    color: 'black'
+                    color: "black",
                 }),
                 offsetX: -textOffsetRadius * headingDelta.x,
                 offsetY: -textOffsetRadius * headingDelta.y,
-                rotateWithView: true
-            })
-        })
-    ]
-    return style
+                rotateWithView: true,
+            }),
+        }),
+    ];
+    return style;
 }
-
-
 
 /**
  * The style for the circles showing the comms limit radii for hubs
@@ -677,7 +676,13 @@ export function divePacketIconStyle(feature: Feature, animatedColor?: string) {
     }
 
     // Icon color
-    const color = animatedColor ? animatedColor : "white";
+    let color = defaultColor;
+
+    if (feature.get("falseDive")) {
+        color = errorColor;
+    }
+
+    color = animatedColor ? animatedColor : color;
 
     return new Style({
         image: new Icon({
@@ -799,7 +804,7 @@ export function missionPath(feature: Feature) {
         pathColor = isSelected ? selectedColor : defaultPathColor;
     }
 
-    const lineDash = feature.get("isConstantHeading") ?? false ? [6, 12] : undefined;
+    const lineDash = (feature.get("isConstantHeading") ?? false) ? [6, 12] : undefined;
 
     const geometry = feature.getGeometry() as LineString;
 

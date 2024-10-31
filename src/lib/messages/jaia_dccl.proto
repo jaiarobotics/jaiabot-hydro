@@ -550,6 +550,10 @@ message DivePacket
         },
         (jaia.field).rest_api.presence = GUARANTEED
     ];
+
+    // Did we have a motor issue that caused a false dive?
+    optional bool false_dive = 21
+        [default = false, (jaia.field).rest_api.presence = GUARANTEED];
 }
 
 message TaskPacket

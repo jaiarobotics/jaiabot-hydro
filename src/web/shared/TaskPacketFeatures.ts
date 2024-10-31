@@ -34,6 +34,7 @@ export function createDivePacketFeature(map: Map, task_packet: TaskPacket) {
         startLocation: dive.start_location,
         selected: false,
         animated: false,
+        falseDive: dive.false_dive,
     });
     feature.setStyle(Styles.divePacketIconStyle(feature));
     return feature;

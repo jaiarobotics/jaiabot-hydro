@@ -33,6 +33,7 @@
 #include "jaiabot/messages/engineering.pb.h"
 #include "jaiabot/messages/pressure_temperature.pb.h"
 #include "jaiabot/messages/salinity.pb.h"
+#include "jaiabot/messages/motor.pb.h"
 
 using goby::glog;
 namespace si = boost::units::si;
@@ -450,6 +451,21 @@ jaiabot::apps::MissionManager::MissionManager()
                         machine_->set_rf_disable(false);
                     }
                 }
+            }
+        });
+
+    interprocess().subscribe<jaiabot::groups::motor_status>(
+        [this](const jaiabot::protobuf::Motor& motor_data)
+        {
+            glog.is_debug2() && glog << "Received Motor Data " << motor_data.ShortDebugString()
+                                     << std::endl;
+
+            if (motor_data.has_rpm())
+            {
+                double rpm = motor_data.rpm();
+                statechart::EvVehicleMotorStatus ev;
+                ev.rpm = rpm;
+                machine_->process_event(ev);
             }
         });
 }

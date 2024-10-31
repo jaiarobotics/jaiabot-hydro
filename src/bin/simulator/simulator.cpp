@@ -149,6 +149,8 @@ jaiabot::apps::Simulator::Simulator()
         launch_thread<SalinityUDPThread>(cfg().salinity_udp_config());
 
         launch_thread<ArduinoSimThread>(cfg().arduino_config());
+
+        launch_thread<MotorSimThread>(cfg().motor_config());
     }
 
     goby::apps::moos::protobuf::GobyMOOSGatewayConfig sim_cfg;

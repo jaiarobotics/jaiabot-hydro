@@ -122,3 +122,11 @@ resolve_no_forward_progress {
     desired_speed_threshold: 0 # m/s - desired speed above which the vehicle is expected to be making forward progress
     trigger_timeout: 15 # seconds - time after desired speed > speed_threshold but pitch > pitch_threshold that triggers EvNoForwardProgress 
 }
+
+detect_false_dive {
+    motor_rpm_false_dives_checks: 5 # (default = 5) - the number of rpms in a row under threshold to determine false dive
+
+    motor_rpm_min_check_time: 2 # (dafault = 2) - the min amount of time to trigger a EvFalseDiveAbort event
+
+    motor_rpm_to_determine_false_dive: 1300 # (default = 1300) - the rpm threshold to determine false dive
+}

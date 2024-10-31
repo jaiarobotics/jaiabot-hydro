@@ -25,7 +25,7 @@ function isoString(tMicroseconds: number | undefined): string {
  */
 export async function getCSV(taskPackets: (TaskPacket | LogTaskPacket)[]) {
     let csvText =
-        "id,bot,task,lat,lon,time,bottom dive,depth achieved (m),current strength (m/s),current heading (deg),(beta) significant wave height (m)\n";
+        "id,bot,task,lat,lon,time,bottom dive,false dive,depth achieved (m),current strength (m/s),current heading (deg),(beta) significant wave height (m)\n";
     let id = 0;
 
     for (const taskPacket of taskPackets) {
@@ -46,6 +46,7 @@ export async function getCSV(taskPackets: (TaskPacket | LogTaskPacket)[]) {
             startLocation.lon?.toString() ?? "",
             isoString(taskPacket.start_time),
             String(taskPacket.dive?.bottom_dive ?? false),
+            String(taskPacket.dive?.false_dive ?? false),
             taskPacket.dive?.depth_achieved?.toFixed(3) ?? "",
             taskPacket.drift?.estimated_drift?.speed?.toFixed(3) ?? "",
             taskPacket.drift?.estimated_drift?.heading?.toFixed(3) ?? "",

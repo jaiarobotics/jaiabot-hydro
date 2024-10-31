@@ -109,6 +109,7 @@ STATECHART_EVENT(EvGPSNoFix)
 STATECHART_EVENT(EvIMURestart)
 STATECHART_EVENT(EvIMURestartCompleted)
 STATECHART_EVENT(EvBottomDepthAbort)
+STATECHART_EVENT(EvFalseDiveAbort)
 
 STATECHART_EVENT(EvLoop)
 struct EvVehicleDepth : boost::statechart::event<EvVehicleDepth>
@@ -134,6 +135,11 @@ struct EvVehicleGPS : boost::statechart::event<EvVehicleGPS>
 struct EvVehiclePitch : boost::statechart::event<EvVehiclePitch>
 {
     boost::units::quantity<boost::units::degree::plane_angle> pitch;
+};
+
+struct EvVehicleMotorStatus : boost::statechart::event<EvVehicleMotorStatus>
+{
+    double rpm;
 };
 
 STATECHART_EVENT(EvResumeMovement)
@@ -1639,13 +1645,17 @@ struct PoweredDescent
 
     void loop(const EvLoop&);
     void depth(const EvVehicleDepth& ev);
+    void motor_status(const EvVehicleMotorStatus& ev);
 
     using reactions = boost::mpl::list<
         boost::statechart::transition<EvDepthTargetReached, Hold>,
         boost::statechart::in_state_reaction<EvLoop, PoweredDescent, &PoweredDescent::loop>,
         boost::statechart::in_state_reaction<EvVehicleDepth, PoweredDescent,
                                              &PoweredDescent::depth>,
-        boost::statechart::transition<EvPowerDescentSafety, UnpoweredAscent>>;
+        boost::statechart::in_state_reaction<EvVehicleMotorStatus, PoweredDescent,
+                                             &PoweredDescent::motor_status>,
+        boost::statechart::transition<EvPowerDescentSafety, UnpoweredAscent>,
+        boost::statechart::transition<EvFalseDiveAbort, UnpoweredAscent>>;
 
   private:
     goby::time::MicroTime start_time_{goby::time::SystemClock::now<goby::time::MicroTime>()};
@@ -1663,6 +1673,9 @@ struct PoweredDescent
     bool is_bot_diving_{false};
     // determines the initial value for last_depth_
     bool is_initial_depth_reading_{true};
+    goby::time::MicroTime last_motor_rpm_time_{
+        goby::time::SystemClock::now<goby::time::MicroTime>()};
+    int motor_rpm_false_dive_check_incr_{0};
 };
 
 struct Hold

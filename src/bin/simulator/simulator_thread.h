@@ -24,10 +24,11 @@
 #define JAIABOT_SRC_BIN_SIMULATOR_SIMULATOR_THREAD_H
 
 #include <boost/units/systems/si.hpp>
+#include <goby/time/steady_clock.h>
 #include <goby/zeromq/application/multi_thread.h>
 
 #include "jaiabot/messages/health.pb.h"
-#include <goby/time/steady_clock.h>
+#include "jaiabot/messages/motor.pb.h"
 
 #include "config.pb.h"
 
@@ -70,6 +71,19 @@ class ArduinoSimThread : public SimulatorThread<jaiabot::config::ArduinoSimThrea
     double voltage_start_{24.0};
     double reset_voltage_level_{15};
     goby::time::SteadyClock::time_point voltage_updated_{std::chrono::seconds(0)};
+};
+
+class MotorSimThread : public SimulatorThread<jaiabot::config::MotorSimThread>
+{
+  public:
+    MotorSimThread(const jaiabot::config::MotorSimThread& cfg);
+    ~MotorSimThread() {}
+
+  private:
+    void loop() override;
+
+  private:
+    jaiabot::protobuf::Motor motor_status_;
 };
 
 } // namespace apps

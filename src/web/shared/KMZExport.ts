@@ -67,6 +67,7 @@ async function taskPacketToKMLPlacemarks(taskPacket: TaskPacket | LogTaskPacket)
                     Start: ${startTimeString}<br />
                     Depth: ${depthString}<br />
                     Bottom-Dive: ${dive.bottom_dive ? "Yes" : "No"}<br />
+                    False-Dive: ${dive.false_dive ? "Yes" : "No"}<br />
                     Duration-to-GPS: ${dive.duration_to_acquire_gps?.toFixed(2)} s<br />
                     Unpowered-Rise-Rate: ${dive.unpowered_rise_rate?.toFixed(2)} m/s<br />
                     Powered-Rise-Rate: ${dive.powered_rise_rate?.toFixed(2)} m/s<br />

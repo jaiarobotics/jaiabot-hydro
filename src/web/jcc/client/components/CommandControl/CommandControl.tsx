@@ -2233,6 +2233,7 @@ export default class CommandControl extends React.Component {
                     depth_achieved: { value: diveFeature.get("depthAchieved"), units: "m" },
                     dive_rate: { value: diveFeature.get("diveRate"), units: "m/s" },
                     bottom_dive: { value: diveFeature.get("bottomDive") ? "Yes" : "No", units: "" },
+                    false_dive: { value: diveFeature.get("falseDive") ? "Yes" : "No", units: "" },
                     start_time: { value: startTime.toLocaleString(), units: "" },
                     end_time: { value: endTime.toLocaleString(), units: "" },
                 };
@@ -2539,7 +2540,7 @@ export default class CommandControl extends React.Component {
             feature.get("type") === "dive" ? divePacketIconStyle : driftPacketIconStyle;
 
         if (feature.get("animated")) {
-            feature.setStyle(styleFunction(feature, "white"));
+            feature.setStyle(styleFunction(feature));
         } else {
             feature.setStyle(styleFunction(feature, "black"));
         }
@@ -2557,7 +2558,7 @@ export default class CommandControl extends React.Component {
                 feature.set("selected", false);
                 // Reset style
                 const styleFunction = type === "dive" ? divePacketIconStyle : driftPacketIconStyle;
-                feature.setStyle(styleFunction(feature, "white"));
+                feature.setStyle(styleFunction(feature));
             }
         }
         clearInterval(this.state.taskPacketIntervalId);
