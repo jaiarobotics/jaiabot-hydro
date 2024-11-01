@@ -1382,12 +1382,12 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         <td>Depth</td>
                                                         <td>{bot.depth?.toFixed(prec)} m</td>
                                                     </tr>
-                                                    <tr>
+                                                    {/* <tr>
                                                         <td>Salinity</td>
                                                         <td>
                                                             {bot.salinity?.toFixed(prec)} PSU(ppt)
                                                         </td>
-                                                    </tr>
+                                                    </tr> */}
                                                 </tbody>
                                             </table>
                                         </AccordionDetails>
