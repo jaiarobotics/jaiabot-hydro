@@ -29,19 +29,35 @@ environment-template-jammy: &environment-template-jammy
   DISTRO_RELEASE_VERSION: "ubuntu22.04"
 
 ## Pre-declare Docker containers
-
 docker-base-focal: &docker-base-focal
   - image: gobysoft/jaiabot-ubuntu-amd64:20.04.1
+    auth:
+      username: $DOCKERHUB_USERNAME
+      password: $DOCKERHUB_PASSWORD
+          
 docker-arm64-focal: &docker-arm64-focal
   - image: gobysoft/jaiabot-ubuntu-arm64:20.04.1
+    auth:
+      username: $DOCKERHUB_USERNAME
+      password: $DOCKERHUB_PASSWORD
 
 docker-base-jammy: &docker-base-jammy
   - image: gobysoft/jaiabot-ubuntu-amd64:22.04.1
+    auth:
+      username: $DOCKERHUB_USERNAME
+      password: $DOCKERHUB_PASSWORD
+
 docker-arm64-jammy: &docker-arm64-jammy
   - image: gobysoft/jaiabot-ubuntu-arm64:22.04.1
+    auth:
+      username: $DOCKERHUB_USERNAME
+      password: $DOCKERHUB_PASSWORD
 
 docker-base-light: &docker-base-light
   - image: gobysoft/ubuntu-build-base:22.04.1
+    auth:
+      username: $DOCKERHUB_USERNAME
+      password: $DOCKERHUB_PASSWORD
 
 ## Pre-declare job templates
 job-template-amd64: &job-template-amd64
@@ -110,18 +126,18 @@ job-template-deb-amd64: &job-template-deb-amd64
           sed -i 's/^\( *\)clang/#\1clang/' ${CIRCLE_WORKING_DIRECTORY}/debian/control &&
           sed -i 's/^\( *\)lld/#\1lld/' ${CIRCLE_WORKING_DIRECTORY}/debian/control
     - run: &run-patch-version
-        name: Patch the version patch number automatically in CMakeLists.txt
+        name: Patch the version patch number automatically in cmake/JaiaVersions.cmake
         command: |
           mkdir -p ${CIRCLE_WORKING_DIRECTORY}/debian/patches
           export NEWVERSION="$(echo ../*.orig.tar.xz | sed 's/.*_\(.*\)\.orig\.tar\.xz/\1/')"
           quilt new 01-patch-version
-          quilt add CMakeLists.txt
+          quilt add cmake/JaiaVersions.cmake
           export NEWVERSION_MAJOR=$(echo $NEWVERSION | cut -d . -f 1)
           export NEWVERSION_MINOR=$(echo $NEWVERSION | cut -d . -f 2)
           export NEWVERSION_PATCH=$(echo $NEWVERSION | cut -d . -f 3)
-          sed -i "s/^set(PROJECT_VERSION_MAJOR *\".*\"/set(PROJECT_VERSION_MAJOR \"${NEWVERSION_MAJOR}\"/" CMakeLists.txt
-          sed -i "s/^set(PROJECT_VERSION_MINOR *\".*\"/set(PROJECT_VERSION_MINOR \"${NEWVERSION_MINOR}\"/" CMakeLists.txt
-          sed -i "s/^set(PROJECT_VERSION_PATCH *\".*\"/set(PROJECT_VERSION_PATCH \"${NEWVERSION_PATCH}\"/" CMakeLists.txt
+          sed -i "s/^set(PROJECT_VERSION_MAJOR *\".*\"/set(PROJECT_VERSION_MAJOR \"${NEWVERSION_MAJOR}\"/" cmake/JaiaVersions.cmake
+          sed -i "s/^set(PROJECT_VERSION_MINOR *\".*\"/set(PROJECT_VERSION_MINOR \"${NEWVERSION_MINOR}\"/" cmake/JaiaVersions.cmake
+          sed -i "s/^set(PROJECT_VERSION_PATCH *\".*\"/set(PROJECT_VERSION_PATCH \"${NEWVERSION_PATCH}\"/" cmake/JaiaVersions.cmake
           quilt refresh
     - run: &run-build-pkg
         name: Build the Debian package
@@ -170,7 +186,7 @@ filter-template-debian-builds: &filter-template-debian-builds
     branches:
       only:
         - "1.y"
-          
+
 # which branches to run the normal source build
 filter-template-normal-builds: &filter-template-normal-builds
   filters:
@@ -189,6 +205,15 @@ filter-template-rootfs-builds: &filter-template-rootfs-builds
 
 # which branches to run the AWS virtual machine conversion (must be same as or subset of filter-template-rootfs-builds)
 filter-template-aws-rootfs-builds: &filter-template-aws-rootfs-builds
+  filters:
+    tags:
+      only: /.*/
+    branches:
+      only:
+        - "1.y"
+
+# which branches to build Docker simulator
+filter-template-docker-sim-builds: &filter-template-docker-sim-builds
   filters:
     tags:
       only: /.*/
@@ -285,6 +310,10 @@ workflows:
             - raspi-image-create-jammy
             - virtualbox-image-create-jammy
           <<: *filter-template-aws-rootfs-builds
+
+      # docker creation jobs
+      - docker-sim:
+          <<: *filter-template-docker-sim-builds
 
 jobs:
   get-orig-source:
@@ -613,3 +642,31 @@ jobs:
               "Key=jaiabot-rootfs-gen_build-unixtime,Value=$(date -u +%s)" \
               "Key=jaiabot_version_when_built,Value=${JAIABOT_VERSION}" \
               "Key=goby_version_when_built,Value=${GOBY_VERSION}"
+  docker-sim:
+    working_directory: /tmp/docker/jaiabot
+    docker:
+      - image: cimg/base:current
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
+    resource_class: large
+    steps:
+      - checkout
+      - run: *run-set-deb-rep-and-version
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Build and Push Docker Sim Image
+          command: |
+            cmake -P cmake/ConfigureDockerfiles.cmake
+            cd scripts/sim-docker
+
+            if [[ "$JAIABOT_APT_REPO" = "release" ]]; then
+              TAG="$CIRCLE_TAG"
+            else
+              TAG="${JAIABOT_APT_VERSION}-${JAIABOT_APT_REPO}"
+            fi
+            
+            docker build -t gobysoft/jaiabot-sim:$TAG .
+            echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+            docker push gobysoft/jaiabot-sim:$TAG

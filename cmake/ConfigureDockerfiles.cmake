@@ -1,6 +1,13 @@
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
+include(JaiaVersions)
 include(ReadCommonVersions)
+
+if(PROJECT_GIT_BUILD)
+  set(JAIABOT_BRANCH_FOR_DOCKER "${PROJECT_VERSION_GITBRANCH}")
+else()
+  set(JAIABOT_BRANCH_FOR_DOCKER "${JAIA_VERSION_RELEASE_BRANCH}")
+endif()
 
 set(DOCKERFILES
   ${CMAKE_SOURCE_DIR}/.docker/focal/amd64/Dockerfile.in
