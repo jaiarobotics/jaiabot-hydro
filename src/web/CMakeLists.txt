@@ -9,8 +9,9 @@ file(MAKE_DIRECTORY ${intermediate_web_dir})
 
 include(ConfigurePackageJSON)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package.json ${intermediate_web_dir}/package.json COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package-lock.json ${intermediate_web_dir}/package-lock.json COPYONLY)
 
-add_custom_command(OUTPUT ${intermediate_web_dir}/package-lock.json ${intermediate_web_dir}/node_modules
+add_custom_command(OUTPUT ${intermediate_web_dir}/node_modules
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/install_dependencies.sh
   ARGS ${intermediate_web_dir}
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/package.json.in
