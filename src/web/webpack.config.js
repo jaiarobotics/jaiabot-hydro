@@ -26,24 +26,6 @@ const baseConfig = {
                 exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
-                    options: {
-                        presets: [
-                            ["@babel/preset-env", { modules: false, targets: "defaults" }],
-                            "@babel/preset-react",
-                        ],
-                        plugins: [
-                            "@babel/plugin-transform-class-properties",
-                            [
-                                "transform-react-remove-prop-types",
-                                {
-                                    mode: "remove",
-                                    _disabled_ignoreFilenames: ["node_modules"],
-                                },
-                            ],
-                            "@babel/plugin-transform-nullish-coalescing-operator",
-                            "@babel/plugin-transform-optional-chaining",
-                        ],
-                    },
                 },
             },
             { test: /\.css$/, use: ["style-loader", "css-loader"] },
