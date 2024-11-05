@@ -128,11 +128,11 @@ message CommandForHub
 message BotStatus
 {
     /*
-    Actual maximum size of message: 54 bytes / 432 bits
-        dccl.id head...........................8
-        user head..............................0
-        body.................................417
-        padding to full byte...................7
+    Actual maximum size of message: 46 bytes / 368 bits
+            dccl.id head...........................8
+            user head..............................0
+            body.................................357
+            padding to full byte...................3
     Allowed maximum size of message: 250 bytes / 2000 bits
     */
     option (dccl.msg) = {
@@ -307,53 +307,25 @@ message BotStatus
         units { derived_dimensions: "temperature" system: "celsius" }
     }];
 
-    optional double thermocouple_temperature = 53 [(dccl.field) = {
-        min: -50
-        max: 100
-        precision: 2
-        units { derived_dimensions: "temperature" system: "celsius" }
-    }];
-
-    optional double vv_current = 54 [(dccl.field) = {
-        min: -5
-        max: 1000
-        precision: 2
-        units { derived_dimensions: "current" }
-    }];
-
-    optional double vcc_current = 55 [(dccl.field) = {
-        min: -5
-        max: 1000
-        precision: 2
-        units { derived_dimensions: "current" }
-    }];
-
-    optional double vcc_voltage = 56 [(dccl.field) = {
-        min: 0
-        max: 25
-        precision: 2
-        units { derived_dimensions: "electric_potential" system: "si" }
-    }];
-
-    optional double battery_percent = 57 [
+    optional double battery_percent = 53 [
         (dccl.field) = { min: 0 max: 100 precision: 0 },
         (jaia.field).rest_api.presence = GUARANTEED
     ];
 
-    optional int32 calibration_status = 58 [(dccl.field) = { min: 0 max: 3 }];
+    optional int32 calibration_status = 54 [(dccl.field) = { min: 0 max: 3 }];
 
-    optional IMUCalibrationState calibration_state = 59;
+    optional IMUCalibrationState calibration_state = 55;
 
-    optional double hdop = 60 [(dccl.field) = { min: 0 max: 100 precision: 2 }];
+    optional double hdop = 56 [(dccl.field) = { min: 0 max: 100 precision: 2 }];
 
-    optional double pdop = 61 [(dccl.field) = { min: 0 max: 100 precision: 2 }];
+    optional double pdop = 57 [(dccl.field) = { min: 0 max: 100 precision: 2 }];
 
-    optional int32 wifi_link_quality_percentage = 62 [
+    optional int32 wifi_link_quality_percentage = 58 [
         (dccl.field) = { min: 0 max: 100 precision: 0 },
         (jaia.field).rest_api.presence = GUARANTEED
     ];
 
-    optional uint64 received_time = 63 [
+    optional uint64 received_time = 59 [
         (dccl.field) = {
             omit: true
             units { prefix: "micro" derived_dimensions: "time" }
