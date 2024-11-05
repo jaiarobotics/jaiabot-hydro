@@ -35,6 +35,9 @@ file(GLOB_RECURSE shared_src_files FOLLOW_SYMLINKS LIST_DIRECTORIES false ${CMAK
 
 # Get the web source tree into the intermediate directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/webpack.config.js DESTINATION ${intermediate_web_dir})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/babel.config.js DESTINATION ${intermediate_web_dir})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/jest.config.js DESTINATION ${intermediate_web_dir})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tests DESTINATION ${intermediate_web_dir})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tsconfig.json DESTINATION ${intermediate_web_dir})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/components DESTINATION ${intermediate_web_dir})
