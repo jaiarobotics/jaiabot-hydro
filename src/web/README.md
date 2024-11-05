@@ -40,7 +40,7 @@ The `webpack.config.js` file contains five different webpack configuration objec
 -   `jedConfig`, which contains build options specific to JED
 -   `jccConfig`, which contains build options specific to JCC
 
-When invoked, the correct options are chosen depending on the build mode provided, and bot `JCC` and `JED` are built.
+When invoked, the correct options are chosen depending on the build mode provided, and both `JCC` and `JED` are built.
 
 ### TypeScript
 
@@ -48,10 +48,20 @@ Most code is written in the TypeScript language, which is essentially JavaScript
 
 ### Jest
 
-Tests are written using the `jest` module. Options for `jest` are found in the `src/web/jest.config.js` file.
+Tests are written using the `jest` module. Options for `jest` are found in the `src/web/jest.config.js` file. The `ts_jest` module is used to transpile .tsx and .ts files into JavaScript for `jest`.
 
-To run the tests:
+To run all of the tests:
 
 ```
 npm test
+```
+
+To run a specific test:
+
+```
+npm test <path to test file>
+```
+
+```
+npm test jcc/client/components/CommandControl/__tests__/CommandControl.test.tsx
 ```
