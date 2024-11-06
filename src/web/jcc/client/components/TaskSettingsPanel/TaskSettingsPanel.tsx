@@ -39,7 +39,7 @@ function fmod(a: number, b: number) {
     return Number((a - Math.floor(a / b) * b).toPrecision(8));
 }
 
-interface Props {
+export interface Props {
     map?: Map;
     title?: string;
     task?: MissionTask;
@@ -160,6 +160,9 @@ function TaskOptionsPanel(props: Props) {
 
             newTask.surface_drift["drift_time"] = surface_drift.drift_time;
         }
+
+        console.log("handleToggle newTask=");
+        console.log(newTask);
 
         props.onChange(newTask);
 
@@ -652,12 +655,17 @@ export function TaskSettingsPanel(props: Props) {
 
     return (
         <FormControl sx={{ minWidth: 120 }} size="small" disabled={!props?.isEditMode}>
-            <Select onChange={(evt) => onChangeTaskType(evt)} value={props.task?.type ?? "NONE"}>
-                <MenuItem value={"NONE"}>None</MenuItem>
-                <MenuItem value={"DIVE"}>Dive</MenuItem>
-                <MenuItem value={"SURFACE_DRIFT"}>Surface Drift</MenuItem>
-                <MenuItem value={"STATION_KEEP"}>Station Keep</MenuItem>
-                <MenuItem value={"CONSTANT_HEADING"}>Constant Heading</MenuItem>
+            <Select
+                native={true}
+                data-testid="taskSelect"
+                onChange={(evt) => onChangeTaskType(evt)}
+                value={props.task?.type ?? "NONE"}
+            >
+                <option value={"NONE"}>None</option>
+                <option value={"DIVE"}>Dive</option>
+                <option value={"SURFACE_DRIFT"}>Surface Drift</option>
+                <option value={"STATION_KEEP"}>Station Keep</option>
+                <option value={"CONSTANT_HEADING"}>Constant Heading</option>
             </Select>
             {TaskOptionsPanel(props)}
         </FormControl>
