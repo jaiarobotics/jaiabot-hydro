@@ -18,6 +18,7 @@ docker run hello-world
 sudo systemctl enable docker.service
 sudo systemctl enable containerd.service
 # Build the container
+(cd ..; cmake -P cmake/ConfigureDockerfiles.cmake)
 cd ../.docker/noble/arm64
 docker build -t gobysoft/jaiabot-ubuntu-arm64:24.04.1 .
 # Optionally, push to docker hub

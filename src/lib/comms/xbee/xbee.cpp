@@ -74,15 +74,12 @@ jaiabot::comms::XBeeDevice::XBeeDevice()
     port = new serial_port(*io);
 }
 
-void jaiabot::comms::XBeeDevice::startup(const std::string& port_name, const int baud_rate,
-                                         const std::string& _my_node_id, const uint16_t network_id,
-                                         const std::string& xbee_info_location,
-                                         const bool& use_encryption,
-                                         const std::string& encryption_password,
-                                         const std::string& mesh_unicast_retries,
-                                         const std::string& unicast_mac_retries,
-                                         const std::string& network_delay_slots,
-                                         const std::string& broadcast_multi_transmits)
+void jaiabot::comms::XBeeDevice::startup(
+    const std::string& port_name, const int baud_rate, const std::string& _my_node_id,
+    const uint16_t network_id, const std::string& xbee_info_location, const bool& use_encryption,
+    const std::string& encryption_password, const std::string& mesh_unicast_retries,
+    const std::string& unicast_mac_retries, const std::string& network_delay_slots,
+    const std::string& broadcast_multi_transmits)
 {
     std::string enable_encryption = "0";
     if (use_encryption)
@@ -236,9 +233,9 @@ void jaiabot::comms::XBeeDevice::startup(const std::string& port_name, const int
         Parameter range - 0 - 7 mesh unicast retries, Default = 1
         */
         stringstream cmd;
-        glog.is_verbose() && glog << group(glog_group) << "Mesh Unicast Retries: " << mesh_unicast_retries
-                                  << endl;
-        cmd << "ATMR" << mesh_unicast_retries << '\r'; 
+        glog.is_verbose() && glog << group(glog_group)
+                                  << "Mesh Unicast Retries: " << mesh_unicast_retries << endl;
+        cmd << "ATMR" << mesh_unicast_retries << '\r';
         write(cmd.str());
         assert_ok();
     }
@@ -253,8 +250,8 @@ void jaiabot::comms::XBeeDevice::startup(const std::string& port_name, const int
         Parameter range - 0 - 0xF, Default = 0xA (10 retries)
         */
         stringstream cmd;
-        glog.is_verbose() && glog << group(glog_group) << "Unicast Mac Retries: " << unicast_mac_retries
-                                  << endl;
+        glog.is_verbose() && glog << group(glog_group)
+                                  << "Unicast Mac Retries: " << unicast_mac_retries << endl;
         cmd << "ATRR" << unicast_mac_retries << '\r';
         write(cmd.str());
         assert_ok();
@@ -268,8 +265,8 @@ void jaiabot::comms::XBeeDevice::startup(const std::string& port_name, const int
         Parameter range - 1 - 0x5 network delay slots, Default = 3
         */
         stringstream cmd;
-        glog.is_verbose() && glog << group(glog_group) << "Network Delay slots: " << network_delay_slots
-                                  << endl;
+        glog.is_verbose() && glog << group(glog_group)
+                                  << "Network Delay slots: " << network_delay_slots << endl;
         cmd << "ATNN" << network_delay_slots << '\r';
         write(cmd.str());
         assert_ok();
@@ -283,9 +280,10 @@ void jaiabot::comms::XBeeDevice::startup(const std::string& port_name, const int
         Parameter range - 0 - 5, Default = 3
         */
         stringstream cmd;
-        glog.is_verbose() && glog << group(glog_group) << "Broadcast Multi Transmits: " << broadcast_multi_transmits
+        glog.is_verbose() && glog << group(glog_group)
+                                  << "Broadcast Multi Transmits: " << broadcast_multi_transmits
                                   << endl;
-        cmd << "ATMT" << broadcast_multi_transmits << '\r'; 
+        cmd << "ATMT" << broadcast_multi_transmits << '\r';
         write(cmd.str());
         assert_ok();
     }
@@ -537,7 +535,7 @@ void jaiabot::comms::XBeeDevice::enter_command_mode()
     std::string buffer;
     std::string delimiter = "OK\r";
     int timeout_seconds = 2;
-    
+
     // Triggers menu to appear for bypass
     write("\r");
 
@@ -547,7 +545,7 @@ void jaiabot::comms::XBeeDevice::enter_command_mode()
     write("b");
 
     sleep(2);
-    
+
     // Send +++ to enter command mode
     write("+++");
 
@@ -1025,28 +1023,23 @@ string jaiabot::comms::XBeeDevice::api_transmit_request(const SerialNumber& dest
                              << endl;
 
     // Frame Type: Transmit Request (0x10)
-    string frame_type = string("\x10", 1);                      
+    string frame_type = string("\x10", 1);
 
     // Frame ID
     string frame_id_string = string((char*)&frame_id, 1);
 
     // 16-bit Network Address (0xFFFE)
-    string network_address = string("\xff\xfe", 2);   
+    string network_address = string("\xff\xfe", 2);
 
     // Broadcast Radius (0 = max hops)
-    string broadcast_radius = string("\x00", 1);               
+    string broadcast_radius = string("\x00", 1);
 
     // Directed broadcast mode (TO = 0x80)
     string transmit_options = string("\x80", 1);
 
     // Construct the full frame by combining the parts
-    string frame = frame_type
-                 + frame_id_string
-                 + dest_string
-                 + network_address
-                 + broadcast_radius
-                 + transmit_options
-                 + data_string;
+    string frame = frame_type + frame_id_string + dest_string + network_address + broadcast_radius +
+                   transmit_options + data_string;
 
     return frame;
 }

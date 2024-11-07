@@ -654,10 +654,10 @@ export interface SRPParameters {
 }
 
 export interface TrailParameters {
-    contact?: number
-    angle?: number
-    angle_relative?: boolean
-    range?: number
+    contact?: number;
+    angle?: number;
+    angle_relative?: boolean;
+    range?: number;
 }
 
 export interface MissionTask {
@@ -677,7 +677,7 @@ export enum MissionStart {
 export enum MovementType {
     TRANSIT = "TRANSIT",
     REMOTE_CONTROL = "REMOTE_CONTROL",
-    TRAIL = "TRAIL"
+    TRAIL = "TRAIL",
 }
 
 export interface Goal {
@@ -1019,10 +1019,6 @@ export interface BotStatus {
     repeat_index?: number;
     salinity?: number;
     temperature?: number;
-    thermocouple_temperature?: number;
-    vv_current?: number;
-    vcc_current?: number;
-    vcc_voltage?: number;
     battery_percent?: number;
     calibration_status?: number;
     hdop?: number;
@@ -1211,8 +1207,8 @@ interface BotOffloadData {
 }
 
 export interface ContactStatus {
-    contact?: number,
-    location: GeographicCoordinate,
-    speed_over_ground?: number,
-    heading_or_cog?: number
+    contact?: number;
+    location: GeographicCoordinate;
+    speed_over_ground?: number;
+    heading_or_cog?: number;
 }

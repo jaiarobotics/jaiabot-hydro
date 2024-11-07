@@ -2,16 +2,17 @@
 
 set -e -u -x
 
-distro=$(<ubuntu_release)
-release_branch=$(<release_branch)
+##  "Usage: $0 [noble] [2.y]"
+
+distro=$1
+release_branch=$2
 
 if [[ "$distro" = "noble" ]]; then
     version=24.04.1
 else
     echo "Distro $distro is not supported"
     exit 1
-fi    
-   
+fi   
 
 script_dir=$(dirname $0)
 cd ${script_dir}/..
