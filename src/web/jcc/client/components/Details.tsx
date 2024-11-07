@@ -1382,54 +1382,12 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         <td>Depth</td>
                                                         <td>{bot.depth?.toFixed(prec)} m</td>
                                                     </tr>
-                                                    <tr>
+                                                    {/* <tr>
                                                         <td>Salinity</td>
                                                         <td>
                                                             {bot.salinity?.toFixed(prec)} PSU(ppt)
                                                         </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </AccordionDetails>
-                                    </Accordion>
-                                </ThemeProvider>
-
-                                <ThemeProvider theme={accordionTheme}>
-                                    <Accordion
-                                        expanded={isExpanded.power}
-                                        onChange={(event, expanded) => {
-                                            setDetailsExpanded("power", expanded);
-                                        }}
-                                        className="nestedAccordionContainer"
-                                    >
-                                        <AccordionSummary
-                                            expandIcon={<ExpandMoreIcon />}
-                                            aria-controls="panel1a-content"
-                                            id="panel1a-header"
-                                        >
-                                            <Typography>Power</Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            <table>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Battery Percentage</td>
-                                                        <td>
-                                                            {bot.battery_percent?.toFixed(prec)} %
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Vcc Voltage</td>
-                                                        <td>{bot.vcc_voltage?.toFixed(prec)} V</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Vcc Current</td>
-                                                        <td>{bot.vcc_current?.toFixed(prec)} A</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>5v Current</td>
-                                                        <td>{bot.vv_current?.toFixed(prec)} A</td>
-                                                    </tr>
+                                                    </tr> */}
                                                 </tbody>
                                             </table>
                                         </AccordionDetails>

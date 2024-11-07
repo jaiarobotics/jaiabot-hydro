@@ -127,10 +127,6 @@
     * Description: Measured in PSS 
   * optional double temperature
     * Description: Measured in Celcius
-  * optional double thermocouple_temperature
-  * optional double vv_current
-  * optional double vcc_current
-  * optional double vcc_voltage
   * optional double battery_percent
   * optional IMUData.CalibrationStatus calibration_status
   * optional double hdop
