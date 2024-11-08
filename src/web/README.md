@@ -46,9 +46,20 @@ When invoked, the correct options are chosen depending on the build mode provide
 
 Most code is written in the TypeScript language, which is essentially JavaScript with type hints. The `ts-loader` module for webpack is used to transpile .tsx and .ts files into JavaScript. Options for this transpilation can be found in the `src/web/tsconfig.json` file.
 
+### Babel
+
+For all JavaScript and JSX files (`.js` and `.jsx`), Babel is used to transpile to the target version of ECMAScript. This is done using the `babel-loader` module specified in `webpack.config.js`.
+
+> NOTE: Although one can specify Babel settings within the `webpack.config.js` file, we keep all Babel settings in the `babel.config.js` file.
+>
+> This way, `webpack` and `jest` will both use the same Babel settings.
+
 ### Jest
 
-Tests are written using the `jest` module. Options for `jest` are found in the `src/web/jest.config.js` file. The `ts_jest` module is used to transpile .tsx and .ts files into JavaScript for `jest`.
+Tests are written using the `jest` module. Options for `jest` are found in the `src/web/jest.config.js` file.
+
+-   The `ts_jest` module is used to transpile `.tsx` and `.ts` files into JavaScript for `jest`.
+-   The `babel_jest` module is used to transpile `.jsx` and `.js` files.
 
 To run all of the tests:
 
