@@ -37,6 +37,8 @@ file(GLOB_RECURSE shared_src_files FOLLOW_SYMLINKS LIST_DIRECTORIES false ${CMAK
 file(GLOB src_files LIST_DIRECTORIES TRUE ${CMAKE_CURRENT_SOURCE_DIR}/*)
 list(REMOVE_ITEM src_files
   ${CMAKE_CURRENT_SOURCE_DIR}/node_modules
+  ${CMAKE_CURRENT_SOURCE_DIR}/dist
+  ${CMAKE_CURRENT_SOURCE_DIR}/package.json
 )
 
 file(COPY ${src_files} DESTINATION ${intermediate_web_dir})
