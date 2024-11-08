@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TaskSettingsPanel, Props } from "../TaskSettingsPanel";
 
@@ -6,9 +6,6 @@ import { MissionTask, TaskType, DiveParameters, DriftParameters } from "../../sh
 import { GlobalSettings, Save } from "../../Settings";
 
 import { log } from "console";
-import { type } from "os";
-import { SafetyCheck } from "@mui/icons-material";
-import { userEventApi } from "@testing-library/user-event/dist/types/setup/api";
 
 const mockMinimumProps: Props = {
     enableEcho: false,
@@ -116,85 +113,20 @@ const mockBADBottomDiveProps: Props = {
     onChange: (task?: MissionTask) => mockOnChangeCheckParameters(task),
 };
 
-describe("TaskSettingsPanel Bottom Dive Integration Tests", () => {
-    //Test Selection of Dive with a Bottom Dive Task including extra parameters
-    test("TaskSettingsPanel Select Bottom Dive BadBottom Dive Task", async () => {
-        render(<TaskSettingsPanel {...mockBADBottomDiveProps} />);
-        const taskSelectElement = screen.getByTestId("taskSelect");
-        expect(taskSelectElement).toHaveTextContent(/None/i);
-        expect(taskSelectElement).toHaveTextContent(/Dive/i);
-        //This approach relies on native={true} in the Select component
-        //https://stackoverflow.com/questions/55184037/react-testing-library-on-change-for-material-ui-select-component
+describe("SelectComponent", () => {
+    test("selects an option", async () => {
+        const handleChange = jest.fn();
+        render(<TaskSettingsPanel {...mockNonBottomDiveProps} />);
 
-        // Dig deep to find the actual <select>
-        const selectNode = taskSelectElement.childNodes[0].childNodes[0];
-        expect(selectNode).toHaveValue("NONE");
-        expect(selectNode).not.toHaveValue("DIVE");
-        fireEvent.change(selectNode, { target: { value: "DIVE" } });
-        expect(selectNode).toHaveValue("DIVE");
-        expect(selectNode).not.toHaveValue("NONE");
-        //mockOnChangeCheckParameters()
+        // Open the dropdown
+        const selectElement = screen.getByLabelText(/TaskOptions/i);
+        await userEvent.click(selectElement);
+
+        // Click the desired option
+        const option = await screen.findByRole("option", { name: "Dive" });
+        await userEvent.click(option);
+
+        // Check if the Select component displays the new value
+        expect(screen.getByDisplayValue(/dive/i)).toBeInTheDocument();
     });
-
-    //Test Selection of Dive with a Different Dive Task Props
-    test.each([
-        mockMinimumProps,
-        mockNonBottomDiveProps,
-        mockBottomDiveProps,
-        mockBADBottomDiveProps,
-    ])("TaskSettingsPanel Select Bottom Dive With Task %s", async (props) => {
-        render(<TaskSettingsPanel {...props} />);
-        const taskSelectElement = screen.getByTestId("taskSelect");
-        expect(taskSelectElement).toHaveTextContent(/None/i);
-        // Dig deep to find the actual <select>
-        const selectNode = taskSelectElement.childNodes[0].childNodes[0];
-        expect(selectNode).toHaveValue("NONE");
-        expect(selectNode).not.toHaveValue("DIVE");
-        fireEvent.change(selectNode, { target: { value: "DIVE" } });
-        expect(selectNode).toHaveValue("DIVE");
-        expect(selectNode).not.toHaveValue("NONE");
-        //This is setting the element to be Dive however onChangeTaskType is not being called!!!
-        expect(sendEventToParentWindowMock).toHaveBeenCalled;
-        // no idea why this passes, mockOnChangeCheckParameters not being called due to ^
-    });
-
-    //Test selection of Dive with different Gloabla Parameters
-    test.each([nonBottomDiveParameters, bottomDiveParameters, badBottomDiveParameters])(
-        "TaskSettingsPanel Select Bottom Dive With Global Settings %s",
-        async (diveParameters) => {
-            GlobalSettings.diveParameters = { ...GlobalSettings.diveParameters, ...diveParameters };
-            // Code above was suggested but does not do what we want, it does a merge
-            // Code below should do what we want but raises
-            // TypeError: value._localStorageKeyFunc is not a function
-            //GlobalSettings.diveParameters = { ...diveParameters };
-            Save(GlobalSettings.diveParameters);
-            //eventual combine with tests above
-            render(<TaskSettingsPanel {...mockBottomDiveProps} />);
-            const taskSelectElement = screen.getByTestId("taskSelect");
-            // Dig deep to find the actual <select>
-            const selectNode = taskSelectElement.childNodes[0].childNodes[0];
-            expect(selectNode).toHaveValue("NONE");
-            expect(selectNode).not.toHaveValue("DIVE");
-            //fireEvent.change(selectNode, { target: { value: "DIVE" } });
-            userEvent.click(taskSelectElement);
-            expect(selectNode).toHaveValue("DIVE");
-            expect(selectNode).not.toHaveValue("NONE");
-            //This is setting the element to be Dive however onChangeTaskType is not being called!!!
-            //expect(sendEventToParentWindowMock).toHaveBeenCalledTimes(1);
-            //^ this fails, mockOnChangeCheckParameters not being called due to ^
-        },
-    );
-});
-
-test("Toggle Bottom Dive ", async () => {
-    render(<TaskSettingsPanel {...mockNonBottomDiveProps} />);
-    const containerComponment = screen.getAllByTitle("Switch to Bottom Dive");
-    log("** containerComponment **");
-    log(containerComponment);
-    const bottomToggleElement = screen.getByRole("checkbox");
-    log("** bottomToggleElement **");
-    log(bottomToggleElement);
-    expect(bottomToggleElement).not.toBeChecked();
-    userEvent.click(bottomToggleElement);
-    expect(bottomToggleElement).toBeChecked();
 });

@@ -10,7 +10,7 @@ import {
 } from "../shared/JAIAProtobuf";
 import { GlobalSettings, Save } from "../Settings";
 import { deepcopy, getGeographicCoordinate } from "../shared/Utilities";
-import { Button, FormControl, MenuItem } from "@mui/material";
+import { InputLabel, FormControl, MenuItem } from "@mui/material";
 import * as turf from "@turf/turf";
 import Map from "ol/Map";
 import { Draw } from "ol/interaction";
@@ -655,9 +655,10 @@ export function TaskSettingsPanel(props: Props) {
 
     return (
         <FormControl sx={{ minWidth: 120 }} size="small" disabled={!props?.isEditMode}>
+            <InputLabel id="task-select-label">TaskOptions</InputLabel>
             <Select
-                //native={true}
                 labelId="task-select-label"
+                label="Options"
                 data-testid="task-select-id"
                 onChange={(evt) => onChangeTaskType(evt)}
                 value={props.task?.type ?? "NONE"}
