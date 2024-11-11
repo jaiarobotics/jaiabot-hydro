@@ -186,6 +186,7 @@ filter-template-debian-builds: &filter-template-debian-builds
     branches:
       only:
         - "1.y"
+        - "bug/first-boot-fails-on-1.14.0"
 
 # which branches to run the normal source build
 filter-template-normal-builds: &filter-template-normal-builds
@@ -202,6 +203,7 @@ filter-template-rootfs-builds: &filter-template-rootfs-builds
     branches:
       only:
         - "1.y"
+        - "bug/first-boot-fails-on-1.14.0"
 
 # which branches to run the AWS virtual machine conversion (must be same as or subset of filter-template-rootfs-builds)
 filter-template-aws-rootfs-builds: &filter-template-aws-rootfs-builds
