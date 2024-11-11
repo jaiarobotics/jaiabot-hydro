@@ -1,9 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TaskSettingsPanel, Props } from "../TaskSettingsPanel";
 
 import { MissionTask, TaskType, DiveParameters, DriftParameters } from "../../shared/JAIAProtobuf";
-import { GlobalSettings, Save } from "../../Settings";
 
 import { log } from "console";
 
@@ -105,28 +104,47 @@ const mockBadBottomDiveTask: MissionTask = {
     dive: badBottomDiveParameters,
     surface_drift: mockDriftParameters,
 };
-const mockBADBottomDiveProps: Props = {
-    //Mock Bottom Dive Props
-    task: mockBadBottomDiveTask,
+const mockProps: Props = {
     isEditMode: true,
     enableEcho: false,
     onChange: (task?: MissionTask) => mockOnChangeCheckParameters(task),
 };
 
-describe("SelectComponent", () => {
-    test("selects an option", async () => {
-        const handleChange = jest.fn();
-        render(<TaskSettingsPanel {...mockNonBottomDiveProps} />);
+describe("MUI Select Component Examples", () => {
+    test("Get by Test ID", async () => {
+        render(<TaskSettingsPanel {...mockProps} />);
 
-        // Open the dropdown
-        const selectElement = screen.getByLabelText(/TaskOptions/i);
-        await userEvent.click(selectElement);
+        // Get the Select Component
+        const selectElement = screen.getByTestId("task-select-input-id");
+        expect(selectElement).toBeInTheDocument();
 
-        // Click the desired option
-        const option = await screen.findByRole("option", { name: "Dive" });
-        await userEvent.click(option);
+        // Verify that the selected value is Dive
+        expect((selectElement as HTMLSelectElement).value).toBe("NONE");
 
-        // Check if the Select component displays the new value
-        expect(screen.getByDisplayValue(/dive/i)).toBeInTheDocument();
-    });
+        // Change the selection to Dive
+        await userEvent.selectOptions(selectElement, "DIVE");
+
+        // Verify that the selected value is Dive
+        expect((selectElement as HTMLSelectElement).value).toBe("DIVE");
+
+        // Change the selection to Dive
+        await userEvent.selectOptions(selectElement, "SURFACE_DRIFT");
+
+        // Verify that the selected value is Dive
+        expect((selectElement as HTMLSelectElement).value).toBe("SURFACE_DRIFT");
+
+          // Change the selection to Dive
+          await userEvent.selectOptions(selectElement, "STATION_KEEP");
+
+          // Verify that the selected value is Dive
+          expect((selectElement as HTMLSelectElement).value).toBe("STATION_KEEP");
+  
+         // Change the selection to Dive
+         await userEvent.selectOptions(selectElement, "CONSTANT_HEADING");
+
+         // Verify that the selected value is Dive
+         expect((selectElement as HTMLSelectElement).value).toBe("CONSTANT_HEADING");
+ 
+        
+   });
 });

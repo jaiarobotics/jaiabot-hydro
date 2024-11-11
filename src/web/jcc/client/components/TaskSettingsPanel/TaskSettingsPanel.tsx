@@ -655,22 +655,20 @@ export function TaskSettingsPanel(props: Props) {
 
     return (
         <FormControl sx={{ minWidth: 120 }} size="small" disabled={!props?.isEditMode}>
-            <InputLabel id="task-select-label">TaskOptions</InputLabel>
             <Select
+                native={true}
                 labelId="task-select-label"
-                label="Options"
                 data-testid="task-select-id"
                 onChange={(evt) => onChangeTaskType(evt)}
                 value={props.task?.type ?? "NONE"}
                 inputProps={{ "data-testid": "task-select-input-id" }}
             >
-                <MenuItem value={"NONE"}>None</MenuItem>
-                <MenuItem value={"DIVE"}>Dive</MenuItem>
-                <MenuItem value={"SURFACE_DRIFT"}>Surface Drift</MenuItem>
-                <MenuItem value={"STATION_KEEP"}>Station Keep</MenuItem>
-                <MenuItem value={"CONSTANT_HEADING"}>Constant Heading</MenuItem>
+                <option value={"NONE"}>None</option>
+                <option value={"DIVE"}>Dive</option>
+                <option value={"SURFACE_DRIFT"}>Surface Drift</option>
+                <option value={"STATION_KEEP"}>Station Keep</option>
+                <option value={"CONSTANT_HEADING"}>Constant Heading</option>
             </Select>
-            {TaskOptionsPanel(props)}
         </FormControl>
     );
 }
