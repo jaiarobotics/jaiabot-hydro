@@ -1,8 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { TaskSettingsPanel, Props } from "../TaskSettingsPanel";
 
+import { TaskSettingsPanel, Props } from "../TaskSettingsPanel";
 import { MissionTask, TaskType } from "../../shared/JAIAProtobuf";
+import { validateTask } from "../../../../../tests/helpers/ValidateTask";
 
 let mockProps: Props = {
     isEditMode: true,
@@ -14,37 +15,6 @@ let mockProps: Props = {
 const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
     mockProps.task = task;
 });
-
-function validateTask(task?: MissionTask): void {
-    if (!task) {
-        return;
-    }
-    switch (task?.type) {
-        case TaskType.CONSTANT_HEADING:
-            //TODO
-            break;
-        case TaskType.DIVE:
-            if (task.dive.bottom_dive) {
-                //Bottom Dive = true, expect no other parameters
-                expect(task.dive.max_depth).toBeUndefined();
-                expect(task.dive.depth_interval).toBeUndefined();
-                expect(task.dive.hold_time).toBeUndefined();
-            } else {
-                //Non Bottom Dive should have other parameters
-                expect(task.dive.max_depth).toBeDefined();
-                expect(task.dive.depth_interval).toBeDefined();
-                expect(task.dive.hold_time).toBeDefined();
-            }
-            expect(task.surface_drift).toBeDefined();
-            break;
-        case TaskType.SURFACE_DRIFT:
-            //TODO
-            break;
-        case TaskType.STATION_KEEP:
-            //TODO
-            break;
-    }
-}
 
 describe("MUI Select Component Examples", () => {
     test("Get by Test ID, Select all Options", async () => {
@@ -65,7 +35,10 @@ describe("MUI Select Component Examples", () => {
             rerender(<TaskSettingsPanel {...mockProps} />);
 
             // Verify that the selected value is Dive
-            expect((selectElement as HTMLSelectElement).value).toBe(value);
+            await waitFor(() => {
+                expect((selectElement as HTMLSelectElement).value).toBe(value);
+            });
+            // Validate the TaskSettingsPanel produce a valid Task
             validateTask(mockProps.task);
         }
     });
