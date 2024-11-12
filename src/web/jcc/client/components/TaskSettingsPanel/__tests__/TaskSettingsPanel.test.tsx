@@ -11,13 +11,16 @@ let mockProps: Props = {
     onChange: (task?: MissionTask) => mockOnChange(task),
 };
 
-//Mock of the onChange to update Props
+//Mock of the onChange callback to update Props
 const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
     mockProps.task = task;
 });
 
 describe("MUI Select Component Examples", () => {
     test("Get by Test ID, Select all Options", async () => {
+        let onChangeCalls = 0;
+
+        //get the rerender function from the object returned when rendering the panel
         const { rerender } = render(<TaskSettingsPanel {...mockProps} />);
 
         // Get the Select Component
@@ -26,6 +29,9 @@ describe("MUI Select Component Examples", () => {
 
         // Verify that the selected value is Dive
         expect((selectElement as HTMLSelectElement).value).toBe("NONE");
+
+        //Verify the mockOnChange function hasn't been called yet
+        expect(mockOnChange).toHaveBeenCalledTimes(0);
 
         for (const value of Object.values(TaskType)) {
             // Change the selection to Dive
@@ -40,6 +46,18 @@ describe("MUI Select Component Examples", () => {
             });
             // Validate the TaskSettingsPanel produce a valid Task
             validateTask(mockProps.task);
+
+            //Verify the mockOnChange function hasn't been called the right number of times
+            expect(mockOnChange).toHaveBeenCalledTimes(onChangeCalls++);
+
+            // Verify that mockOnChange was called with the correct task type
+            if (value != TaskType.NONE) {
+                expect(mockOnChange).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        type: value,
+                    }),
+                );
+            }
         }
     });
 });
