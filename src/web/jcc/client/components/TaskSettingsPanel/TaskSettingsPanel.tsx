@@ -666,6 +666,7 @@ export function TaskSettingsPanel(props: Props) {
                 <option value={"STATION_KEEP"}>Station Keep</option>
                 <option value={"CONSTANT_HEADING"}>Constant Heading</option>
             </Select>
+            {TaskOptionsPanel(props)}
         </FormControl>
     );
 }
