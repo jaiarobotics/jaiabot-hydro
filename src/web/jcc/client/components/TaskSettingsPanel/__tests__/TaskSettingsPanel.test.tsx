@@ -2,9 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TaskSettingsPanel, Props } from "../TaskSettingsPanel";
 
-import { MissionTask, TaskType, DiveParameters, DriftParameters } from "../../shared/JAIAProtobuf";
-
-import { log } from "console";
+import { MissionTask, TaskType } from "../../shared/JAIAProtobuf";
 
 let mockProps: Props = {
     isEditMode: true,
@@ -12,27 +10,28 @@ let mockProps: Props = {
     onChange: (task?: MissionTask) => mockOnChange(task),
 };
 
-//Mock of the onChange Prop to verify tasks are formatted correctly
+//Mock of the onChange to update Props
 const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
     mockProps.task = task;
 });
 
 function validateTask(task?: MissionTask): void {
-    log("validateTask checking task");
-    log(task);
-
-    switch (task.type) {
+    if (!task) {
+        return;
+    }
+    switch (task?.type) {
         case TaskType.CONSTANT_HEADING:
             //TODO
             break;
         case TaskType.DIVE:
             if (task.dive.bottom_dive) {
                 //Bottom Dive = true, expect no other parameters
-                expect(task.dive.max_depth).toBeUndefined(); //this should fail, fix once verify function gets called
+                expect(task.dive.max_depth).toBeUndefined();
                 expect(task.dive.depth_interval).toBeUndefined();
                 expect(task.dive.hold_time).toBeUndefined();
             } else {
-                expect(task.dive.max_depth).toBeDefined(); //this should fail, fix once verify function gets called
+                //Non Bottom Dive should have other parameters
+                expect(task.dive.max_depth).toBeDefined();
                 expect(task.dive.depth_interval).toBeDefined();
                 expect(task.dive.hold_time).toBeDefined();
             }
@@ -48,7 +47,7 @@ function validateTask(task?: MissionTask): void {
 }
 
 describe("MUI Select Component Examples", () => {
-    test("Get by Test ID", async () => {
+    test("Get by Test ID, Select all Options", async () => {
         const { rerender } = render(<TaskSettingsPanel {...mockProps} />);
 
         // Get the Select Component
@@ -58,44 +57,16 @@ describe("MUI Select Component Examples", () => {
         // Verify that the selected value is Dive
         expect((selectElement as HTMLSelectElement).value).toBe("NONE");
 
-        // Change the selection to Dive
-        await userEvent.selectOptions(selectElement, "DIVE");
+        for (const value of Object.values(TaskType)) {
+            // Change the selection to Dive
+            await userEvent.selectOptions(selectElement, value);
 
-        // rerender with updated props
-        rerender(<TaskSettingsPanel {...mockProps} />);
+            // rerender with updated props
+            rerender(<TaskSettingsPanel {...mockProps} />);
 
-        // Verify that the selected value is Dive
-        expect((selectElement as HTMLSelectElement).value).toBe("DIVE");
-        validateTask(mockProps.task);
-
-        // Change the selection to Dive
-        await userEvent.selectOptions(selectElement, "SURFACE_DRIFT");
-
-        // rerender with updated props
-        rerender(<TaskSettingsPanel {...mockProps} />);
-
-        // Verify that the selected value is Dive
-        expect((selectElement as HTMLSelectElement).value).toBe("SURFACE_DRIFT");
-
-        // rerender with updated props
-        rerender(<TaskSettingsPanel {...mockProps} />);
-
-        // Change the selection to Dive
-        await userEvent.selectOptions(selectElement, "STATION_KEEP");
-
-        // rerender with updated props
-        rerender(<TaskSettingsPanel {...mockProps} />);
-
-        // Verify that the selected value is Dive
-        expect((selectElement as HTMLSelectElement).value).toBe("STATION_KEEP");
-
-        // Change the selection to Dive
-        await userEvent.selectOptions(selectElement, "CONSTANT_HEADING");
-
-        // rerender with updated props
-        rerender(<TaskSettingsPanel {...mockProps} />);
-
-        // Verify that the selected value is Dive
-        expect((selectElement as HTMLSelectElement).value).toBe("CONSTANT_HEADING");
+            // Verify that the selected value is Dive
+            expect((selectElement as HTMLSelectElement).value).toBe(value);
+            validateTask(mockProps.task);
+        }
     });
 });
