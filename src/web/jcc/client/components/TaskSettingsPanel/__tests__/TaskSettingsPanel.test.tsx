@@ -44,10 +44,10 @@ describe("MUI Select Component Examples", () => {
             await waitFor(() => {
                 expect((selectElement as HTMLSelectElement).value).toBe(value);
             });
-            // Validate the TaskSettingsPanel produce a valid Task
+            // Validate the TaskSettingsPanel sent a valid Task to mockOnChange
             validateTask(mockProps.task);
 
-            //Verify the mockOnChange function hasn't been called the right number of times
+            //Verify the mockOnChange function has been called the right number of times
             expect(mockOnChange).toHaveBeenCalledTimes(onChangeCalls++);
 
             // Verify that mockOnChange was called with the correct task type
