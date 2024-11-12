@@ -143,6 +143,27 @@ ln -s -f /dev/arduino /etc/jaiabot/dev/arduino
 ln -s -f /dev/xbee /etc/jaiabot/dev/xbee
 
 echo "###############################################"
+echo "## Install jaiabot-embedded package          ##"
+echo "###############################################"
+
+run_wt_yesno jaia_install_jaiabot_embedded "Install jaiabot-embedded package" "\nDo you want to install and configure the jaiabot-embedded Debian package?" && do_install=true
+
+if [[ "$do_install" = "true" ]]; then
+   if [[ "$USING_PRESEED" = "true" ]]; then
+       echo "$jaia_embedded_debconf" | debconf-set-selections -
+       debconf-get-selections | grep jaia
+   fi
+   export DEBIAN_FRONTEND=noninteractive
+   if dpkg -s jaiabot-embedded; then
+       # if it's already installed, reconfigure
+       dpkg-reconfigure jaiabot-embedded;
+   else
+       # otherwise install it
+       apt install -y /opt/jaiabot-embedded*.deb;
+   fi
+fi
+
+echo "###############################################"
 echo "## Setting up authorized ssh keys            ##"
 echo "###############################################"
 
@@ -170,27 +191,7 @@ chown -R jaia:jaia /home/jaia/.ssh
 chown -R jaia:jaia /etc/jaiabot/ssh
 )
 
-echo "###############################################"
-echo "## Install jaiabot-embedded package          ##"
-echo "###############################################"
 
-run_wt_yesno jaia_install_jaiabot_embedded "Install jaiabot-embedded package" "\nDo you want to install and configure the jaiabot-embedded Debian package?" && do_install=true
-
-if [[ "$do_install" = "true" ]]; then
-   if [[ "$USING_PRESEED" = "true" ]]; then
-       echo "$jaia_embedded_debconf" | debconf-set-selections -
-       debconf-get-selections | grep jaia
-   fi
-   if dpkg -s jaiabot-embedded; then
-       # if it's already installed, reconfigure
-       export DEBIAN_FRONTEND=noninteractive
-       dpkg-reconfigure jaiabot-embedded;
-   else
-       # otherwise install it
-       apt install -y /opt/jaiabot-embedded*.deb;
-   fi
-fi
-   
 echo "###############################################################"
 echo "## Removing first-boot hooks so that this does not run again ##"
 echo "###############################################################"
