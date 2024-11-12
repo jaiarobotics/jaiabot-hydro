@@ -1,24 +1,7 @@
 import { render, screen, fireEvent, prettyDOM, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event"
-import { log } from "console";
 
 import JaiaToggle from "../JaiaToggle";
-import { Metadata, Version } from "../shared/PortalStatus";
-
-const sampleVersion1: Version = {
-    major: "1",
-    minor: "10",
-    patch: "0",
-};
-
-const sampleMetadata1: Metadata = {
-    jaiabot_version: sampleVersion1,
-};
-
-
-function logElement(element: Element) {
-    log(prettyDOM(element))
-}
 
 
 describe("JaiaToggle", () => {
