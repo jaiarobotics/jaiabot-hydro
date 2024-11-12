@@ -161,9 +161,6 @@ function TaskOptionsPanel(props: Props) {
             newTask.surface_drift["drift_time"] = surface_drift.drift_time;
         }
 
-        console.log("handleToggle newTask=");
-        console.log(newTask);
-
         props.onChange(newTask);
 
         //Save bottom dive to local storage
