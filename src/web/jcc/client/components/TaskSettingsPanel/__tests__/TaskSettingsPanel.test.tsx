@@ -20,7 +20,7 @@ const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
 function validateTask(task?: MissionTask): void {
     log("validateTask checking task");
     log(task);
-    expect(false);
+
     switch (task.type) {
         case TaskType.CONSTANT_HEADING:
             //TODO
@@ -28,15 +28,15 @@ function validateTask(task?: MissionTask): void {
         case TaskType.DIVE:
             if (task.dive.bottom_dive) {
                 //Bottom Dive = true, expect no other parameters
-                expect(task.dive.max_depth).toBeDefined(); //this should fail, fix once verify function gets called
+                expect(task.dive.max_depth).toBeUndefined(); //this should fail, fix once verify function gets called
                 expect(task.dive.depth_interval).toBeUndefined();
                 expect(task.dive.hold_time).toBeUndefined();
             } else {
-                expect(task.dive.max_depth).not.toBeDefined; //this should fail, fix once verify function gets called
-                expect(task.dive.depth_interval).toBeDefined;
-                expect(task.dive.hold_time).toBeDefined;
+                expect(task.dive.max_depth).toBeDefined(); //this should fail, fix once verify function gets called
+                expect(task.dive.depth_interval).toBeDefined();
+                expect(task.dive.hold_time).toBeDefined();
             }
-            expect(task.surface_drift).toBeDefined;
+            expect(task.surface_drift).toBeDefined();
             break;
         case TaskType.SURFACE_DRIFT:
             //TODO
