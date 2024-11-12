@@ -35,14 +35,8 @@ def calculate_rpm():
         while True:
             now = time.time()
 
-            if GPIO.input(RPM_PIN):
-                current_state = "HIGH"
-            else:
-                current_state = "LOW"
-
-            if current_state != prev_state:
-                state_change_count += 1
-                prev_state = current_state
+            GPIO.wait_for_edge(RPM_PIN, GPIO.FALLING)
+            state_change_count += 2
 
             # 0.2 second elapsed | Revolutions per second
             if (now - start_interval >= 0.2):

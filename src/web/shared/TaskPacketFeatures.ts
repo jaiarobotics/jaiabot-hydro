@@ -34,6 +34,7 @@ export function createDivePacketFeature(map: Map, task_packet: TaskPacket) {
         startLocation: dive.start_location,
         selected: false,
         animated: false,
+        falseDive: dive.false_dive,
     });
     feature.setStyle(Styles.divePacketIconStyle(feature));
     return feature;
@@ -77,7 +78,7 @@ export function createDriftPacketFeature(map: Map, taskPacket: TaskPacket) {
 export function getDivePacketFeature(
     map: Map,
     taskPacket: TaskPacket,
-    divePacketLayer: VectorLayer<VectorSource<Geometry>>,
+    divePacketLayer: VectorLayer<VectorSource<Feature<Geometry>>>,
 ) {
     if (taskPacket?.dive != undefined) {
         const dive = taskPacket.dive;
@@ -98,7 +99,7 @@ export function getDivePacketFeature(
 export function getDriftPacketFeature(
     map: Map,
     taskPacket: TaskPacket,
-    driftPacketLayer: VectorLayer<VectorSource<Geometry>>,
+    driftPacketLayer: VectorLayer<VectorSource<Feature<Geometry>>>,
 ) {
     if (taskPacket?.drift != undefined) {
         const drift = taskPacket.drift;
@@ -119,7 +120,7 @@ export function getDriftPacketFeature(
     }
 }
 
-function getSelectedFeature(collectionLayer: VectorLayer<VectorSource<Geometry>>) {
+function getSelectedFeature(collectionLayer: VectorLayer<VectorSource<Feature<Geometry>>>) {
     const currentFeatures = collectionLayer.getSource()?.getFeatures() ?? [];
     for (const featuresArray of currentFeatures) {
         const feature = featuresArray.get("features")[0];

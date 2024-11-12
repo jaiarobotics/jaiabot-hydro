@@ -44,7 +44,6 @@ constexpr goby::middleware::Group pressure_temperature{"jaiabot::pressure_temper
 constexpr goby::middleware::Group pressure_adjusted{"jaiabot::pressure_adjusted"};
 constexpr goby::middleware::Group salinity{"jaiabot::salinity"};
 constexpr goby::middleware::Group echo{"jaiabot::echo"};
-constexpr goby::middleware::Group thermistor{"jaiabot::thermistor"};
 
 // low control
 constexpr goby::middleware::Group low_control{"jaiabot::low_control"};
@@ -114,6 +113,9 @@ constexpr goby::middleware::Group simulator_command{"jaiabot::simulator_command"
 
 // production
 constexpr goby::middleware::Group production{"jaiabot::production"};
+
+// web_portal
+constexpr goby::middleware::Group web_portal("jaiabot::web_portal");
 
 } // namespace groups
 } // namespace jaiabot

@@ -243,4 +243,17 @@ message MissionManager
     }
 
     optional ResolveNoForwardProgress resolve_no_forward_progress = 88;
+
+    message DetectFalseDive
+    {
+        optional int32 motor_rpm_false_dives_checks = 1 [default = 5];
+
+        // The min amount of time to trigger a EvFalseDiveAbort event
+        optional int32 motor_rpm_min_check_time = 2
+            [default = 2, (dccl.field).units = { base_dimensions: "T" }];
+
+        optional int32 motor_rpm_to_determine_false_dive = 3 [default = 1300];
+    }
+
+    optional DetectFalseDive detect_false_dive = 89;
 }

@@ -720,6 +720,12 @@ void jaiabot::statechart::inmission::underway::task::dive::PoweredDescent::depth
         is_bot_diving_ = true;
     }
 
+    if (context<Dive>().dive_packet().false_dive())
+    {
+        context<Dive>().dive_packet().set_depth_achieved_with_units(ev.depth);
+        post_event(EvFalseDiveAbort());
+    }
+
     // Check if our initial timeout has been reached to detect bottom
     // or if the bot is diving.
     if (current_clock >= detect_bottom_logic_timeout_ || is_bot_diving_)
@@ -784,6 +790,41 @@ void jaiabot::statechart::inmission::underway::task::dive::PoweredDescent::depth
         glog << "Exit jaiabot::statechart::inmission::underway::task::dive::PoweredDescent::depth: "
                 "\n"
              << std::endl;
+}
+
+/**
+ * @brief Executes when the bot receives a new motor status reading
+ * 
+ * @param ev Motor status event used to pass the new motor status reading
+ */
+void jaiabot::statechart::inmission::underway::task::dive::PoweredDescent::motor_status(
+    const EvVehicleMotorStatus& ev)
+{
+    auto now = goby::time::SystemClock::now<goby::time::MicroTime>();
+
+    auto detect_cfg = cfg().detect_false_dive();
+
+    if (std::abs(ev.rpm) < detect_cfg.motor_rpm_to_determine_false_dive())
+    {
+        // Check the min check time has been reached and
+        // the number of checks has been reached
+        // to determine if a bot is false diving
+        if (((motor_rpm_false_dive_check_incr_ >=
+              (detect_cfg.motor_rpm_false_dives_checks() - 1)) &&
+             (now - last_motor_rpm_time_) >=
+                 static_cast<decltype(now)>(detect_cfg.motor_rpm_min_check_time_with_units())))
+        {
+            glog.is_warn() && glog << "PoweredDescent::motor_status Bot is false diving!"
+                                   << std::endl;
+            context<Dive>().dive_packet().set_false_dive(true);
+        }
+        motor_rpm_false_dive_check_incr_++;
+    }
+    else
+    {
+        last_motor_rpm_time_ = now;
+        motor_rpm_false_dive_check_incr_ = 0;
+    }
 }
 
 // Task::Dive::Hold

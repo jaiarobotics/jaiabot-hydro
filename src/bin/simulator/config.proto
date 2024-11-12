@@ -116,6 +116,8 @@ message Simulator
     optional string hub_gpsd_device = 43;
 
     optional ArduinoSimThread arduino_config = 60;
+
+    optional MotorSimThread motor_config = 61;
 }
 
 message ArduinoSimThread
@@ -128,4 +130,13 @@ message ArduinoSimThread
     optional double voltage_step_decrease = 2 [default = 0.1];
     optional double voltage_start = 3 [default = 24.0];
     optional double reset_voltage_level = 4 [default = 15.0];
+}
+
+message MotorSimThread
+{
+    option (dccl.msg) = {
+        unit_system: "si"
+    };
+
+    optional int32 rpm = 1 [default = 1300];
 }
