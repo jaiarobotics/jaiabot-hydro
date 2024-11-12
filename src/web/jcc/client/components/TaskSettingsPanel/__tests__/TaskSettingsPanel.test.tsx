@@ -9,17 +9,18 @@ import { log } from "console";
 let mockProps: Props = {
     isEditMode: true,
     enableEcho: false,
-    onChange: (task?: MissionTask) => mockOnChangeCheckParameters(task),
+    onChange: (task?: MissionTask) => mockOnChange(task),
 };
 
-const sendEventToParentWindowMock = jest.fn(() => {
-    log("** sendEventToParentWindowMock called **");
+//Mock of the onChange Prop to verify tasks are formatted correctly
+const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
+    mockProps.task = task;
 });
 
-//Mock of the onChange Prop to verify tasks are formatted correctly
-const mockOnChangeCheckParameters = (task?: MissionTask) => {
-    log("mockOnChangeCheckParameters checking task");
+function validateTask(task?: MissionTask): void {
+    log("validateTask checking task");
     log(task);
+    expect(false);
     switch (task.type) {
         case TaskType.CONSTANT_HEADING:
             //TODO
@@ -31,7 +32,7 @@ const mockOnChangeCheckParameters = (task?: MissionTask) => {
                 expect(task.dive.depth_interval).toBeUndefined();
                 expect(task.dive.hold_time).toBeUndefined();
             } else {
-                expect(task.dive.max_depth).toBeDefined;
+                expect(task.dive.max_depth).not.toBeDefined; //this should fail, fix once verify function gets called
                 expect(task.dive.depth_interval).toBeDefined;
                 expect(task.dive.hold_time).toBeDefined;
             }
@@ -44,9 +45,7 @@ const mockOnChangeCheckParameters = (task?: MissionTask) => {
             //TODO
             break;
     }
-    mockProps.task = task;
-    sendEventToParentWindowMock();
-};
+}
 
 describe("MUI Select Component Examples", () => {
     test("Get by Test ID", async () => {
@@ -67,6 +66,7 @@ describe("MUI Select Component Examples", () => {
 
         // Verify that the selected value is Dive
         expect((selectElement as HTMLSelectElement).value).toBe("DIVE");
+        validateTask(mockProps.task);
 
         // Change the selection to Dive
         await userEvent.selectOptions(selectElement, "SURFACE_DRIFT");
