@@ -20,27 +20,28 @@ describe("MUI Select Component Examples", () => {
     test("Get by Test ID, Select all Options", async () => {
         let onChangeCalls = 0;
 
-        //get the rerender function from the object returned when rendering the panel
+        // Get the rerender function from the object returned when rendering the panel
         const { rerender } = render(<TaskSettingsPanel {...mockProps} />);
 
         // Get the Select Component
         const selectElement = screen.getByTestId("task-select-input-id");
         expect(selectElement).toBeInTheDocument();
 
-        // Verify that the selected value is Dive
+        // Verify that the selected value is None
         expect((selectElement as HTMLSelectElement).value).toBe("NONE");
 
-        //Verify the mockOnChange function hasn't been called yet
+        // Verify the mockOnChange function hasn't been called yet
         expect(mockOnChange).toHaveBeenCalledTimes(0);
 
+        // Change the Task Type to all options and verify the change occured
         for (const value of Object.values(TaskType)) {
-            // Change the selection to Dive
+            // Change the selection
             await userEvent.selectOptions(selectElement, value);
 
-            // rerender with updated props
+            // Rerender with updated props
             rerender(<TaskSettingsPanel {...mockProps} />);
 
-            // Verify that the selected value is Dive
+            // Verify that the selected value is correct
             await waitFor(() => {
                 expect((selectElement as HTMLSelectElement).value).toBe(value);
             });
