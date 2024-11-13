@@ -24,11 +24,11 @@ describe("MUI Select Component Examples", () => {
         const { rerender } = render(<TaskSettingsPanel {...mockProps} />);
 
         // Get the Select Component
-        const selectElement = screen.getByTestId("task-select-input-id");
+        const selectElement: HTMLSelectElement = screen.getByTestId("task-select-input-id");
         expect(selectElement).toBeInTheDocument();
 
         // Verify that the selected value is None
-        expect((selectElement as HTMLSelectElement).value).toBe("NONE");
+        expect(selectElement.value).toBe("NONE");
 
         // Verify the mockOnChange function hasn't been called yet
         expect(mockOnChange).toHaveBeenCalledTimes(0);
@@ -43,7 +43,7 @@ describe("MUI Select Component Examples", () => {
 
             // Verify that the selected value is correct
             await waitFor(() => {
-                expect((selectElement as HTMLSelectElement).value).toBe(value);
+                expect(selectElement.value).toBe(value);
             });
             // Validate the TaskSettingsPanel sent a valid Task to mockOnChange
             validateTask(mockProps.task);
