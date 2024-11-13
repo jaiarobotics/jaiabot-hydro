@@ -34,6 +34,8 @@ import "../style/components/SettingsPanel.css";
 interface Props {
     taskPacketsTimeline: { [key: string]: string | boolean };
     isClusterModeOn: boolean;
+    iseDNAOn: boolean;
+    toggleeDNA: (bot_id: number) => boolean;
     handleTaskPacketEditDatesToggle: () => void;
     handleTaskPacketsTimelineChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
     handleSubmitTaskPacketsTimeline: () => void;
@@ -45,6 +47,7 @@ interface Props {
     trackingTarget: string | number | null;
     visiblePanel: PanelType;
     zoomToPod: (firstMove: boolean) => void;
+    selectBot: (bot_id: number) => void;
 
     // Engineering Accordion Props
     api: JaiaAPI;
@@ -173,6 +176,55 @@ export function SettingsPanel(props: Props) {
             </ThemeProvider>
         );
     };
+
+    let bots = props.bots;
+    let botId: number = null;
+
+    function didSelectBot(bot_id: number) {}
+
+    // No bots in list
+    if (bots == null || Object.keys(bots).length == 0) {
+        return <div></div>;
+    }
+
+    // If we haven't selected a bot yet, and there are bots available, then select the lowest indexed bot
+    if (botId == null) {
+        botId = Number(Object.keys(bots)[0]);
+    }
+
+    let botSelector = (
+        <div>
+            <label style={{ fontSize: "32px", marginRight: "25px", color: "#0bc9cd" }}>Bot</label>
+            <select
+                style={{ width: "50px", marginBottom: "10px", color: "#0bc9cd" }}
+                name="bot"
+                id="pid_gains_bot_selector"
+                defaultValue={botId}
+                onChange={() => props.selectBot(botId)}
+            >
+                {bots
+                    ? Object.keys(bots).map((botId) => (
+                          <option key={botId} value={botId}>
+                              {botId}
+                          </option>
+                      ))
+                    : ""}
+            </select>
+        </div>
+    );
+
+    const ednaActiveClass = props.iseDNAOn ? " edna-active" : " edna-inactive";
+    const ednaOnButton = (
+        <div className="panel">
+            {botSelector}
+            <Button
+                className={"button-jcc engineering-panel-button" + ednaActiveClass}
+                onClick={() => props.toggleeDNA(bots[botId].bot_id)}
+            >
+                eDNA Pump
+            </Button>
+        </div>
+    );
 
     return (
         <div className="settings-outer-container">
@@ -308,6 +360,7 @@ export function SettingsPanel(props: Props) {
                         </AccordionSummary>
                         <AccordionDetails className="settings-accordion-inner-container">
                             <div id="engineeringPanel">
+                                {ednaOnButton}
                                 <div className="panel">
                                     <Button
                                         className="button-jcc engineering-panel-btn"

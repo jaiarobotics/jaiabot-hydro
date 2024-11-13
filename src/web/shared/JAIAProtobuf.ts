@@ -659,10 +659,10 @@ export interface SRPParameters {
 }
 
 export interface TrailParameters {
-    contact?: number
-    angle?: number
-    angle_relative?: boolean
-    range?: number
+    contact?: number;
+    angle?: number;
+    angle_relative?: boolean;
+    range?: number;
 }
 
 export interface MissionTask {
@@ -683,7 +683,7 @@ export enum MissionStart {
 export enum MovementType {
     TRANSIT = "TRANSIT",
     REMOTE_CONTROL = "REMOTE_CONTROL",
-    TRAIL = "TRAIL"
+    TRAIL = "TRAIL",
 }
 
 export interface Goal {
@@ -1036,6 +1036,7 @@ export interface BotStatus {
     pdop?: number;
     data_offload_percentage?: number;
     wifi_link_quality_percentage?: number;
+    edna_on?: boolean;
 }
 
 export interface EstimatedDrift {
@@ -1183,14 +1184,11 @@ export interface Echo {
 }
 
 export enum eDNAState {
-    START = 0,
-    STOP = 1,
-    RUNNING = 2,
+    EDNA_OFF = 0,
+    ENDA_ON = 1,
 }
 
-export interface eDNA { 
-    start_edna?: boolean;
-    stop_edna?: boolean;
+export interface eDNA {
     edna_state?: eDNAState;
 }
 
@@ -1217,7 +1215,7 @@ export interface HubStatus {
     time?: number;
     health_state?: HealthState;
     error?: Error[];
-    warning?: Warning[]; 
+    warning?: Warning[];
     location?: GeographicCoordinate;
     bot_ids_in_radio_file?: number[];
     linux_hardware_status?: LinuxHardwareStatus;
@@ -1231,8 +1229,8 @@ interface BotOffloadData {
 }
 
 export interface ContactStatus {
-    contact?: number,
-    location: GeographicCoordinate,
-    speed_over_ground?: number,
-    heading_or_cog?: number
+    contact?: number;
+    location: GeographicCoordinate;
+    speed_over_ground?: number;
+    heading_or_cog?: number;
 }

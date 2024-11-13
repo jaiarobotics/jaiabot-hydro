@@ -6,7 +6,7 @@ import * as MissionFeatures from "../shared/MissionFeatures";
 import RCControllerPanel from "../RCControllerPanel";
 import DownloadPanel from "../DownloadPanel";
 import RunInfoPanel from "../RunInfoPanel";
-import ContactInfoPanel from '../ContactInfoPanel'
+import ContactInfoPanel from "../ContactInfoPanel";
 import JaiaAbout from "../JaiaAbout/JaiaAbout";
 import { layers } from "../Layers";
 import { jaiaAPI, BotPaths } from "../../../common/JaiaAPI";
@@ -16,7 +16,7 @@ import { HubOrBot } from "../HubOrBot";
 import { createMap } from "../Map";
 import { BotLayers } from "../BotLayers";
 import { HubLayers } from "../HubLayers";
-import { ContactLayers } from '../ContactLayers'
+import { ContactLayers } from "../ContactLayers";
 import { HubDetails } from "../../../../containers/HubDetails";
 import { CommandList } from "../Missions";
 import { SurveyLines } from "../SurveyLines";
@@ -124,6 +124,7 @@ import "./CommandControl.less";
 // Utility
 import cloneDeep from "lodash.clonedeep";
 import { HelpWindow } from "../HelpWindow";
+import { BentoSharp } from "@mui/icons-material";
 
 const rallyIcon = require("../../../../shared/rally.svg") as string;
 
@@ -152,7 +153,7 @@ export enum PanelType {
     RALLY_POINT = "RALLY_POINT",
     TASK_PACKET = "TASK_PACKET",
     SETTINGS = "SETTINGS",
-    CONTACT_INFO = 'CONTACT_INFO'
+    CONTACT_INFO = "CONTACT_INFO",
 }
 
 export enum Mode {
@@ -204,7 +205,7 @@ interface State {
         runNum: number;
         botId: number;
     };
-    contactClickedInfo: ContactStatus,
+    contactClickedInfo: ContactStatus;
     goalBeingEdited: {
         goal?: Goal;
         originalGoal?: Goal;
@@ -251,6 +252,7 @@ interface State {
     taskPacketIntervalId: NodeJS.Timeout;
     taskPacketsTimeline: { [key: string]: string | boolean };
     isClusterModeOn: boolean;
+    iseDNAOn: boolean;
     isHelpWindowDisplayed: boolean;
 
     disconnectionMessage?: string;
@@ -286,7 +288,7 @@ export default class CommandControl extends React.Component {
     mapDivId = `map-${Math.round(Math.random() * 100000000)}`;
     botLayers: BotLayers;
     hubLayers: HubLayers;
-    contactLayers: ContactLayers
+    contactLayers: ContactLayers;
     oldPodStatus?: PodStatus;
     missionPlans?: CommandList = null;
     taskPackets: TaskPacket[];
@@ -354,11 +356,11 @@ export default class CommandControl extends React.Component {
                 botId: -1,
             },
             contactClickedInfo: {
-				location: {
-					lat: 0,
-					lon: 0
-				}
-			},
+                location: {
+                    lat: 0,
+                    lon: 0,
+                },
+            },
             goalBeingEdited: {},
 
             selectedHubOrBot: null,
@@ -411,7 +413,7 @@ export default class CommandControl extends React.Component {
                     timeout: 1,
                 },
                 edna: {
-                    start_edna: false,
+                    edna_state: 0,
                 },
             },
             rcDives: {},
@@ -431,6 +433,7 @@ export default class CommandControl extends React.Component {
                 isEditing: false,
             },
             isClusterModeOn: true,
+            iseDNAOn: false,
             isHelpWindowDisplayed: false,
 
             viewportPadding: [
@@ -531,7 +534,7 @@ export default class CommandControl extends React.Component {
         // Class that keeps track of the bot layers, and updates them
         this.botLayers = new BotLayers(map);
         this.hubLayers = new HubLayers(map);
-        this.contactLayers = new ContactLayers(map)
+        this.contactLayers = new ContactLayers(map);
 
         const viewport = document.getElementById(this.mapDivId);
         map.setTarget(this.mapDivId);
@@ -633,7 +636,7 @@ export default class CommandControl extends React.Component {
                 this.props.globalContext.selectedPodElement,
             );
             this.botLayers.update(this.state.podStatus.bots, this.state.selectedHubOrBot);
-            this.contactLayers.update(this.state.podStatus?.contacts)
+            this.contactLayers.update(this.state.podStatus?.contacts);
             this.updateHubCommsCircles();
             this.updateActiveMissionLayer();
             this.updateBotCourseOverGroundLayer();
@@ -2103,9 +2106,18 @@ export default class CommandControl extends React.Component {
         }
 
         if (feature) {
-            console.log(feature)
+            console.log(feature);
             // Allow an operator to click on certain features while edit mode is off
-            const editModeExemptions = ["dive", "drift", "rallyPoint", "bot", "hub", "wpt", "line", "contact"];
+            const editModeExemptions = [
+                "dive",
+                "drift",
+                "rallyPoint",
+                "bot",
+                "hub",
+                "wpt",
+                "line",
+                "contact",
+            ];
             const isCollection = feature.get("features");
 
             if (
@@ -2163,19 +2175,18 @@ export default class CommandControl extends React.Component {
             }
 
             // Clicked on contact
-			const isContact = feature.get('type') === "contact"
-			if (isContact) {
-                
-				const contactFeature = feature.get('contact')
-                console.log(contactFeature)
-				const contactClickedInfo = contactFeature
+            const isContact = feature.get("type") === "contact";
+            if (isContact) {
+                const contactFeature = feature.get("contact");
+                console.log(contactFeature);
+                const contactClickedInfo = contactFeature;
 
-				this.setState({ contactClickedInfo }, () => {
-					this.setVisiblePanel(PanelType.CONTACT_INFO)	
-				})
+                this.setState({ contactClickedInfo }, () => {
+                    this.setVisiblePanel(PanelType.CONTACT_INFO);
+                });
 
-				return false
-			}
+                return false;
+            }
 
             // Clicked on mission planning point
             if (this.state.mode == Mode.MISSION_PLANNING) {
@@ -2876,19 +2887,28 @@ export default class CommandControl extends React.Component {
 
     /**
      * Used to flip the state of the eDNA pump. Used within the RCControllerPanel
-     * 
+     *
      * @param {boolean} eDNAState New state the eDNA pump should adopt
      * @returns {void}
      */
-    toggleeDNA(eDNAState: boolean) {
+    toggleeDNA(bot_id: number) {
         let neweDNA = cloneDeep(this.state.remoteControlValues);
-        neweDNA.bot_id = this.selectedBotId();
-        neweDNA.edna.start_edna = !eDNAState;
-        neweDNA.edna.stop_edna = eDNAState;
-        neweDNA.edna.edna_state = 2;
+        neweDNA.bot_id = bot_id;
+
+        const bots = this.getPodStatus().bots;
+
+        if (neweDNA.edna.edna_state === 0) {
+            neweDNA.edna.edna_state = 1;
+            bots[bot_id].edna_on = true;
+        } else {
+            neweDNA.edna.edna_state = 0;
+            bots[bot_id].edna_on = false;
+        }
+
         this.setState({ remoteControlValues: neweDNA });
-        this.api.postEngineering(neweDNA)
-        console.log(this.state.remoteControlValues)
+        this.api.postEngineering(neweDNA);
+        console.log("eDNA Turned on?: " + bots[bot_id].edna_on);
+        console.log("Selected Bot: " + bots[bot_id].bot_id);
     }
     //
     // RC Mode (End)
@@ -3155,7 +3175,11 @@ export default class CommandControl extends React.Component {
                 >
                     <Icon path={mdiPlay} title="Run Mission" />
                 </Button>
-                <Button id="downloadAll" className={`button-jcc`} onClick={this.processDownloadAllBots.bind(this)}>
+                <Button
+                    id="downloadAll"
+                    className={`button-jcc`}
+                    onClick={this.processDownloadAllBots.bind(this)}
+                >
                     <Icon path={mdiDownloadMultiple} title="Download All" />
                 </Button>
                 <Button id="undo" className="button-jcc" onClick={() => this.handleUndoClick()}>
@@ -4159,11 +4183,11 @@ export default class CommandControl extends React.Component {
                     <ContactInfoPanel
                         setVisiblePanel={this.setVisiblePanel.bind(this)}
                         contact={this.state.contactClickedInfo}
-                        botIds={this.getBotIdList()} 
+                        botIds={this.getBotIdList()}
                         api={this.api}
                     />
-                )
-                break
+                );
+                break;
             case PanelType.GOAL_SETTINGS:
                 visiblePanelElement = (
                     <GoalSettingsPanel
@@ -4225,6 +4249,8 @@ export default class CommandControl extends React.Component {
                     <SettingsPanel
                         taskPacketsTimeline={this.state.taskPacketsTimeline}
                         isClusterModeOn={this.state.isClusterModeOn}
+                        iseDNAOn={this.state.iseDNAOn}
+                        toggleeDNA={this.toggleeDNA.bind(this)}
                         handleTaskPacketEditDatesToggle={this.handleTaskPacketEditDatesToggle.bind(
                             this,
                         )}
@@ -4253,6 +4279,7 @@ export default class CommandControl extends React.Component {
                         trackingTarget={this.state.trackingTarget}
                         visiblePanel={this.state.visiblePanel}
                         zoomToPod={this.zoomToPod.bind(this)}
+                        selectBot={this.selectBot.bind(this)}
                     />
                 );
                 break;
