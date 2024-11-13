@@ -6,7 +6,7 @@ import { Point } from "ol/geom";
 import { mdiClose } from "@mdi/js";
 import { PanelType } from "../CommandControl/CommandControl";
 import { mdiPlay, mdiDelete } from "@mdi/js";
-import "../style/components/RallyPointPanel.css";
+import "./RallyPointPanel.css";
 
 export interface Props {
     selectedRallyFeature: OlFeature<Point>;
