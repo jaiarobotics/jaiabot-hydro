@@ -18,59 +18,63 @@ const mockProps: Props = {
     setVisiblePanel: mockSetVisiblePanel,
 };
 
-describe("MUI Button Examples", () => {
-    test("Test Go To Rally Point Button using test-id", async () => {
-        // Render the Rally Point Panel
-        render(<RallyPointPanel {...mockProps} />);
-        // Get the button using Test ID
-        const buttonElement = screen.getByTestId("go-to-rally-point-id");
-        // Click the button and check the callback was called
-        await userEvent.click(buttonElement);
-        expect(mockGoToRallyPoint).toHaveBeenCalled();
+type TestParams = {
+    description: string;
+    getMethod: () => HTMLElement;
+    callBackMethod: () => jest.Mock;
+};
+
+const testCases: TestParams[] = [
+    {
+        description: "Test Go To Button using test-id",
+        getMethod: () => screen.getByTestId("go-to-rally-point-id"),
+        callBackMethod: mockGoToRallyPoint,
+    },
+    {
+        description: "Test Go To Button using label",
+        getMethod: () => screen.getByLabelText("Go To Rally Point Label"),
+        callBackMethod: mockGoToRallyPoint,
+    },
+    {
+        description: "Test Go To Button using title",
+        getMethod: () => screen.getByTitle("Go To Rally Point Button"),
+        callBackMethod: mockGoToRallyPoint,
+    },
+    {
+        description: "Test Delete Button using test-id",
+        getMethod: () => screen.getByTestId("delete-rally-point-id"),
+        callBackMethod: mockDeleteRallyPoint,
+    },
+    {
+        description: "Test Delete Button using label",
+        getMethod: () => screen.getByLabelText("Delete Rally Point Label"),
+        callBackMethod: mockDeleteRallyPoint,
+    },
+    {
+        description: "Test Delete Button using title",
+        getMethod: () => screen.getByTitle("Delete Rally Point Button"),
+        callBackMethod: mockDeleteRallyPoint,
+    },
+];
+
+describe("Rally Point Panel Button Tests", () => {
+    beforeEach(() => {
+        jest.clearAllMocks(); // Ensure a clean state for each test
     });
-    test("Test Go To Rally Point Button using label", async () => {
-        // Render the Rally Point Panel
+    test.each(testCases)("$description", async ({ getMethod, callBackMethod }) => {
+        // Render the Rally Point Panel with mock props
         render(<RallyPointPanel {...mockProps} />);
-        // Get the button using Test ID
-        const buttonElement = screen.getByLabelText("Go To Rally Point Label");
-        // Click the button and check the callback was called
+
+        // Get the button using the provided getMethod
+        const buttonElement = getMethod();
+        expect(buttonElement).toBeInTheDocument();
+
+        // Click the button
         await userEvent.click(buttonElement);
-        expect(mockGoToRallyPoint).toHaveBeenCalled();
-    });
-    test("Test Go To Rally Point Button using title", async () => {
-        // Render the Rally Point Panel
-        render(<RallyPointPanel {...mockProps} />);
-        // Get the button using Test ID
-        const buttonElement = screen.getByTitle("Go To Rally Point Button");
-        // Click the button and check the callback was called
-        await userEvent.click(buttonElement);
-        expect(mockGoToRallyPoint).toHaveBeenCalled();
-    });
-    test("Test Delete Rally Point Button using test-id", async () => {
-        // Render the Rally Point Panel
-        render(<RallyPointPanel {...mockProps} />);
-        // Get the button using Test ID
-        const buttonElement = screen.getByTestId("delete-rally-point-id");
-        // Click the button and check the callback was called
-        await userEvent.click(buttonElement);
-        expect(mockDeleteRallyPoint).toHaveBeenCalled();
-    });
-    test("Test Delete Rally Point Button using label", async () => {
-        // Render the Rally Point Panel
-        render(<RallyPointPanel {...mockProps} />);
-        // Get the button using Test ID
-        const buttonElement = screen.getByLabelText("Delete Rally Point Label");
-        // Click the button and check the callback was called
-        await userEvent.click(buttonElement);
-        expect(mockDeleteRallyPoint).toHaveBeenCalled();
-    });
-    test("Test Delete Rally Point Button using title", async () => {
-        // Render the Rally Point Panel
-        render(<RallyPointPanel {...mockProps} />);
-        // Get the button using Test ID
-        const buttonElement = screen.getByTitle("Delete Rally Point Button");
-        // Click the button and check the callback was called
-        await userEvent.click(buttonElement);
-        expect(mockDeleteRallyPoint).toHaveBeenCalled();
+
+        // Verify that the callback was called
+        await waitFor(() => {
+            expect(callBackMethod).toHaveBeenCalledTimes(1);
+        });
     });
 });
