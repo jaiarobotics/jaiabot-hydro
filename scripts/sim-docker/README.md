@@ -9,15 +9,22 @@ A few important Docker terms:
 
 _All commands should be executed in the `jaiabot/scripts/sim-docker directory` for **Linux users**_
 
-1.  **Build the image**
+1. **Download the image from DockerHub** (preferred) or **Build the image** (advanced)
+    - **Download the image** (preferred)
+       - Choose a version you want where `<tag>` is the version you want (e.g. 1.13.0) or `1.y-beta`, `1.y-continuous`, `1.y-test` for the latest of the respective repository. 
+       - Run `docker pull gobysoft/jaiabot-sim:<tag>`, for example,  `docker pull gobysoft/jaiabot-sim:1.14.0`
+       - Run `docker tag gobysoft/jaiabot-sim:<tag> jaiauser:jaia-sim-image`,  for example,  `docker tag gobysoft/jaiabot-sim:1.14.0 jaiauser:jaia-sim-image`
+       - Skip the "Build the image" section
+    - (or) **Build the image**  (advanced)
     
-    - **Linux users:** `$ ./build-image.sh`
-    - **Windows users:** `docker build --no-cache -t jaiauser:jaia-sim-image .`
-      - First, copy the `Dockerfile` from the jaiabot repository (`jaiabot/scripts/sim-docker`).
-      - Second, copy the `entrypoint.sh` script from the jaiabot repository (`jaiabot/scripts/sim-docker`).
-      - These two files should live in the location where you run the docker build command.
-    - This will build the Docker image needed to run the simulator.
-    - This will take a while.
+        - **Linux users:** `$ ./build-image.sh`
+        - **Windows users:** `docker build --no-cache -t jaiauser:jaia-sim-image .`
+          - Before running this command, copy the `Dockerfile` from the jaiabot repository (`jaiabot/scripts/sim-docker`).
+
+        - This will build the Docker image needed to run the simulator.
+        - This will take a while.
+
+2. **Windows users only**:  copy the `sim_env_vars.txt` config file from the jaiabot repository (`jaiabot/scripts/sim-docker`) into your working directory.
 
 2.  **Edit sim_env_vars.txt**
     

@@ -995,10 +995,6 @@ export interface BotStatus {
     repeat_index?: number;
     salinity?: number;
     temperature?: number;
-    thermocouple_temperature?: number;
-    vv_current?: number;
-    vcc_current?: number;
-    vcc_voltage?: number;
     battery_percent?: number;
     calibration_status?: number;
     hdop?: number;

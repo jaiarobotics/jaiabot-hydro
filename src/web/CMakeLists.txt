@@ -9,8 +9,9 @@ file(MAKE_DIRECTORY ${intermediate_web_dir})
 
 include(ConfigurePackageJSON)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package.json ${intermediate_web_dir}/package.json COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package-lock.json ${intermediate_web_dir}/package-lock.json COPYONLY)
 
-add_custom_command(OUTPUT ${intermediate_web_dir}/package-lock.json ${intermediate_web_dir}/node_modules
+add_custom_command(OUTPUT ${intermediate_web_dir}/node_modules
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/install_dependencies.sh
   ARGS ${intermediate_web_dir}
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/package.json.in
@@ -33,18 +34,14 @@ file(GLOB_RECURSE shared_src_files FOLLOW_SYMLINKS LIST_DIRECTORIES false ${CMAK
 # We will be compiling it there, targeting the final location.
 
 # Get the web source tree into the intermediate directory
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/webpack.config.js DESTINATION ${intermediate_web_dir})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/tsconfig.json DESTINATION ${intermediate_web_dir})
+file(GLOB src_files LIST_DIRECTORIES TRUE ${CMAKE_CURRENT_SOURCE_DIR}/*)
+list(REMOVE_ITEM src_files
+  ${CMAKE_CURRENT_SOURCE_DIR}/node_modules
+  ${CMAKE_CURRENT_SOURCE_DIR}/dist
+  ${CMAKE_CURRENT_SOURCE_DIR}/package.json
+)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/components DESTINATION ${intermediate_web_dir})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/containers DESTINATION ${intermediate_web_dir})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/context DESTINATION ${intermediate_web_dir})
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/jcc DESTINATION ${intermediate_web_dir})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/jed DESTINATION ${intermediate_web_dir})
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shared DESTINATION ${intermediate_web_dir})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/utils DESTINATION ${intermediate_web_dir})
+file(COPY ${src_files} DESTINATION ${intermediate_web_dir})
 
 set(web_out_dir ${project_SHARE_DIR}/jaiabot/web)
 
