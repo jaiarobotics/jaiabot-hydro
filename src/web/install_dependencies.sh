@@ -3,7 +3,7 @@
 # Where is your package.json?
 PACKAGE_JSON_DIR=$1
 
-if [ -z "${VAR}" ]; then
+if [ -z "${PACKAGE_JSON_DIR}" ]; then
     PACKAGE_JSON_DIR="."
 fi
 
