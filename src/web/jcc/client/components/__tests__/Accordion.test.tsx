@@ -31,6 +31,8 @@ describe("Accordion Tests", () => {
         const summary = screen.getByText("Accordion Title Here");
         const details = screen.getByText("Accordion Details Here");
 
+        //Summary should be visible
+        expect(summary).toBeVisible();
         // Accordion starts closed, so details invisible
         expect(details).not.toBeVisible();
 
@@ -45,7 +47,7 @@ describe("Accordion Tests", () => {
         // Click summary again
         await userEvent.click(summary);
 
-        // Wait for onChange logic to be triggere again, which closes the details
+        // Wait for onChange logic to be triggered again, which closes the details
         waitFor(() => {
             expect(details).not.toBeVisible();
         });
