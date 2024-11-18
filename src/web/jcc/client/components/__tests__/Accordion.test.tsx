@@ -2,9 +2,14 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { Accordion, AccordionSummary, AccordionDetails, Typography } from "@mui/material";
 
+// Mock the onChange function, so we can track calls to it
+const mockOnChange = jest.fn();
+
 interface Props {
     onChange: () => void;
 }
+
+const mockProps: Props = { onChange: mockOnChange };
 
 function AccordionTestComponent(props: Props) {
     return (
@@ -19,13 +24,8 @@ function AccordionTestComponent(props: Props) {
 
 describe("Accordion Tests", () => {
     test("Accordion Test", async () => {
-        function onChange() {}
-
-        // Mock the onChange function, so we can track calls to it
-        const mockOnChange = jest.fn(onChange);
-
         // Render the component
-        render(<AccordionTestComponent onChange={mockOnChange} />);
+        render(<AccordionTestComponent {...mockProps} />);
 
         // Get the accordion elements
         const summary = screen.getByText("Accordion Title Here");
