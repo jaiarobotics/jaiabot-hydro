@@ -221,17 +221,20 @@ def pollEC():
     ec_old = None
     timestr = time.strftime("%Y%m%d-T%H%M%S")
     with open(f"{timestr}.csv", "w") as new_file:
-        for i in range(0,30):
-            
-            ec = probe.EC()
-            if ec_old:
-                delta_percent = abs(ec - ec_old) / ec_old * 100
-            else:
-                delta_percent = 0.0
-            print(f'time: {datetime.datetime.now()}  EC: {ec: 6.0f}  delta: {delta_percent: 3.2f}%')
-            new_file.write(f'time: {datetime.datetime.now()}  EC: {ec: 6.0f}  delta: {delta_percent: 3.2f}%\n')
-            ec_old = ec
-            time.sleep(1)
+        while True:
+            try: 
+                ec = probe.EC()
+                if ec_old:
+                    delta_percent = abs(ec - ec_old) / ec_old * 100
+                else:
+                    delta_percent = 0.0
+                print(f'time: {datetime.datetime.now()}  EC: {ec: 6.0f}  delta: {delta_percent: 3.2f}%')
+                new_file.write(f'time: {datetime.datetime.now()}  EC: {ec: 6.0f}  delta: {delta_percent: 3.2f}%\n')
+                ec_old = ec
+                time.sleep(1)
+            except KeyboardInterrupt:
+                print("User Interrupt")
+                break
     
 def setProbeType():
     value = input('Enter probe type value (K value) > ')
@@ -344,8 +347,7 @@ def getTemperatureCalibratedSalinity(measured_conductivity, expected_conductivit
         Rt = R / (Rp * rt)
         dS = (t - 15) * (b0 + (b1 * Rt**0.5) + (b2 * Rt) + (b3 * Rt**1.5) + (b4 * Rt**2) + (b5 * Rt**2.5)) / (1 + k * (t - 15))
 
-        S = a0 + (a1 * Rt**0.5) + (a2 * Rt) + (a3 * Rt**1.5) + (a4 * Rt**2) + (a5 * Rt**2.5) + dS, 2
-        print(f"Salinity: {S}")
+        S = round(a0 + (a1 * Rt**0.5) + (a2 * Rt) + (a3 * Rt**1.5) + (a4 * Rt**2) + (a5 * Rt**2.5) + dS, 2)
 
         return S
     
@@ -382,14 +384,14 @@ def doJaiaCalibration(description: str, type: int, value: int, temperature: floa
             delta_list.append(delta_percent)
             ec_old = ec
             salinity = getTemperatureCalibratedSalinity(ec, value, temperature, 0)
-            print(ec, ', ', salinity, ', ', delta_percent)
+            print(f"Conductivity: {ec}, Salinity: {salinity}, Percent Change: {delta_percent}")
 
             # Wait 1 second between taking readings
             time.sleep(1)
         
         repetitions += 1
 
-        if max(delta_list) < 0.10 or (repetitions >= 3 and max(delta_list) < 0.5):
+        if max(delta_list) < 0.15:
             break
     
     input(f"{description} calibration at {value} μS/cm complete. Press enter")
@@ -424,15 +426,15 @@ def jaiaCalibration():
     time.sleep(1)
 
     # Dual Point Low calibration (12,880)
-    print("\n==========\nWe will now begin the DUAL POINT LOW calibration. Submerge the probe in the 12,880 μS/cm solution and ensure the sampling window is fully submerged and has no bubbles stuck inside.")
+    print("\n==========\nWe will now begin the DUAL POINT LOW calibration. Rinse and dry, then submerge the probe in the 12,880 μS/cm solution and ensure the sampling window is fully submerged with no bubbles stuck inside. Let the probe sit for five minutes.")
     time.sleep(1)
-    input("When you're ready to begin the calibration procedure, press enter.\n")
+    input("After the probe has been submerged for five minutes, press enter.\n")
     doJaiaCalibration('DUAL POINT LOW', 4, getTemperatureCalibratedConductivity(12880, temperature), temperature)
 
     # Dual Point High calibration (80,000)
-    print("\n==========\nWe will now begin the DUAL POINT HIGH calibration. Rinse and dry the probe, then put the probe in the 80,000 μS/cm solution. Ensure the sampling window is fully submerged and has no bubbles stuck inside.")
+    print("\n==========\nWe will now begin the DUAL POINT HIGH calibration. Rinse and dry the probe, then put the probe in the 80,000 μS/cm solution. Ensure the sampling window is fully submerged with no bubbles stuck inside. Let the probe sit for five minutes.")
     time.sleep(1)
-    input("When you're ready to begin the calibration procedure, press enter.\n")
+    input("After the probe has been submerged for five minutes, press enter.\n")
     doJaiaCalibration('DUAL POINT HIGH', 5, getTemperatureCalibratedConductivity(80000, temperature), temperature)
 
     
@@ -440,15 +442,15 @@ def jaiaCalibration():
     print("\n==========\nRough calibration procedure complete. Beginning the fine calibration procedure")
 
     # Dual Point Low calibration (12,880)
-    print("\n==========\nWe will now begin the DUAL POINT LOW calibration. Submerge the probe in the 12,880 μS/cm solution and ensure the sampling window is fully submerged and has no bubbles stuck inside.")
+    print("\n==========\nWe will now begin the DUAL POINT LOW calibration. Rinse and dry, then submerge the probe in the 12,880 μS/cm solution and ensure the sampling window is fully submerged with no bubbles stuck inside. Let the probe sit for five minutes.")
     time.sleep(1)
-    input("When you're ready to begin the calibration procedure, press enter.\n")
+    input("After the probe has been submerged for five minutes, press enter.\n")
     doJaiaCalibration('DUAL POINT LOW', 4, getTemperatureCalibratedConductivity(12880, temperature), temperature)
 
     # Dual Point High calibration (80,000)
-    print("\n==========\nWe will now begin the DUAL POINT HIGH calibration. Rinse and dry the probe, then put the probe in the 80,000 μS/cm solution. Ensure the sampling window is fully submerged and has no bubbles stuck inside.")
+    print("\n==========\nWe will now begin the DUAL POINT HIGH calibration. Rinse and dry the probe, then put the probe in the 80,000 μS/cm solution. Ensure the sampling window is fully submerged with no bubbles stuck inside. Let the probe sit for five minutes.")
     time.sleep(1)
-    input("When you're ready to begin the calibration procedure, press enter.\n")
+    input("After the probe has been submerged for five minutes, press enter.\n")
     doJaiaCalibration('DUAL POINT HIGH', 5, getTemperatureCalibratedConductivity(80000, temperature), temperature)
 
     # Calibration complete
