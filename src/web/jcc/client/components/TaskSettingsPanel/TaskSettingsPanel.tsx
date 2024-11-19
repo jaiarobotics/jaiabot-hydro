@@ -10,7 +10,7 @@ import {
 } from "../shared/JAIAProtobuf";
 import { GlobalSettings, Save } from "../Settings";
 import { deepcopy, getGeographicCoordinate } from "../shared/Utilities";
-import { InputLabel, FormControl, MenuItem } from "@mui/material";
+import { FormControl } from "@mui/material";
 import * as turf from "@turf/turf";
 import Map from "ol/Map";
 import { Draw } from "ol/interaction";

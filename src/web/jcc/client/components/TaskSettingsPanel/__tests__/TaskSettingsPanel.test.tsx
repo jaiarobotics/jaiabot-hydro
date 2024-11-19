@@ -5,18 +5,29 @@ import { TaskSettingsPanel, Props } from "../TaskSettingsPanel";
 import { MissionTask, TaskType } from "../../shared/JAIAProtobuf";
 import { validateTask } from "../../../../../tests/helpers/ValidateTask";
 
-let mockProps: Props = {
+const defaultProps: Props = {
     isEditMode: true,
     enableEcho: false,
     onChange: (task?: MissionTask) => mockOnChange(task),
 };
+
+let mockProps: Props = defaultProps;
 
 //Mock of the onChange callback to update Props
 const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
     mockProps.task = task;
 });
 
+function resetProps() {
+    mockProps = { ...defaultProps };
+}
+
 describe("MUI Select Component Examples", () => {
+    beforeEach(() => {
+        resetProps();
+        jest.clearAllMocks(); // Ensure a clean state for each test
+    });
+
     test("Get by Test ID, Select all Options", async () => {
         let onChangeCalls = 0;
 
@@ -42,7 +53,7 @@ describe("MUI Select Component Examples", () => {
             rerender(<TaskSettingsPanel {...mockProps} />);
 
             // Verify that the selected value is correct
-            await waitFor(() => {
+            waitFor(() => {
                 expect(selectElement.value).toBe(value);
             });
             // Validate the TaskSettingsPanel sent a valid Task to mockOnChange
@@ -60,5 +71,61 @@ describe("MUI Select Component Examples", () => {
                 );
             }
         }
+    });
+});
+
+describe("Unit Test Bottom Dive Toggle JAIA-1512", () => {
+    beforeEach(() => {
+        resetProps();
+        jest.clearAllMocks(); // Ensure a clean state for each test
+    });
+
+    test("Toggle Bottom Dive, Verify Task", async () => {
+        // Get the rerender function from the object returned when rendering the panel
+        const { rerender } = render(<TaskSettingsPanel {...mockProps} />);
+
+        // Get the Select Component
+        const selectElement: HTMLSelectElement = screen.getByTestId("task-select-input-id");
+        expect(selectElement).toBeInTheDocument();
+
+        // Verify that the select value is None
+        expect(selectElement.value).toBe("NONE");
+
+        // Change Select to Dive
+        await userEvent.selectOptions(selectElement, "DIVE");
+
+        // Rerender with updated props
+        rerender(<TaskSettingsPanel {...mockProps} />);
+
+        // Verify the mockOnChange function has been called
+        expect(mockOnChange).toHaveBeenCalledTimes(1);
+
+        // Verify that the select value is Dive
+        waitFor(() => {
+            expect(selectElement.value).toBe("DIVE");
+        });
+
+        // Validate the TaskSettingsPanel sent a valid Task to mockOnChange
+        validateTask(mockProps.task);
+
+        // Get the Bottom Dive Toggle
+        const bottomToggle = screen.getByTitle("Switch to Bottom Dive");
+
+        // Verify Toggle is unchecked
+        expect(bottomToggle).not.toBeChecked();
+
+        //Change to Bottom Dive
+        await userEvent.click(bottomToggle);
+
+        // Verify Toggle ischecked
+        waitFor(() => {
+            expect(bottomToggle).toBeChecked();
+        });
+
+        // Verify the mockOnChange function has been called
+        expect(mockOnChange).toHaveBeenCalledTimes(2);
+
+        // Validate the TaskSettingsPanel created valid Bottom Dive Task
+        validateTask(mockProps.task);
     });
 });
