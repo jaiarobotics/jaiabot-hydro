@@ -60,6 +60,7 @@ constexpr goby::middleware::Group mission_ivp_behavior_report{
     "jaiabot::mission_ivp_behavior_report"};
 constexpr goby::middleware::Group powerstate_command{"jaiabot::powerstate_command"};
 constexpr goby::middleware::Group mission_dive{"jaiabot::mission_dive"};
+constexpr goby::middleware::Group self_command{"jaiabot::self_command"};
 
 // hub manager
 constexpr goby::middleware::Group hub_status{"jaiabot::hub_status"};

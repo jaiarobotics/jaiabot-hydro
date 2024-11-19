@@ -26,7 +26,8 @@
 
 #include "config.pb.h"
 #include "jaiabot/groups.h"
-#include "jaiabot/messages/example.pb.h"
+#include "jaiabot/messages/jaia_dccl.pb.h"
+#include "jaiabot/messages/mission.pb.h"
 
 using goby::glog;
 namespace si = boost::units::si;
@@ -42,7 +43,8 @@ class MissionRepeater : public ApplicationBase
     MissionRepeater();
 
   private:
-    void loop() override;
+    //    void loop() override;
+    void run_script();
 
   private:
     bool script_run_{false};
@@ -56,8 +58,32 @@ int main(int argc, char* argv[])
         goby::middleware::ProtobufConfigurator<jaiabot::config::MissionRepeater>(argc, argv));
 }
 
-jaiabot::apps::MissionsRepeater::MissionRepeater()
+jaiabot::apps::MissionRepeater::MissionRepeater()
+{
+    interprocess().subscribe<jaiabot::groups::mission_report>(
+        [this](const protobuf::MissionReport& report)
+        {
+            glog.is_debug1() && glog << protobuf::MissionState_Name(report.state()) << std::endl;
+            if (report.state() == protobuf::IN_MISSION__UNDERWAY__RECOVERY__TRANSIT)
+            {
+                if (!script_run_)
+                    run_script();
+            }
+            else if (report.state() == protobuf::IN_MISSION__UNDERWAY__REPLAN)
+            {
+                script_run_ = false;
+            }
+        });
+}
 
-    interprocess()
-        .subscribe<jaiabot::groups::mission_report>([](const protobuf::MissionReport& report) {});
+void jaiabot::apps::MissionRepeater::run_script()
+{
+    glog.is_verbose() && glog << "Start script" << std::endl;
+    protobuf::Command command;
+    command.set_bot_id(cfg().bot_id());
+    command.set_time_with_units(goby::time::SystemClock::now<goby::time::MicroTime>());
+    command.set_type(protobuf::Command::PAUSE);
+    interprocess().publish<jaiabot::groups::self_command>(command);
+
+    script_run_ = true;
 }
