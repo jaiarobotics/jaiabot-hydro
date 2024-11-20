@@ -117,12 +117,12 @@ describe("Unit Test Bottom Dive Toggle JAIA-1512", () => {
         //Change to Bottom Dive
         await userEvent.click(bottomToggle);
 
-        // Verify Toggle ischecked
+        // Verify Toggle is checked
         waitFor(() => {
             expect(bottomToggle).toBeChecked();
         });
 
-        // Verify the mockOnChange function has been called
+        // Verify the mockOnChange function has been called again
         expect(mockOnChange).toHaveBeenCalledTimes(2);
 
         // Validate the TaskSettingsPanel created valid Bottom Dive Task
