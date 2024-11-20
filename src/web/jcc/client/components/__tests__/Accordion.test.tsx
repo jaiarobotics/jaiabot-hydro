@@ -31,7 +31,7 @@ function AccordionTestComponent(props: Props) {
 }
 
 describe("Accordion Tests", () => {
-    test("Accordion Test", async () => {
+    test("Accordion expands and collapses on summary click", async () => {
         // Render the component
         render(<AccordionTestComponent {...mockProps} />);
 
