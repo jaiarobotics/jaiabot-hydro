@@ -26,7 +26,7 @@ describe("JaiaToggle", () => {
         expect(isChecked).toBe(false);
     });
 
-    test("JaiaToggle disables", async () => {
+    test("JaiaToggle disables", () => {
         let isChecked = false;
 
         const props = {
