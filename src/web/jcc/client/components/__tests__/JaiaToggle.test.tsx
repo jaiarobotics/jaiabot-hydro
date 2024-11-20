@@ -5,7 +5,7 @@ import JaiaToggle from "../JaiaToggle";
 
 describe("JaiaToggle", () => {
     test("JaiaToggle switching on/off", async () => {
-        var isChecked = false;
+        let isChecked = false;
 
         const props = {
             checked: () => isChecked,
@@ -27,7 +27,7 @@ describe("JaiaToggle", () => {
     });
 
     test("JaiaToggle disables", async () => {
-        var isChecked = false;
+        let isChecked = false;
 
         const props = {
             checked: () => false,
