@@ -613,12 +613,6 @@ export function TaskSettingsPanel(props: Props) {
         // No change
         if (newTaskType == oldTaskType) return;
 
-        // Change to NONE
-        if (newTaskType == TaskType.NONE) {
-            props.onChange(undefined);
-            return;
-        }
-
         // Use default parameters depending on which type of task we've switched to
         var newTask: MissionTask = {
             type: newTaskType,

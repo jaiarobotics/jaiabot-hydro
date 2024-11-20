@@ -19,6 +19,8 @@ const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
 describe("TaskSettingsPanel: Should update task type correctly for all options", () => {
     test("Get by Test ID, Select all Options", async () => {
         let onChangeCalls = 0;
+        // Task Settings Panel initializes the Select to None when no type is passed in
+        let previousValue = "NONE";
 
         // Get the rerender function from the object returned when rendering the panel
         const { rerender } = render(<TaskSettingsPanel {...mockProps} />);
@@ -28,34 +30,36 @@ describe("TaskSettingsPanel: Should update task type correctly for all options",
         expect(selectElement).toBeInTheDocument();
 
         // Verify that the selected value is None
-        expect(selectElement.value).toBe("NONE");
+        expect(selectElement.value).toBe(previousValue);
 
         // Verify the mockOnChange function hasn't been called yet
         expect(mockOnChange).toHaveBeenCalledTimes(0);
 
         // Change the Task Type to all options and verify the change occured
-        for (const value of Object.values(TaskType)) {
+        for (const newValue of Object.values(TaskType)) {
             // Change the selection
-            await userEvent.selectOptions(selectElement, value);
+            await userEvent.selectOptions(selectElement, newValue);
 
             // Rerender with updated props
             rerender(<TaskSettingsPanel {...mockProps} />);
 
             // Verify that the selected value is correct
             await waitFor(() => {
-                expect(selectElement.value).toBe(value);
+                expect(selectElement.value).toBe(newValue);
             });
+
             // Validate the TaskSettingsPanel sent a valid Task to mockOnChange
             validateTask(mockProps.task);
 
-            // Verify the mockOnChange function has been called the right number of times
-            expect(mockOnChange).toHaveBeenCalledTimes(onChangeCalls++);
+            if (newValue != previousValue) {
+                // Verify the mockOnChange function has been called the right number of times
+                expect(mockOnChange).toHaveBeenCalledTimes(++onChangeCalls);
 
-            // Verify that mockOnChange was called with the correct task type
-            if (value != TaskType.NONE) {
+                // Verify that mockOnChange was called with the correct task type
+
                 expect(mockOnChange).toHaveBeenCalledWith(
                     expect.objectContaining({
-                        type: value,
+                        type: newValue,
                     }),
                 );
             }
