@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { Accordion, AccordionSummary, AccordionDetails, Typography } from "@mui/material";
+import { ChangeEvent, useState } from "react";
 
 // Mock the onChange function, so we can track calls to it
 const mockOnChange = jest.fn();
@@ -12,8 +13,15 @@ interface Props {
 const mockProps: Props = { onChange: mockOnChange };
 
 function AccordionTestComponent(props: Props) {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    function onChange() {
+        setIsExpanded(!isExpanded);
+        props.onChange();
+    }
+
     return (
-        <Accordion expanded={false} onChange={props.onChange}>
+        <Accordion expanded={isExpanded} onChange={onChange}>
             <AccordionSummary>
                 <Typography>Accordion Title Here</Typography>
             </AccordionSummary>
@@ -40,17 +48,13 @@ describe("Accordion Tests", () => {
         await userEvent.click(summary);
 
         // Wait for onChange logic to be triggered, which opens the details
-        waitFor(() => {
-            expect(details).toBeVisible();
-        });
+        expect(details).toBeVisible();
 
         // Click summary again
         await userEvent.click(summary);
 
         // Wait for onChange logic to be triggered again, which closes the details
-        waitFor(() => {
-            expect(details).not.toBeVisible();
-        });
+        expect(details).not.toBeVisible();
 
         // The onChange function should have been called twice during this test
         expect(mockOnChange).toHaveBeenCalledTimes(2);
