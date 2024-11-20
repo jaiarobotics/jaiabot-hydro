@@ -11,7 +11,7 @@ let mockProps: Props = {
     onChange: (task?: MissionTask) => mockOnChange(task),
 };
 
-//Mock of the onChange callback to update Props
+// Mock of the onChange callback to update Props
 const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
     mockProps.task = task;
 });
@@ -48,7 +48,7 @@ describe("TaskSettingsPanel: Should update task type correctly for all options",
             // Validate the TaskSettingsPanel sent a valid Task to mockOnChange
             validateTask(mockProps.task);
 
-            //Verify the mockOnChange function has been called the right number of times
+            // Verify the mockOnChange function has been called the right number of times
             expect(mockOnChange).toHaveBeenCalledTimes(onChangeCalls++);
 
             // Verify that mockOnChange was called with the correct task type
