@@ -56,8 +56,9 @@ export function validateTask(task?: MissionTask): void {
             expect(task.dive).toBeUndefined();
             expect(task.surface_drift).toBeUndefined();
             expect(task.station_keep).toBeUndefined();
+            break;
         default:
             // Throw error if we get unexpected task type
-            throw new Error("Unhandled TaskType: ${task.type}");
+            throw new Error(`Unhandled TaskType: ${task.type}`);
     }
 }
