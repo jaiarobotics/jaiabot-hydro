@@ -1,4 +1,4 @@
-import { MissionTask, TaskType } from "../../jcc/client/components/shared/JAIAProtobuf";
+import { MissionTask, TaskType } from "../../../jcc/client/components/shared/JAIAProtobuf";
 //Helper function to verify the task created by the Panel is valid
 export function validateTask(task?: MissionTask): void {
     if (!task) {

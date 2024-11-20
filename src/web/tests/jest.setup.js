@@ -13,7 +13,6 @@ global.ResizeObserver = class ResizeObserver {
     disconnect() {}
 };
 
-// Silence output while running tests
+// Silence non error output while running tests
 global.console.log = jest.fn();
-global.console.error = jest.fn();
 global.console.debug = jest.fn();
