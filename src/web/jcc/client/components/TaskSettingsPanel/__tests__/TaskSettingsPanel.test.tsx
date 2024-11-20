@@ -16,7 +16,7 @@ const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
     mockProps.task = task;
 });
 
-describe("MUI Select Component Examples", () => {
+describe("TaskSettingsPanel: Should update task type correctly for all options", () => {
     test("Get by Test ID, Select all Options", async () => {
         let onChangeCalls = 0;
 
