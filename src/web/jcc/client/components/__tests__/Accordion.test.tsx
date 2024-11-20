@@ -47,13 +47,11 @@ describe("Accordion Tests", () => {
         // Click the summary
         await userEvent.click(summary);
 
-        // Wait for onChange logic to be triggered, which opens the details
         expect(details).toBeVisible();
 
         // Click summary again
         await userEvent.click(summary);
 
-        // Wait for onChange logic to be triggered again, which closes the details
         expect(details).not.toBeVisible();
 
         // The onChange function should have been called twice during this test
