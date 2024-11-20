@@ -6,6 +6,7 @@ import * as MissionFeatures from "../shared/MissionFeatures";
 import RCControllerPanel from "../RCControllerPanel";
 import DownloadPanel from "../DownloadPanel";
 import RunInfoPanel from "../RunInfoPanel";
+import ContactInfoPanel from "../ContactInfoPanel";
 import JaiaAbout from "../JaiaAbout/JaiaAbout";
 import { layers } from "../Layers";
 import { jaiaAPI, BotPaths } from "../../../common/JaiaAPI";
@@ -15,6 +16,7 @@ import { HubOrBot } from "../HubOrBot";
 import { createMap } from "../Map";
 import { BotLayers } from "../BotLayers";
 import { HubLayers } from "../HubLayers";
+import { ContactLayers } from "../ContactLayers";
 import { HubDetails } from "../../../../containers/HubDetails";
 import { CommandList } from "../Missions";
 import { SurveyLines } from "../SurveyLines";
@@ -61,6 +63,7 @@ import {
     TaskPacket,
     BottomDepthSafetyParams,
     BotType,
+    ContactStatus,
 } from "../shared/JAIAProtobuf";
 import {
     getGeographicCoordinate,
@@ -78,21 +81,15 @@ import OlCollection from "ol/Collection";
 import LayerGroup from "ol/layer/Group";
 import OlLayerSwitcher from "ol-layerswitcher";
 import OlMultiLineString from "ol/geom/MultiLineString";
-import { Coordinate } from "ol/coordinate";
 import { Interaction } from "ol/interaction";
 import { boundingExtent } from "ol/extent.js";
-import { Feature, MapBrowserEvent } from "ol";
+import { MapBrowserEvent } from "ol";
 import { getLength as OlGetLength } from "ol/sphere";
-import { Geometry, LineString, LineString as OlLineString, Point } from "ol/geom";
-import {
-    Circle as OlCircleStyle,
-    Fill as OlFillStyle,
-    Stroke as OlStrokeStyle,
-    Style as OlStyle,
-} from "ol/style";
+import { Geometry, LineString as OlLineString, Point } from "ol/geom";
+import { Fill as OlFillStyle, Stroke as OlStrokeStyle, Style as OlStyle } from "ol/style";
 
 // TurfJS
-import * as turf from "@turf/turf";
+import { Feature as GjFeature, LineString as GjLineString } from "geojson";
 
 // Styling
 import Icon from "@mdi/react";
@@ -148,6 +145,7 @@ export enum PanelType {
     RALLY_POINT = "RALLY_POINT",
     TASK_PACKET = "TASK_PACKET",
     SETTINGS = "SETTINGS",
+    CONTACT_INFO = "CONTACT_INFO",
 }
 
 export enum Mode {
@@ -199,7 +197,7 @@ interface State {
         runNum: number;
         botId: number;
     };
-
+    contactClickedInfo: ContactStatus;
     goalBeingEdited: {
         goal?: Goal;
         originalGoal?: Goal;
@@ -231,7 +229,7 @@ interface State {
     saveMissionPanel?: ReactElement;
 
     surveyExclusionCoords?: number[][];
-    centerLineString: turf.helpers.Feature<turf.helpers.LineString>;
+    centerLineString: GjFeature<GjLineString>;
     bottomDepthSafetyParams: BottomDepthSafetyParams;
     isSRPEnabled: boolean;
 
@@ -281,6 +279,7 @@ export default class CommandControl extends React.Component {
     mapDivId = `map-${Math.round(Math.random() * 100000000)}`;
     botLayers: BotLayers;
     hubLayers: HubLayers;
+    contactLayers: ContactLayers;
     oldPodStatus?: PodStatus;
     missionPlans?: CommandList = null;
     taskPackets: TaskPacket[];
@@ -296,7 +295,7 @@ export default class CommandControl extends React.Component {
     flagNumber: number;
     missionHistory: MissionInterface[];
     lastBotPathPointUtime: number = 0;
-    botPathFeatures: { [key: number]: Feature<LineString> } = {};
+    botPathFeatures: { [key: number]: OlFeature<OlLineString> } = {};
 
     constructor(props: Props) {
         super(props);
@@ -305,6 +304,7 @@ export default class CommandControl extends React.Component {
             podStatus: {
                 bots: {},
                 hubs: {},
+                contacts: {},
                 controllingClientId: null,
             },
             podStatusVersion: 0,
@@ -345,6 +345,12 @@ export default class CommandControl extends React.Component {
             flagClickedInfo: {
                 runNum: -1,
                 botId: -1,
+            },
+            contactClickedInfo: {
+                location: {
+                    lat: 0,
+                    lon: 0,
+                },
             },
             goalBeingEdited: {},
 
@@ -436,7 +442,6 @@ export default class CommandControl extends React.Component {
         this.interactions = new Interactions(this, map);
         map.addInteraction(this.interactions.pointerInteraction);
         map.addInteraction(this.interactions.translateInteraction);
-        map.addInteraction(this.interactions.dragAndDropInteraction);
         // Center persistence
         map.getView().setCenter(mapSettings.center);
         map.getView().on("change:center", function () {
@@ -515,6 +520,7 @@ export default class CommandControl extends React.Component {
         // Class that keeps track of the bot layers, and updates them
         this.botLayers = new BotLayers(map);
         this.hubLayers = new HubLayers(map);
+        this.contactLayers = new ContactLayers(map);
 
         const viewport = document.getElementById(this.mapDivId);
         map.setTarget(this.mapDivId);
@@ -616,6 +622,7 @@ export default class CommandControl extends React.Component {
                 this.props.globalContext.selectedPodElement,
             );
             this.botLayers.update(this.state.podStatus.bots, this.state.selectedHubOrBot);
+            this.contactLayers.update(this.state.podStatus?.contacts);
             this.updateHubCommsCircles();
             this.updateActiveMissionLayer();
             this.updateBotCourseOverGroundLayer();
@@ -931,6 +938,13 @@ export default class CommandControl extends React.Component {
     pollMetadata() {
         this.api.getMetadata().then(
             (result) => {
+                // Create hook for first metadata poll
+                if (Object.keys(this.state.metadata).length === 0) {
+                    if (result.is_simulation) {
+                        this.createSimulationBanner();
+                        document.title = "Simulation - Jaia Command & Control";
+                    }
+                }
                 this.setState({ metadata: result });
             },
             (err) => {
@@ -990,8 +1004,8 @@ export default class CommandControl extends React.Component {
             if (!(bot_id in this.botPathFeatures)) {
                 const newLayer = layers.createNewBotPathLayer(bot_id);
 
-                const newFeature = new Feature<LineString>({
-                    geometry: new LineString([]),
+                const newFeature = new OlFeature<OlLineString>({
+                    geometry: new OlLineString([]),
                     bot_id: Number(bot_id),
                 });
 
@@ -1263,6 +1277,20 @@ export default class CommandControl extends React.Component {
                 },
             );
         }
+    }
+
+    /**
+     * Creates the simulation indicator in the JCC
+     *
+     * @returns {void}
+     */
+    createSimulationBanner() {
+        const jccContainer = document.getElementById("jcc_container");
+        const simulationBanner = document.createElement("div");
+        const textConent = document.createTextNode("Simulation");
+        simulationBanner.setAttribute("id", "simulation-banner");
+        simulationBanner.appendChild(textConent);
+        jccContainer.appendChild(simulationBanner);
     }
 
     /**
@@ -1791,7 +1819,7 @@ export default class CommandControl extends React.Component {
                 const runNumber = run.id.slice(4);
 
                 const newFeatures = (plan.goal ?? []).map((goal, goalIndex) => {
-                    return new Feature({
+                    return new OlFeature({
                         geometry: new Point(getMapCoordinate(goal.location, map)),
                         goal: goal,
                         isActive: activeGoalIndex == goalIndex + 1,
@@ -1849,7 +1877,7 @@ export default class CommandControl extends React.Component {
 
         for (const hub of hubs) {
             if (hub?.location) {
-                const feature = new Feature(new Point(getMapCoordinate(hub?.location, map)));
+                const feature = new OlFeature(new Point(getMapCoordinate(hub?.location, map)));
                 feature.set("hub", hub);
                 features.push(feature);
             }
@@ -2085,8 +2113,18 @@ export default class CommandControl extends React.Component {
         }
 
         if (feature) {
+            console.log(feature);
             // Allow an operator to click on certain features while edit mode is off
-            const editModeExemptions = ["dive", "drift", "rallyPoint", "bot", "hub", "wpt", "line"];
+            const editModeExemptions = [
+                "dive",
+                "drift",
+                "rallyPoint",
+                "bot",
+                "hub",
+                "wpt",
+                "line",
+                "contact",
+            ];
             const isCollection = feature.get("features");
 
             if (
@@ -2140,6 +2178,20 @@ export default class CommandControl extends React.Component {
                     hubID: hubID,
                 });
                 this.didClickHub(hubID);
+                return false;
+            }
+
+            // Clicked on contact
+            const isContact = feature.get("type") === "contact";
+            if (isContact) {
+                const contactFeature = feature.get("contact");
+                console.log(contactFeature);
+                const contactClickedInfo = contactFeature;
+
+                this.setState({ contactClickedInfo }, () => {
+                    this.setVisiblePanel(PanelType.CONTACT_INFO);
+                });
+
                 return false;
             }
 
@@ -2361,7 +2413,7 @@ export default class CommandControl extends React.Component {
     //
     addRallyPointAt(coordinate: number[]) {
         const point = getMapCoordinate(getGeographicCoordinate(coordinate, map), map);
-        const rallyFeature = new Feature({ geometry: new Point(point) });
+        const rallyFeature = new OlFeature({ geometry: new Point(point) });
         const rallyNum = this.getRallyNumber();
 
         rallyFeature.setProperties({
@@ -2538,7 +2590,7 @@ export default class CommandControl extends React.Component {
         this.unselectTaskPacket("drift");
     }
 
-    setTaskPacketInterval(selectedFeature: Feature, type: string) {
+    setTaskPacketInterval(selectedFeature: OlFeature, type: string) {
         const taskPacketFeatures =
             type === "dive"
                 ? taskData.divePacketLayer.getSource().getFeatures()
@@ -3104,7 +3156,11 @@ export default class CommandControl extends React.Component {
                 >
                     <Icon path={mdiPlay} title="Run Mission" />
                 </Button>
-                <Button id="downloadAll" className={`button-jcc`} onClick={this.processDownloadAllBots.bind(this)}>
+                <Button
+                    id="downloadAll"
+                    className={`button-jcc`}
+                    onClick={this.processDownloadAllBots.bind(this)}
+                >
                     <Icon path={mdiDownloadMultiple} title="Download All" />
                 </Button>
                 <Button id="undo" className="button-jcc" onClick={() => this.handleUndoClick()}>
@@ -4099,6 +4155,16 @@ export default class CommandControl extends React.Component {
                         runNum={this.state.flagClickedInfo.runNum}
                         botId={this.state.flagClickedInfo.botId}
                         deleteRun={this.deleteSingleRun.bind(this)}
+                    />
+                );
+                break;
+            case PanelType.CONTACT_INFO:
+                visiblePanelElement = (
+                    <ContactInfoPanel
+                        setVisiblePanel={this.setVisiblePanel.bind(this)}
+                        contact={this.state.contactClickedInfo}
+                        botIds={this.getBotIdList()}
+                        api={this.api}
                     />
                 );
                 break;

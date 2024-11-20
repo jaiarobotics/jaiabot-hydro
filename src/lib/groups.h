@@ -84,6 +84,9 @@ constexpr goby::middleware::Group engineering_command{"jaiabot::engineering_comm
 constexpr goby::middleware::Group engineering_status{"jaiabot::engineering_status",
                                                      jaiabot::INTERVEHICLE_API_VERSION};
 
+constexpr goby::middleware::Group contact_update{"jaiabot::contact_update",
+                                                 goby::middleware::Group::broadcast_group};
+
 // DCCL (interprocess)
 constexpr goby::middleware::Group hub_command_full{"jaiabot::hub_command_full"};
 
@@ -105,6 +108,9 @@ constexpr goby::middleware::Group intervehicle_subscribe_request{
 
 // simulator
 constexpr goby::middleware::Group simulator_command{"jaiabot::simulator_command"};
+
+// web_portal
+constexpr goby::middleware::Group web_portal("jaiabot::web_portal");
 
 } // namespace groups
 } // namespace jaiabot

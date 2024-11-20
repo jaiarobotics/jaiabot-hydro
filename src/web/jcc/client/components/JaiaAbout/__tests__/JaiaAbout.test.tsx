@@ -45,7 +45,7 @@ describe("System information is visible", () => {
     });
 });
 
-describe("JaiaABout panel closes", () => {
+describe("JaiaAbout panel closes", () => {
     test("JaiaAbout panel closes", () => {
         render(<JaiaAbout metadata={sampleMetadata1} />);
         const panelElement = screen.getByTestId("jaia-about-panel");

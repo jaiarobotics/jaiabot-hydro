@@ -24,6 +24,7 @@ message ClientToPortalMessage
     optional Command command = 2;
     optional CommandForHub command_for_hub = 3;
     optional bool ping = 4;
+    optional string client_id = 5;
 }
 
 message PortalToClientMessage
@@ -40,5 +41,6 @@ message PortalToClientMessage
 
     // For sending a bot's currently active mission back to all the clients, so they can update their GUI to show the active missions for each bot
     optional MissionPlan active_mission_plan = 6;
+    optional ContactUpdate contact_update = 7;
 
 }
