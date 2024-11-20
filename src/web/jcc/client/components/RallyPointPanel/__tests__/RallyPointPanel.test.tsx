@@ -57,9 +57,10 @@ const testCases: TestParams[] = [
     },
 ];
 
-describe("Rally Point Panel Button Tests", () => {
+describe("RallyPointPanel: Button Interaction Tests", () => {
     beforeEach(() => {
-        jest.clearAllMocks(); // Ensure a clean state for each test
+        // Ensure a clean state for each test
+        jest.clearAllMocks();
     });
     test.each(testCases)("$description", async ({ getMethod, callBackMethod }) => {
         // Render the Rally Point Panel with mock props
