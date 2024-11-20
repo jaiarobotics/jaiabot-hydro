@@ -18,7 +18,7 @@ import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
 import { Point } from "ol/geom";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import JaiaToggle from "./JaiaToggle";
+import JaiaToggle from "./JaiaToggle/JaiaToggle";
 
 // For keeping heading angles in the [0, 360] range
 

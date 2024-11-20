@@ -19,7 +19,7 @@ import { RunInterface } from "../CommandControl/CommandControl";
 import { deepcopy, addDropdownListener } from "../shared/Utilities";
 import { jaiaAPI } from "../../../common/JaiaAPI";
 import "../../style/components/RunItem.less";
-import JaiaToggle from "../JaiaToggle";
+import JaiaToggle from "../JaiaToggle/JaiaToggle";
 
 type RunItemProps = {
     botIds: number[];
