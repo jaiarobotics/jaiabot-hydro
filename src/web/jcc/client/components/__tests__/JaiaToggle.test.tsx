@@ -1,44 +1,45 @@
 import { render, screen, fireEvent, prettyDOM, waitFor } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event"
+import { userEvent } from "@testing-library/user-event";
 
 import JaiaToggle from "../JaiaToggle";
 
-
 describe("JaiaToggle", () => {
-    test("JaiaToggle toggles", async () => {
-        var isChecked = false
-        
+    test("JaiaToggle switching on/off", async () => {
+        var isChecked = false;
+
         const props = {
             checked: () => isChecked,
-            onClick: () => { isChecked = !isChecked },
+            onClick: () => {
+                isChecked = !isChecked;
+            },
             disabled: () => false,
             label: "Test Label",
-            title: "Test Title"
-        }
+            title: "Test Title",
+        };
 
         render(<JaiaToggle {...props} />);
-        const toggle: HTMLInputElement = screen.getByRole("checkbox")
+        const toggle: HTMLInputElement = screen.getByRole("checkbox");
 
-        await userEvent.click(toggle)
-        expect(isChecked).toBe(true)
-        await userEvent.click(toggle)
-        expect(isChecked).toBe(false)
+        await userEvent.click(toggle);
+        expect(isChecked).toBe(true);
+        await userEvent.click(toggle);
+        expect(isChecked).toBe(false);
     });
 
     test("JaiaToggle disables", async () => {
-        var isChecked = false
-        
+        var isChecked = false;
+
         const props = {
             checked: () => false,
             onClick: () => {},
             disabled: () => true,
             label: "Test Label",
-            title: "Test Title"
-        }
+            title: "Test Title",
+        };
 
         render(<JaiaToggle {...props} />);
-        const toggle: HTMLInputElement = screen.getByRole("checkbox")
+        const toggle: HTMLInputElement = screen.getByRole("checkbox");
 
-        expect(toggle.disabled).toBe(true)
+        expect(toggle.disabled).toBe(true);
     });
 });
