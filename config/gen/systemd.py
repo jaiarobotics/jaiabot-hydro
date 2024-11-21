@@ -58,8 +58,13 @@ parser.add_argument('--imu_type', choices=['bno055', 'bno085', 'none'], help='If
 parser.add_argument('--imu_install_type', choices=['embedded', 'retrofit', 'none'], help='If set, configure services for imu install type')
 parser.add_argument('--arduino_type', choices=['spi', 'usb', 'none'], help='If set, configure services for arduino type')
 parser.add_argument('--bot_type', choices=['hydro', 'echo', 'none'], help='If set, configure services for bot type')
+<<<<<<< HEAD
 parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for arduino type')
 parser.add_argument('--temperature_sensor_type', choices=['bar30', 'tsys01', 'none'], help='If set, configure services for temperature sensor')
+=======
+parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for data offload ignore type')
+parser.add_argument('--motor_harness_info_type', choices=['NONE', 'RPM_AND_THERMISTOR'], help='If set, configure services for motor harness info type')
+>>>>>>> feature/add-driver-for-motor-rpm
 
 args=parser.parse_args()
 
@@ -103,10 +108,16 @@ class DATA_OFFLOAD_IGNORE_TYPE(Enum):
     TASKPACKET = 'TASKPACKET'
     NONE = 'NONE'
 
+<<<<<<< HEAD
 class TEMPERATURE_SENSOR_TYPE(Enum):
     BAR30 = 'bar30'
     TSYS01 = 'tsys01'
     NONE = 'none'
+=======
+class MOTOR_HARNESS_INFO_TYPE(Enum):
+    NONE = 'NONE'
+    RPM_AND_THERMISTOR = 'RPM_AND_THERMISTOR'
+>>>>>>> feature/add-driver-for-motor-rpm
 
 # Set the arduino type based on the argument
 # Used to set the serial port device
@@ -166,12 +177,19 @@ if args.data_offload_ignore_type == 'goby':
 elif args.data_offload_ignore_type == 'taskpacket':
     jaia_data_offload_ignore_type = DATA_OFFLOAD_IGNORE_TYPE.TASKPACKET
 
+<<<<<<< HEAD
 if args.temperature_sensor_type == 'bar30':
     jaia_temperature_sensor_type = TEMPERATURE_SENSOR_TYPE.BAR30
 elif args.temperature_sensor_type == 'tsys01':
     jaia_temperature_sensor_type = TEMPERATURE_SENSOR_TYPE.TSYS01
 else:
     jaia_temperature_sensor_type = TEMPERATURE_SENSOR_TYPE.NONE
+=======
+jaia_motor_harness_info_type = DATA_OFFLOAD_IGNORE_TYPE.NONE
+
+if args.motor_harness_info_type == 'RPM_AND_THERMISTOR':
+    jaia_motor_harness_info_type = MOTOR_HARNESS_INFO_TYPE.RPM_AND_THERMISTOR
+>>>>>>> feature/add-driver-for-motor-rpm
 
 # make the output directories, if they don't exist
 os.makedirs(os.path.dirname(args.env_file), exist_ok=True)
@@ -222,6 +240,7 @@ subprocess.run('bash -ic "' +
                'export jaia_bot_type=' + str(jaia_bot_type.value) + '; ' +
                'export jaia_data_offload_ignore_type=' + str(jaia_data_offload_ignore_type.value) + '; ' +
                'export jaia_temperature_sensor_type=' + str(jaia_temperature_sensor_type.value) + ': ' +
+               'export jaia_motor_harness_info_type=' + str(jaia_motor_harness_info_type.value) + '; ' +
                'source ' + args.gen_dir + '/../preseed.goby; env | egrep \'^jaia|^LD_LIBRARY_PATH\' > /tmp/runtime.env; cp --backup=numbered /tmp/runtime.env ' + args.env_file + '; rm /tmp/runtime.env"',
                check=True, shell=True)
 
@@ -534,6 +553,7 @@ if jaia_bot_type.value == 'echo':
     ] 
     jaiabot_apps.extend(jaiabot_apps_echo)
 
+<<<<<<< HEAD
 if jaia_temperature_sensor_type == 'tsys01':
     jaiabot_apps_tsys01 = [
         {'exe': 'jaiabot_tsys01_temperature_sensor_driver',
@@ -554,6 +574,24 @@ if jaia_temperature_sensor_type == 'tsys01':
         'restart': 'on-failure'},
     ]
     jaiabot_apps.extend(jaiabot_apps_tsys01)
+=======
+if jaia_motor_harness_info_type.value == 'RPM_AND_THERMISTOR':
+    jaiabot_apps_motor_harness_info_type = [
+        {'exe': 'rpm.py',
+        'description': 'JaiaBot Motor Python Driver',
+        'template': 'py-app.service.in',
+        'user': 'root', # must run as root to allow interaction with GPIO Pin
+        'group': 'root',
+        'subdir': 'motor',
+        'args': '',
+        'error_on_fail': 'ERROR__FAILED__PYTHON_JAIABOT_MOTOR_DRIVER',
+        'runs_on': Type.BOT,
+        'runs_when': Mode.RUNTIME,
+        'wanted_by': 'jaiabot_health.service',
+        'restart': 'on-failure'}
+    ] 
+    jaiabot_apps.extend(jaiabot_apps_motor_harness_info_type)
+>>>>>>> feature/add-driver-for-motor-rpm
 
 jaia_firmware = [
     {'exe': 'hub-button-led-poweroff.py',
