@@ -34,7 +34,7 @@
 #include "jaiabot/groups.h"
 #include "jaiabot/messages/health.pb.h"
 #include "jaiabot/messages/moos.pb.h"
-#include "jaiabot/messages/salinity.pb.h"
+#include "jaiabot/messages/sensors/salinity.pb.h"
 
 using goby::glog;
 namespace si = boost::units::si;
