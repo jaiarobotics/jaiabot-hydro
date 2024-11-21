@@ -60,7 +60,6 @@ parser.add_argument('--arduino_type', choices=['spi', 'usb', 'none'], help='If s
 parser.add_argument('--bot_type', choices=['hydro', 'echo', 'none'], help='If set, configure services for bot type')
 parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for arduino type')
 parser.add_argument('--temperature_sensor_type', choices=['bar30', 'tsys01', 'none'], help='If set, configure services for temperature sensor')
-parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for data offload ignore type')
 parser.add_argument('--motor_harness_info_type', choices=['NONE', 'RPM_AND_THERMISTOR'], help='If set, configure services for motor harness info type')
 
 args=parser.parse_args()
@@ -546,7 +545,7 @@ if jaia_bot_type.value == 'echo':
     ] 
     jaiabot_apps.extend(jaiabot_apps_echo)
 
-if jaia_temperature_sensor_type == 'tsys01':
+if jaia_temperature_sensor_type.value == 'tsys01':
     jaiabot_apps_tsys01 = [
         {'exe': 'jaiabot_tsys01_temperature_sensor_driver',
         'description': 'JaiaBot TSYS01 Temperature Sensor Driver',
