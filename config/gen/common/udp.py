@@ -20,7 +20,7 @@ def tsys01_cpp_udp_port():
     return 0
 
 def tsys01_py_udp_port():
-    return 20005 
+    return 20006 
 
 def atlas_ezo_cpp_udp_port(node_id):
     if is_simulation():
