@@ -113,6 +113,6 @@ Description: What type of imu installation does your system have?
 Template: jaiabot-embedded/temperature_sensor_type
 Type: select
 Choices: bar30, tsys01, none
-Default: embedded
+Default: bar30
 Description: What temperature sensor do you want to use?
 
