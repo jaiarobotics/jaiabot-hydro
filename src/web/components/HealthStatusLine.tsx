@@ -6,6 +6,8 @@ interface HealthStatusLineProps {
     healthState: HealthState;
 }
 
+interface Test {}
+
 export function HealthStatusLine(props: HealthStatusLineProps) {
     const healthClassNames = {
         HEALTH__OK: "healthOK",
