@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 
 // Main thread
 
-double loop_freq = 10;
+double loop_freq = 5;
 
 jaiabot::apps::AdaFruitBNO085Publisher::AdaFruitBNO085Publisher()
     : zeromq::MultiThreadApplication<config::AdaFruitBNO085Publisher>(loop_freq * si::hertz)
