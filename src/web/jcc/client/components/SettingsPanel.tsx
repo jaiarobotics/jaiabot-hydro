@@ -8,7 +8,7 @@ import { GlobalActions } from "../../../context/actions/GlobalActions";
 
 import { Map } from "ol";
 
-import JaiaToggle from "./JaiaToggle";
+import JaiaToggle from "./JaiaToggle/JaiaToggle";
 import SetHubLocation from "./SetHubLocation";
 import ScanForBotPanel from "./ScanForBotPanel";
 import QueryBotStatusPanel from "./QueryBotStatusPanel";
