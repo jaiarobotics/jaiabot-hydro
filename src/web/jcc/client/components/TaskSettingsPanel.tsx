@@ -290,7 +290,7 @@ function TaskOptionsPanel(props: Props) {
                 </tr>
             );
         }
-        return <div></div>;
+        return <tr></tr>;
     }
 
     /**
@@ -359,7 +359,7 @@ function TaskOptionsPanel(props: Props) {
                                             max="3600"
                                             className="NumberInput"
                                             name="drift_time"
-                                            value={surface_drift.drift_time}
+                                            value={surface_drift.drift_time.toString()}
                                             onChange={onChangeDriftParameter}
                                             disabled={!props?.isEditMode}
                                         />
@@ -382,7 +382,7 @@ function TaskOptionsPanel(props: Props) {
                                             max="60"
                                             className="NumberInput"
                                             name="max_depth"
-                                            value={dive.max_depth}
+                                            value={dive.max_depth.toString()}
                                             onChange={onChangeDiveParameter}
                                             disabled={!props?.isEditMode}
                                         />
@@ -399,7 +399,7 @@ function TaskOptionsPanel(props: Props) {
                                             max="60"
                                             className="NumberInput"
                                             name="depth_interval"
-                                            value={dive.depth_interval}
+                                            value={dive.depth_interval.toString()}
                                             onChange={onChangeDiveParameter}
                                             disabled={!props?.isEditMode}
                                         />
@@ -416,7 +416,7 @@ function TaskOptionsPanel(props: Props) {
                                             max="3600"
                                             className="NumberInput"
                                             name="hold_time"
-                                            value={dive.hold_time}
+                                            value={dive.hold_time.toString()}
                                             onChange={onChangeDiveParameter}
                                             disabled={!props?.isEditMode}
                                         />
@@ -433,7 +433,7 @@ function TaskOptionsPanel(props: Props) {
                                             max="3600"
                                             className="NumberInput"
                                             name="drift_time"
-                                            value={surface_drift.drift_time}
+                                            value={surface_drift.drift_time.toString()}
                                             onChange={onChangeDriftParameter}
                                             disabled={!props?.isEditMode}
                                         />
@@ -461,7 +461,7 @@ function TaskOptionsPanel(props: Props) {
                                         max="3600"
                                         className="NumberInput"
                                         name="station_keep_time"
-                                        value={station_keep?.station_keep_time}
+                                        value={station_keep?.station_keep_time.toString()}
                                         onChange={onChangeStationKeepParameter}
                                         disabled={!props?.isEditMode}
                                     />
@@ -485,7 +485,7 @@ function TaskOptionsPanel(props: Props) {
                                         step="1"
                                         className="NumberInput"
                                         name="drift_time"
-                                        value={surface_drift.drift_time}
+                                        value={surface_drift.drift_time.toString()}
                                         onChange={onChangeDriftParameter}
                                         disabled={!props?.isEditMode}
                                     />
@@ -629,7 +629,12 @@ export function TaskSettingsPanel(props: Props) {
                 newTask.constant_heading = deepcopy(GlobalSettings.constantHeadingParameters);
                 break;
             case TaskType.DIVE:
-                newTask.dive = deepcopy(GlobalSettings.diveParameters);
+                if (GlobalSettings.diveParameters.bottom_dive) {
+                    //Bottom Dives should not include other dive parameters
+                    newTask.dive = { bottom_dive: true };
+                } else {
+                    newTask.dive = deepcopy(GlobalSettings.diveParameters);
+                }
                 newTask.surface_drift = deepcopy(GlobalSettings.driftParameters);
                 break;
             case TaskType.SURFACE_DRIFT:
@@ -639,7 +644,6 @@ export function TaskSettingsPanel(props: Props) {
                 newTask.station_keep = deepcopy(GlobalSettings.stationKeepParameters);
                 break;
         }
-
         props.onChange(newTask);
         if (props.scrollTaskSettingsIntoView !== undefined) {
             props.scrollTaskSettingsIntoView();

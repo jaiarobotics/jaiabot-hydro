@@ -83,7 +83,7 @@ export class Layers {
             title: "Hub Comms Limit Circles",
         },
         source: new VectorSource(),
-        visible: false,
+        visible: true,
         zIndex: 500,
     });
 
@@ -155,7 +155,6 @@ export class Layers {
         wrapX: false,
     });
 
-    dragAndDropVectorLayer = new VectorLayer();
     baseLayerGroup = createBaseLayerGroup();
     chartLayerGroup = createChartLayerGroup();
     customLayerGroupFactory: CustomLayerGroupFactory;
@@ -178,7 +177,6 @@ export class Layers {
             this.measurementLayerGroup,
             this.graticuleLayer,
             this.missionLayerGroup,
-            this.dragAndDropVectorLayer,
             //this.botPathsGroup
         ];
     }

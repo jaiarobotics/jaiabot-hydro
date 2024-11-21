@@ -215,12 +215,24 @@ jaiabot::apps::WebPortal::WebPortal()
             jaiabot::protobuf::PortalToClientMessage message;
             device_metadata_ = metadata;
         });
+
+    // Subscribe to ContactUpdate
+    interprocess().subscribe<jaiabot::groups::contact_update>(
+        [this](const jaiabot::protobuf::ContactUpdate contact_update) {
+            jaiabot::protobuf::PortalToClientMessage message;
+            *message.mutable_contact_update() = contact_update;
+
+            send_message_to_client(message);
+        });
 }
 
 void jaiabot::apps::WebPortal::process_client_message(jaiabot::protobuf::ClientToPortalMessage& msg)
 {
     glog.is_verbose() && glog << group("main")
                               << "Received message from client: " << msg.ShortDebugString() << endl;
+
+    // Republish the message on interprocess, to get it into the logs
+    interprocess().publish<jaiabot::groups::web_portal>(msg);
 
     if (msg.has_engineering_command())
     {

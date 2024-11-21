@@ -13,6 +13,7 @@ import {
     formatLongitude,
 } from "../shared/Utilities";
 import { CommandInfo, hubCommands, sendHubCommand, takeControl } from "../utils/commands";
+import { getIPPrefix } from "../shared/IPPrefix";
 
 // Styles
 import Button from "@mui/material/Button";
@@ -38,9 +39,7 @@ export function HubDetails() {
 
     const hubContext = useContext(HubContext);
 
-    if (hubContext === null || !globalContext.showHubDetails) {
-        return <div></div>;
-    }
+    const IPPrefix = getIPPrefix(location.hostname);
 
     const [accordionTheme, setAccordionTheme] = useState(
         createTheme({
@@ -54,8 +53,16 @@ export function HubDetails() {
         addDropdownListener("accordionContainer", "hubDetailsAccordionContainer", 30);
     }, []);
 
-    const firstKey = Object.keys(hubContext.hubStatus)[0];
-    const hubStatus = hubContext.hubStatus[firstKey];
+    if (hubContext === null || !globalContext.showHubDetails) {
+        return <div></div>;
+    }
+
+    const firstKey = Number(Object.keys(hubContext.hubStatuses)[0]);
+    const hubStatus = hubContext.hubStatuses[firstKey];
+
+    if (!hubStatus) {
+        return <div></div>;
+    }
 
     /**
      * Dispatches an action to close the HubDetails panel
@@ -95,7 +102,7 @@ export function HubDetails() {
      * @returns {number | string} Load average for the hub or 'N/A' if an issue arises
      */
     function getCPULoadAverage(timeMins: number) {
-        const loads = hubContext.hubStatus?.processor?.loads;
+        const loads = hubStatus?.linux_hardware_status?.processor?.loads;
 
         if (loads === undefined) {
             return "N/A";
@@ -123,8 +130,8 @@ export function HubDetails() {
         const isControlTaken = await takeControl(globalContext.clientID);
         if (isControlTaken) {
             globalDispatch({ type: GlobalActions.TAKE_CONTROL_SUCCESS });
+            sendHubCommand(hubStatus.hub_id, command);
         }
-        sendHubCommand(hubStatus.hub_id, command);
     }
 
     /**
@@ -133,9 +140,9 @@ export function HubDetails() {
      * @returns {void}
      */
     function openJDV() {
-        const hubOctal = 10 + hubStatus.hub_id;
-        const fleetOctal = hubStatus.fleet_id;
-        const url = `http://10.23.${fleetOctal}.${hubOctal}:40010`;
+        const hubOctet = 10 + hubStatus.hub_id;
+        const fleetOctet = hubStatus.fleet_id;
+        const url = `http://${IPPrefix}.${fleetOctet}.${hubOctet}:40010`;
         window.open(url, "_blank");
     }
 
@@ -145,8 +152,8 @@ export function HubDetails() {
      * @returns {void}
      */
     function openRouterPage() {
-        const fleetOctal = hubStatus.fleet_id;
-        const url = `http://10.23.${fleetOctal}.1`;
+        const fleetOctet = hubStatus.fleet_id;
+        const url = `http://${IPPrefix}.${fleetOctet}.1`;
         window.open(url, "_blank");
     }
 
@@ -156,9 +163,9 @@ export function HubDetails() {
      * @returns {void}
      */
     function openUpgradePage() {
-        const hubOctal = 10 + hubStatus.hub_id;
-        const fleetOctal = hubStatus.fleet_id;
-        const url = `http://10.23.${fleetOctal}.${hubOctal}:9091`;
+        const hubOctet = 10 + hubStatus.hub_id;
+        const fleetOctet = hubStatus.fleet_id;
+        const url = `http://${IPPrefix}.${fleetOctet}.${hubOctet}:9091`;
         window.open(url, "_blank");
     }
 
@@ -196,11 +203,11 @@ export function HubDetails() {
                                     <HealthStatusLine healthState={hubStatus?.health_state} />
                                     <tr>
                                         <td>Latitude</td>
-                                        <td>{formatLatitude(hubStatus?.location.lat)}</td>
+                                        <td>{formatLatitude(hubStatus?.location?.lat)}</td>
                                     </tr>
                                     <tr>
                                         <td>Longitude</td>
-                                        <td>{formatLongitude(hubStatus?.location.lon)}</td>
+                                        <td>{formatLongitude(hubStatus?.location?.lon)}</td>
                                     </tr>
                                     <tr
                                         className={getStatusAgeClassName(hubStatus.portalStatusAge)}

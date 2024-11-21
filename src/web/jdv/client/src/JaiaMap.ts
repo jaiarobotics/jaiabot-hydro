@@ -129,7 +129,7 @@ export default class JaiaMap {
     map: Map;
     projection: Projection;
 
-    divePacketLayer: VectorLayer<VectorSource<Geometry>> = new VectorLayer({
+    divePacketLayer: VectorLayer<VectorSource<Feature<Geometry>>> = new VectorLayer({
         properties: {
             title: "Dives",
         },
@@ -137,7 +137,7 @@ export default class JaiaMap {
         zIndex: 12,
     });
 
-    driftPacketLayer: VectorLayer<VectorSource<Geometry>> = new VectorLayer({
+    driftPacketLayer: VectorLayer<VectorSource<Feature<Geometry>>> = new VectorLayer({
         properties: {
             title: "Drifts",
         },
@@ -180,7 +180,7 @@ export default class JaiaMap {
                 this.createMissionLayer(),
                 this.createTaskPacketLayer(),
                 this.createDepthContourLayer(),
-                this.createDriftInterpolationLayer(),
+                //this.createDriftInterpolationLayer(),
             ],
             view: view,
             controls: [
@@ -348,6 +348,7 @@ export default class JaiaMap {
             zIndex: 13,
             style: Styles.driftMapStyle,
             opacity: 0.6,
+            visible: false,
         });
 
         return layer;
@@ -666,7 +667,7 @@ export default class JaiaMap {
                     <tbody>
                         <tr><th>Bot ID</th><td>${task_packet.bot_id}</td></tr>
                         <tr><th>Depth</th><td>${dive.depth_achieved?.toFixed(2) ?? "?"} m</td></tr>
-                        <tr><th>Bottom Dive</th><td>${dive.bottom_dive ?? false ? "Yes" : "No"}</td></tr>
+                        <tr><th>Bottom Dive</th><td>${(dive.bottom_dive ?? false) ? "Yes" : "No"}</td></tr>
                         <tr><th>Dive Rate</th><td>${dive.dive_rate?.toFixed(2) ?? "?"} m/s</td></tr>
                         <tr><th>Duration To Acquire GPS Lock</th><td>${dive.duration_to_acquire_gps?.toFixed(1) ?? "?"} s</td></tr>
                     </tbody>
