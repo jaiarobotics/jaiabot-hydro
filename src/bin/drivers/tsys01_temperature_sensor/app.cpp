@@ -66,9 +66,7 @@ class TSYS01TemperatureSensorDriver
                            goby::middleware::protobuf::HealthState& health_state);
 
   private:
-    dccl::Codec dccl_;
     goby::time::SteadyClock::time_point last_tsys01_report_time_{std::chrono::seconds(0)};
-    bool helm_ivp_in_mission_{false};
 };
 
 } // namespace apps
@@ -79,8 +77,6 @@ int main(int argc, char* argv[])
     return goby::run<jaiabot::apps::TSYS01TemperatureSensorDriver>(
         goby::middleware::ProtobufConfigurator<config::TSYS01TemperatureSensorDriver>(argc, argv));
 }
-
-// Main thread
 
 jaiabot::apps::TSYS01TemperatureSensorDriver::TSYS01TemperatureSensorDriver()
     : zeromq::MultiThreadApplication<config::TSYS01TemperatureSensorDriver>(10 * si::hertz)
@@ -104,25 +100,11 @@ jaiabot::apps::TSYS01TemperatureSensorDriver::TSYS01TemperatureSensorDriver()
         interprocess().publish<groups::tsys01>(tsys01_data);
         last_tsys01_report_time_ = goby::time::SteadyClock::now();
     });
-
-    interprocess().subscribe<jaiabot::groups::moos>([this](const protobuf::MOOSMessage& moos_msg) {
-        if (moos_msg.key() == "JAIABOT_MISSION_STATE")
-        {
-            if (moos_msg.svalue() == "IN_MISSION__UNDERWAY__MOVEMENT__TRANSIT")
-            {
-                helm_ivp_in_mission_ = true;
-            }
-            else
-            {
-                helm_ivp_in_mission_ = false;
-            }
-        }
-    });
 }
 
 void jaiabot::apps::TSYS01TemperatureSensorDriver::loop()
 {
-    // Just send an empty packet to provide the python driver with a return address
+    // send an empty packet to provide the python driver with a return address
     auto io_data = std::make_shared<goby::middleware::protobuf::IOData>();
     io_data->set_data("hello\n");
     interthread().publish<tsys01_udp_out>(io_data);
@@ -131,7 +113,6 @@ void jaiabot::apps::TSYS01TemperatureSensorDriver::loop()
 void jaiabot::apps::TSYS01TemperatureSensorDriver::health(
     goby::middleware::protobuf::ThreadHealth& health)
 {
-    health.ClearExtension(jaiabot::protobuf::jaiabot_thread);
     health.ClearExtension(jaiabot::protobuf::jaiabot_thread);
     health.set_name(this->app_name());
     auto health_state = goby::middleware::protobuf::HEALTH__OK;

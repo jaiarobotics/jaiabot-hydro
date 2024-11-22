@@ -114,7 +114,7 @@ JAIA_TEMPERATURE_SENSOR_TYPE=$RET
 					 --bot_type=${JAIA_BOT_TYPE} \
 					 --imu_install_type=${JAIA_IMU_INSTALL_TYPE} \
 					 --data_offload_ignore_type=${JAIA_DATA_OFFLOAD_IGNORE_TYPE} \
-                     --temperature_sensor_type=${JAIA_TEMPERATURE_SENSOR_TYPE}
+                                         --temperature_sensor_type=${JAIA_TEMPERATURE_SENSOR_TYPE}
 
 echo "<<<<< Installing and enabling systemd services complete!"
 

@@ -221,7 +221,7 @@ subprocess.run('bash -ic "' +
                'export jaia_arduino_type=' + str(jaia_arduino_type.value) + '; ' +
                'export jaia_bot_type=' + str(jaia_bot_type.value) + '; ' +
                'export jaia_data_offload_ignore_type=' + str(jaia_data_offload_ignore_type.value) + '; ' +
-               'export jaia_temperature_sensor_type=' + str(jaia_temperature_sensor_type.value) + ': ' +
+               'export jaia_temperature_sensor_type=' + str(jaia_temperature_sensor_type.value) + '; ' +
                'source ' + args.gen_dir + '/../preseed.goby; env | egrep \'^jaia|^LD_LIBRARY_PATH\' > /tmp/runtime.env; cp --backup=numbered /tmp/runtime.env ' + args.env_file + '; rm /tmp/runtime.env"',
                check=True, shell=True)
 
@@ -484,7 +484,7 @@ if jaia_imu_type.value == 'bno085':
         'description': 'JaiaBot BNO085 IMU Python Driver',
         'template': 'py-app.service.in',
         'subdir': 'adafruit',
-        'args': f'-t {IMU_TYPE.BNO085.value} -p 20000 -d',
+        'args': f'-t {IMU_TYPE.BNO085.value} -p 20000',
         'error_on_fail': 'ERROR__FAILED__PYTHON_JAIABOT_IMU',
         'runs_on': Type.BOT,
         'runs_when': Mode.RUNTIME,
@@ -504,7 +504,7 @@ else:
         'description': 'JaiaBot BNO055 IMU Python Driver',
         'template': 'py-app.service.in',
         'subdir': 'adafruit',
-        'args': f'-t {IMU_TYPE.BNO055.value} -p 20000 -d',
+        'args': f'-t {IMU_TYPE.BNO055.value} -p 20000',
         'error_on_fail': 'ERROR__FAILED__PYTHON_JAIABOT_IMU',
         'runs_on': Type.BOT,
         'runs_when': Mode.RUNTIME,
@@ -546,7 +546,7 @@ if jaia_temperature_sensor_type.value == 'tsys01':
         'description': 'JaiaBot TSYS01 Temperature Sensor Python Driver',
         'template': 'py-app.service.in',
         'subdir': 'tsys01_temperature_sensor',
-        'args': '--port 20006',
+        'args': '-p 20006',
         'error_on_fail': 'ERROR__FAILED__PYTHON_JAIABOT_TSYS01_TEMPERATURE_SENSOR_DRIVER',
         'runs_on': Type.BOT,
         'runs_when': Mode.RUNTIME,
