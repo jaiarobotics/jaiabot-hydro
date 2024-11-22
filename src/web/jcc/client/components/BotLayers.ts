@@ -11,7 +11,7 @@ import { createGPSMarker } from "./shared/Marker";
 import { getMapCoordinate } from "./shared/Utilities";
 import * as Styles from "./shared/Styles";
 
-// test 2
+// test 4
 export class BotLayers {
     layers: { [key: number]: VectorLayer<VectorSource> } = {};
     map: Map;
