@@ -243,4 +243,15 @@ message MissionManager
     }
 
     optional ResolveNoForwardProgress resolve_no_forward_progress = 88;
+
+    message eDNA
+    {
+        optional bool start_edna = 1 [default = false];
+
+        optional bool stop_edna = 2 [default = true];
+
+        optional int32 edna_state = 3 [default = 0];
+    }
+
+    optional eDNA edna = 89;
 }

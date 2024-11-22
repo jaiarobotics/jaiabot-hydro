@@ -16,7 +16,7 @@ import { JaiaAPI } from "../../common/JaiaAPI";
 import { taskData } from "./TaskPackets";
 import { PanelType } from "./CommandControl/CommandControl";
 import { PIDGainsPanel } from "./PIDGainsPanel";
-import { PortalBotStatus, PortalHubStatus } from "./shared/PortalStatus";
+import { PodStatus, PortalBotStatus, PortalHubStatus } from "./shared/PortalStatus";
 
 import Button from "@mui/material/Button";
 import Accordion from "@mui/material/Accordion";
@@ -35,7 +35,7 @@ interface Props {
     taskPacketsTimeline: { [key: string]: string | boolean };
     isClusterModeOn: boolean;
     iseDNAOn: boolean;
-    toggleeDNA: (bot_id: number) => void;
+    toggleeDNA: (bot_id: number, new_state: boolean) => void;
     handleTaskPacketEditDatesToggle: () => void;
     handleTaskPacketsTimelineChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
     handleSubmitTaskPacketsTimeline: () => void;

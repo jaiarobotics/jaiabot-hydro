@@ -18,7 +18,7 @@ import {
 import JaiaToggle from "./JaiaToggle";
 import { JaiaAPI } from "../../common/JaiaAPI";
 import { getElementById } from "./shared/Utilities";
-import { PortalBotStatus } from "./shared/PortalStatus";
+import { PodStatus, PortalBotStatus } from "./shared/PortalStatus";
 import { TurnSlightRightSharp } from "@mui/icons-material";
 
 let pidTypes: (keyof PIDControl)[] = [
@@ -35,7 +35,7 @@ interface Props {
     api: JaiaAPI;
     bots: { [key: number]: PortalBotStatus };
     control: (onSuccess: () => void) => void;
-    toggleeDNA: (bot_id: number) => void;
+    toggleeDNA: (bot_id: number, new_state: boolean) => void;
 }
 
 interface State {
@@ -134,18 +134,31 @@ export class PIDGainsPanel extends React.Component {
         let engineering = bots[self.botId]?.engineering;
 
         //console.log(engineering);
-
+        /**
         if (engineering?.edna === undefined) {
-            engineering = {
-                ...engineering,
-                bot_id: self.botId,
+            let engineeringCommand: Engineering = {
+                bot_id: this.botId,
+                query_engineering_status: true,
                 edna: {
+                    start_edna: false,
+                    stop_edna: true,
                     edna_state: eDNAState.EDNA_OFF,
-                },
+                }
             };
 
-            this.props.api.postEngineeringPanel(engineering);
+            engineering = {
+                ...engineering,
+                edna: {
+                    start_edna: false,
+                    stop_edna: true,
+                    edna_state: eDNAState.EDNA_OFF,
+                }
+            }
+
+            console.log("Engineering: ", engineering);
+            //this.props.api.postEngineering(engineeringCommand);
         }
+        */
 
         //console.log(engineering);
 
@@ -655,6 +668,7 @@ export class PIDGainsPanel extends React.Component {
         this.props.control(() => {
             let botId = getValueOfInput("pid_gains_bot_selector");
             let new_engineering: Engineering;
+            let new_pod_status = this.props.bots;
 
             console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering);
             console.log(botId);
@@ -669,25 +683,39 @@ export class PIDGainsPanel extends React.Component {
                         edna_state: eDNAState.EDNA_OFF,
                     },
                 };
+                new_pod_status[botId].edna_on = false;
             }
 
             new_engineering =
-                this.props.bots[botId].engineering.edna.edna_state === eDNAState.EDNA_ON
+                this.props.bots[botId].edna_on === true
                     ? {
                           bot_id: botId,
                           edna: {
-                              edna_state: eDNAState.EDNA_OFF,
+                              stop_edna: true,
                           },
                       }
                     : {
                           bot_id: botId,
                           edna: {
-                              edna_state: eDNAState.EDNA_ON,
+                              start_edna: true,
                           },
                       };
 
-            this.props.bots[botId].engineering = new_engineering;
-            this.props.api.postEngineering(new_engineering);
+            new_pod_status[botId].edna_on = new_engineering.edna.start_edna;
+
+            this.props.toggleeDNA(botId, new_engineering.edna.start_edna);
+
+            //this.props.bots[botId].engineering = new_engineering;
+
+            this.props.api.postEngineeringPanel(new_engineering).then((response) => {
+                if (response.message) {
+                    error("Unable to post RC eDNA Pump command");
+                } else if (new_engineering.edna.edna_state === eDNAState.EDNA_ON) {
+                    success("eDNA Pump Activated");
+                } else {
+                    success("eDNA Pump Deactivated");
+                }
+            });
             console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering);
         });
     }

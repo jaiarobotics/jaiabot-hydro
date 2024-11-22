@@ -2906,90 +2906,14 @@ export default class CommandControl extends React.Component {
      * @returns {void}
      */
 
-    toggleeDNA(bot_id: number) {
-        let neweDNA = cloneDeep(this.state.remoteControlValues);
+    toggleeDNA(bot_id: number, new_state: boolean) {
+        let new_pod_status = deepcopy(this.state.podStatus);
 
-        neweDNA = {
-            bot_id: bot_id,
-            edna: {
-                edna_state:
-                    this.state.remoteControlValues.edna.edna_state === eDNAState.EDNA_OFF
-                        ? eDNAState.EDNA_ON
-                        : eDNAState.EDNA_OFF,
-            },
-        };
-
-        this.setState({ remoteControlValues: neweDNA });
-        this.api.postEngineering(neweDNA);
-        console.log(
-            "Bot: ",
-            this.state.remoteControlValues.bot_id,
-            "eDNA: ",
-            this.state.remoteControlValues.edna,
-        );
+        new_pod_status.bots[bot_id].edna_on = new_state;
+        this.setState({ podStatus: new_pod_status });
+        console.log("Pod Status Updated: ", this.state.podStatus);
     }
 
-    /**
-    toggleeDNA(bot_id: number) {
-        let current_edna_state = this.getPodStatus().bots[bot_id].edna_on;
-        let new_engineering: Engineering; 
-        let bots = this.getPodStatus().bots;
-        console.log(bots);
-
-        console.log("Bot: ", bot_id, "Status: ", current_edna_state);
-
-        if (current_edna_state === true) {
-            new_engineering = {
-                bot_id: bot_id,
-                edna: {
-                    edna_state: eDNAState.EDNA_OFF,
-                }
-            }
-
-            bots[bot_id].engineering = new_engineering;
-        } else {
-            new_engineering = {
-                bot_id: bot_id,
-                edna: {
-                    edna_state: eDNAState.ENDA_ON,
-                },
-            }
-
-            bots[bot_id].engineering = new_engineering;
-        }
-
-        console.log("Bot: ", bot_id, "eDNA: ", new_engineering.edna, "Status: ", bots[bot_id].edna_on);
-
-        console.log(bots);
-        
-        this.api.postEngineering(new_engineering);
-    }
-
-    toggleeDNA(bot_id: number) {
-        const bots = this.getPodStatus().bots;
-        const bot = bots[bot_id];
-        let engineering: Engineering;
-
-        if (bot.engineering === undefined || bot.engineering.edna === undefined) {
-            engineering = this.createeDNAField(bot_id);
-        }
-
-        let new_engineering = engineering;
-
-        if (engineering.edna.edna_state === 0 || engineering.edna === undefined) {
-            new_engineering.edna.edna_state = 1;
-            bots[bot_id].edna_on = true;
-        } else {
-            new_engineering.edna.edna_state = 0;
-            bots[bot_id].edna_on = false;
-        }
-
-        this.setState({ remoteControlValues: new_engineering });
-        this.api.postEngineering(new_engineering);
-        console.log("eDNA Turned on?: " + bots[bot_id].edna_on);
-        console.log("Selected Bot: " + bots[bot_id].bot_id);
-    }
-    */
     //
     // RC Mode (End)
     //

@@ -529,6 +529,12 @@ struct MissionManagerStateMachine
     }
     const std::string& data_offload_exclude() { return data_offload_exclude_; }
 
+    void set_start_edna(const bool& start_edna) { start_edna_ = start_edna; }
+    const bool& start_edna() { return start_edna_; }
+
+    void set_stop_edna(const bool& stop_edna) { stop_edna_ = stop_edna; }
+    const bool& stop_edna() { return stop_edna_; }
+
   private:
     apps::MissionManager& app_;
     jaiabot::protobuf::MissionState state_{jaiabot::protobuf::PRE_DEPLOYMENT__IDLE};
@@ -566,6 +572,9 @@ struct MissionManagerStateMachine
     std::string data_time_string_{""};
     int32_t hub_id_{0};
     std::string data_offload_exclude_{""};
+    bool start_edna_{false};
+    bool stop_edna_{true};
+    jaiabot::protobuf::eDNACommand edna_state_;
 };
 
 struct PreDeployment

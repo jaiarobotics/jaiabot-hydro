@@ -1189,6 +1189,8 @@ export enum eDNAState {
 }
 
 export interface eDNA {
+    start_edna?: boolean;
+    stop_edna?: boolean;
     edna_state?: eDNAState;
 }
 
