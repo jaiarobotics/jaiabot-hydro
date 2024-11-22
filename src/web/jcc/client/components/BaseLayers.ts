@@ -4,7 +4,7 @@ import { XYZ, OSM } from "ol/source";
 import { persistVisibility } from "./VisibleLayerPersistance";
 import * as Layers from "./shared/Layers";
 
-// test 6
+// test 7
 export function createBaseLayerGroup() {
     const layers = [
         Layers.getArcGISSatelliteImageryLayer(),
