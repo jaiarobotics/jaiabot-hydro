@@ -400,8 +400,7 @@ jaiabot::apps::MissionManager::MissionManager()
 
             if (command.has_edna())
             {
-                machine_->set_start_edna(command.edna().start_edna());
-                machine_->set_stop_edna(command.edna().stop_edna());
+                machine_->set_edna_active(command.edna().edna_active());
             }
 
             // Publish only when we get a query for status
@@ -435,8 +434,7 @@ jaiabot::apps::MissionManager::MissionManager()
                 engineering_status.mutable_bottom_depth_safety_params()->set_constant_heading_time(
                     machine_->bottom_depth_safety_constant_heading_time());
 
-                engineering_status.mutable_edna()->set_start_edna(machine_->start_edna());
-                engineering_status.mutable_edna()->set_stop_edna(machine_->stop_edna());
+                engineering_status.mutable_edna()->set_edna_active(machine_->edna_active());
 
                 interprocess().publish<jaiabot::groups::engineering_status>(engineering_status);
             }

@@ -548,8 +548,7 @@ export class PIDGainsPanel extends React.Component {
                 {botSelector}
                 <JaiaToggle
                     checked={() =>
-                        this.props.bots[this.botId].engineering?.edna?.edna_state ===
-                        eDNAState.EDNA_ON
+                        this.props.bots[this.botId].engineering?.edna?.edna_active === true
                     }
                     onClick={this.toggleeDNA.bind(this)}
                     label={"eDNA"}
@@ -667,56 +666,57 @@ export class PIDGainsPanel extends React.Component {
     toggleeDNA() {
         this.props.control(() => {
             let botId = getValueOfInput("pid_gains_bot_selector");
-            let new_engineering: Engineering;
+            let engineeringCommand: Engineering;
             let new_pod_status = this.props.bots;
 
-            console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering);
+            console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering.edna);
             console.log(botId);
 
             if (
                 this.props.bots[botId].engineering?.edna === undefined ||
                 this.props.bots[botId].engineering?.edna?.edna_state === undefined
             ) {
-                new_engineering = {
+                engineeringCommand = {
                     bot_id: botId,
                     edna: {
-                        edna_state: eDNAState.EDNA_OFF,
+                        edna_active: true,
                     },
                 };
                 new_pod_status[botId].edna_on = false;
             }
 
-            new_engineering =
-                this.props.bots[botId].edna_on === true
-                    ? {
-                          bot_id: botId,
-                          edna: {
-                              stop_edna: true,
-                          },
-                      }
-                    : {
-                          bot_id: botId,
-                          edna: {
-                              start_edna: true,
-                          },
-                      };
+            if (this.props.bots[botId].engineering.edna?.edna_active === true) {
+                engineeringCommand = {
+                    bot_id: botId,
+                    edna: {
+                        edna_active: false,
+                    },
+                };
+            } else {
+                engineeringCommand = {
+                    bot_id: botId,
+                    edna: {
+                        edna_active: true,
+                    },
+                };
+            }
 
-            new_pod_status[botId].edna_on = new_engineering.edna.start_edna;
+            new_pod_status[botId].edna_on = engineeringCommand.edna.edna_active;
 
-            this.props.toggleeDNA(botId, new_engineering.edna.start_edna);
+            //this.props.toggleeDNA(botId, new_engineering.edna.start_edna);
 
             //this.props.bots[botId].engineering = new_engineering;
 
-            this.props.api.postEngineeringPanel(new_engineering).then((response) => {
+            this.props.api.postEngineeringPanel(engineeringCommand).then((response) => {
                 if (response.message) {
                     error("Unable to post RC eDNA Pump command");
-                } else if (new_engineering.edna.edna_state === eDNAState.EDNA_ON) {
+                } else if (engineeringCommand.edna.edna_active === true) {
                     success("eDNA Pump Activated");
                 } else {
                     success("eDNA Pump Deactivated");
                 }
             });
-            console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering);
+            console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering.edna);
         });
     }
 
@@ -751,7 +751,7 @@ export class PIDGainsPanel extends React.Component {
                     rf_disable_timeout_mins: getValueOfInput("rf_disable_timeout_mins_input"),
                 },
                 edna: {
-                    edna_state: eDNAState.EDNA_OFF,
+                    edna_active: true,
                 },
             };
 

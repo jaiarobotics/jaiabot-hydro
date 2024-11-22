@@ -342,16 +342,16 @@ void jaiabot::apps::JaiabotEngineering::handle_engineering_command(
     else if (command.has_edna())
     {
         protobuf::eDNACommand edna_command;
-        if (command.edna().start_edna())
+        if (command.edna().edna_active())
         {
             edna_command.set_type(protobuf::eDNACommand::CMD_START);
-            interprocess().publish<jaiabot::groups::edna>(edna_command);
         }
-        else if (command.edna().stop_edna())
+        else
         {
             edna_command.set_type(protobuf::eDNACommand::CMD_END);
-            interprocess().publish<jaiabot::groups::edna>(edna_command);
         }
+
+        interprocess().publish<jaiabot::groups::edna>(edna_command);
     }
 
     if (command.has_bounds())

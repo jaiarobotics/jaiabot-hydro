@@ -129,9 +129,8 @@ message eDNA
         unit_system: "si"
     };
 
-    optional bool start_edna = 1 [default = false];
-    optional bool stop_edna = 2 [default = true];
-    optional eDNAState edna_state = 3 [default = EDNA_OFF];
+    optional bool edna_active = 1 [default = false];
+    optional eDNAState edna_state = 2 [default = EDNA_OFF];
 }
 
 message Engineering
