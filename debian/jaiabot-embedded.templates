@@ -112,7 +112,7 @@ Description: What type of imu installation does your system have?
 
 Template: jaiabot-embedded/motor_harness_info_type
 Type: select
-Choices: NONE, RPM_AND_THERMISTOR
-Default: NONE
+Choices: rpm_and_thermistor, none
+Default: none
 Description: What type of motor harness info does your bot provide?
 

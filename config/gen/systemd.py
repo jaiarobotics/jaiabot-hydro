@@ -59,7 +59,7 @@ parser.add_argument('--imu_install_type', choices=['embedded', 'retrofit', 'none
 parser.add_argument('--arduino_type', choices=['spi', 'usb', 'none'], help='If set, configure services for arduino type')
 parser.add_argument('--bot_type', choices=['hydro', 'echo', 'none'], help='If set, configure services for bot type')
 parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for data offload ignore type')
-parser.add_argument('--motor_harness_info_type', choices=['NONE', 'RPM_AND_THERMISTOR'], help='If set, configure services for motor harness info type')
+parser.add_argument('--motor_harness_info_type', choices=['rpm_and_thermistor, none'], help='If set, configure services for motor harness info type')
 
 args=parser.parse_args()
 
@@ -167,7 +167,7 @@ elif args.data_offload_ignore_type == 'taskpacket':
 
 jaia_motor_harness_info_type = DATA_OFFLOAD_IGNORE_TYPE.NONE
 
-if args.motor_harness_info_type == 'RPM_AND_THERMISTOR':
+if args.motor_harness_info_type == 'rpm_and_thermistor':
     jaia_motor_harness_info_type = MOTOR_HARNESS_INFO_TYPE.RPM_AND_THERMISTOR
 
 # make the output directories, if they don't exist
