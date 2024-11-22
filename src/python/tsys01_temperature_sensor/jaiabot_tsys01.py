@@ -11,7 +11,7 @@ parser.add_argument('-p', '--port', dest='port', help='Port to access temperatur
 args = parser.parse_args()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind(('', args.port))
+sock.bind(('', int(args.port)))
 buffer_size = 1024
 
 sensor = tsys01.TSYS01()
