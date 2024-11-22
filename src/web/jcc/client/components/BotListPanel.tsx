@@ -24,6 +24,7 @@ function faultLevel(health_state: HealthState) {
     );
 }
 
+// test 3
 export function BotListPanel(props: Props) {
     if (props.podStatus == null) return null;
 
