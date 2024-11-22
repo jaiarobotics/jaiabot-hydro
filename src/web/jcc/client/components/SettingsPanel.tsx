@@ -35,7 +35,7 @@ interface Props {
     taskPacketsTimeline: { [key: string]: string | boolean };
     isClusterModeOn: boolean;
     iseDNAOn: boolean;
-    toggleeDNA: (bot_id: number) => boolean;
+    toggleeDNA: (bot_id: number) => void;
     handleTaskPacketEditDatesToggle: () => void;
     handleTaskPacketsTimelineChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
     handleSubmitTaskPacketsTimeline: () => void;
@@ -192,37 +192,6 @@ export function SettingsPanel(props: Props) {
         botId = Number(Object.keys(bots)[0]);
     }
 
-    let botSelector = (
-        <div>
-            <label style={{ fontSize: "32px", marginRight: "25px", color: "#0bc9cd" }}>Bot</label>
-            <select
-                style={{ width: "50px", marginBottom: "10px", color: "#0bc9cd" }}
-                name="bot"
-                id="pid_gains_bot_selector"
-                defaultValue={botId}
-                onChange={() => props.selectBot(botId)}
-            >
-                {bots
-                    ? Object.keys(bots).map((botId) => (
-                          <option key={botId} value={botId}>
-                              {botId}
-                          </option>
-                      ))
-                    : ""}
-            </select>
-        </div>
-    );
-
-    const ednaActiveClass = props.iseDNAOn ? " edna-active" : " edna-inactive";
-    const ednaOnButton = (
-        <div className="panel">
-            {botSelector}
-            <Button className={"button-jcc engineering-panel-button" + ednaActiveClass}>
-                eDNA Pump
-            </Button>
-        </div>
-    );
-
     return (
         <div className="settings-outer-container">
             <div className="panel-heading">Settings</div>
@@ -357,7 +326,6 @@ export function SettingsPanel(props: Props) {
                         </AccordionSummary>
                         <AccordionDetails className="settings-accordion-inner-container">
                             <div id="engineeringPanel">
-                                {ednaOnButton}
                                 <div className="panel">
                                     <Button
                                         className="button-jcc engineering-panel-btn"
@@ -371,6 +339,7 @@ export function SettingsPanel(props: Props) {
                                     bots={props.bots}
                                     control={props.control}
                                     api={props.api}
+                                    toggleeDNA={props.toggleeDNA}
                                 />
 
                                 <QueryBotStatusPanel control={props.control} api={props.api} />

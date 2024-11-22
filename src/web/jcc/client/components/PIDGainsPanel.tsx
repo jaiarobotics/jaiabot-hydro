@@ -15,9 +15,11 @@ import {
     PIDSettings,
     eDNAState,
 } from "./shared/JAIAProtobuf";
+import JaiaToggle from "./JaiaToggle";
 import { JaiaAPI } from "../../common/JaiaAPI";
 import { getElementById } from "./shared/Utilities";
 import { PortalBotStatus } from "./shared/PortalStatus";
+import { TurnSlightRightSharp } from "@mui/icons-material";
 
 let pidTypes: (keyof PIDControl)[] = [
     "speed",
@@ -33,6 +35,7 @@ interface Props {
     api: JaiaAPI;
     bots: { [key: number]: PortalBotStatus };
     control: (onSuccess: () => void) => void;
+    toggleeDNA: (bot_id: number) => void;
 }
 
 interface State {
@@ -66,6 +69,29 @@ export class PIDGainsPanel extends React.Component {
         };
     }
 
+    ednaOnButton(engineering: Engineering) {
+        if (engineering) {
+            //console.log("After button: ", engineering);
+            const ednaActiveClass =
+                engineering.edna.edna_state === eDNAState.EDNA_ON
+                    ? " edna-active"
+                    : " edna-inactive";
+            return (
+                <div className="panel">
+                    <Button
+                        className={"button-jcc engineering-panel-button" + ednaActiveClass}
+                        onClick={this.toggleeDNA.bind(this)}
+                    >
+                        eDNA Pump
+                    </Button>
+                </div>
+            );
+        } else {
+            console.log("No engineering");
+            return <div></div>;
+        }
+    }
+
     render() {
         let botStatusRate = Object.keys(BotStatusRate);
         let bots = this.state.bots;
@@ -78,10 +104,6 @@ export class PIDGainsPanel extends React.Component {
         // If we haven't selected a bot yet, and there are bots available, then select the lowest indexed bot
         if (this.botId == null) {
             this.botId = Number(Object.keys(bots)[0]);
-        }
-
-        function toggleeDNA(bot_id: number) {
-            console.log(bot_id, bots[self.botId].engineering);
         }
 
         let self = this;
@@ -134,28 +156,6 @@ export class PIDGainsPanel extends React.Component {
             if (bot_status_rate != null || bot_status_rate != undefined) {
                 let splitRate = bot_status_rate.split("_");
                 showRate = splitRate[1] + "_" + splitRate[2];
-            }
-        }
-
-        function ednaOnButton(engineering: Engineering) {
-            if (engineering) {
-                //console.log("After button: ", engineering);
-                const ednaActiveClass =
-                    engineering.edna.edna_state === eDNAState.ENDA_ON
-                        ? " edna-active"
-                        : " edna-inactive";
-                return (
-                    <div className="panel">
-                        <Button
-                            className={"button-jcc engineering-panel-button" + ednaActiveClass}
-                            onClick={() => toggleeDNA(engineering.bot_id)}
-                        >
-                            eDNA Pump
-                        </Button>
-                    </div>
-                );
-            } else {
-                return <div></div>;
             }
         }
 
@@ -533,7 +533,14 @@ export class PIDGainsPanel extends React.Component {
         return (
             <div className="panel">
                 {botSelector}
-                {ednaOnButton(engineering)}
+                <JaiaToggle
+                    checked={() =>
+                        this.props.bots[this.botId].engineering?.edna?.edna_state ===
+                        eDNAState.EDNA_ON
+                    }
+                    onClick={this.toggleeDNA.bind(this)}
+                    label={"eDNA"}
+                />
                 <Button
                     className="button-jcc engineering-panel-btn"
                     type="button"
@@ -644,6 +651,47 @@ export class PIDGainsPanel extends React.Component {
         });
     }
 
+    toggleeDNA() {
+        this.props.control(() => {
+            let botId = getValueOfInput("pid_gains_bot_selector");
+            let new_engineering: Engineering;
+
+            console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering);
+            console.log(botId);
+
+            if (
+                this.props.bots[botId].engineering?.edna === undefined ||
+                this.props.bots[botId].engineering?.edna?.edna_state === undefined
+            ) {
+                new_engineering = {
+                    bot_id: botId,
+                    edna: {
+                        edna_state: eDNAState.EDNA_OFF,
+                    },
+                };
+            }
+
+            new_engineering =
+                this.props.bots[botId].engineering.edna.edna_state === eDNAState.EDNA_ON
+                    ? {
+                          bot_id: botId,
+                          edna: {
+                              edna_state: eDNAState.EDNA_OFF,
+                          },
+                      }
+                    : {
+                          bot_id: botId,
+                          edna: {
+                              edna_state: eDNAState.EDNA_ON,
+                          },
+                      };
+
+            this.props.bots[botId].engineering = new_engineering;
+            this.props.api.postEngineering(new_engineering);
+            console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering);
+        });
+    }
+
     submitBotRequirements() {
         this.props.control(() => {
             let botId = getValueOfInput("pid_gains_bot_selector");
@@ -673,6 +721,9 @@ export class PIDGainsPanel extends React.Component {
                 },
                 rf_disable_options: {
                     rf_disable_timeout_mins: getValueOfInput("rf_disable_timeout_mins_input"),
+                },
+                edna: {
+                    edna_state: eDNAState.EDNA_OFF,
                 },
             };
 

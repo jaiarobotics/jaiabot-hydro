@@ -2905,6 +2905,66 @@ export default class CommandControl extends React.Component {
      * @param {boolean} eDNAState New state the eDNA pump should adopt
      * @returns {void}
      */
+
+    toggleeDNA(bot_id: number) {
+        let neweDNA = cloneDeep(this.state.remoteControlValues);
+
+        neweDNA = {
+            bot_id: bot_id,
+            edna: {
+                edna_state:
+                    this.state.remoteControlValues.edna.edna_state === eDNAState.EDNA_OFF
+                        ? eDNAState.EDNA_ON
+                        : eDNAState.EDNA_OFF,
+            },
+        };
+
+        this.setState({ remoteControlValues: neweDNA });
+        this.api.postEngineering(neweDNA);
+        console.log(
+            "Bot: ",
+            this.state.remoteControlValues.bot_id,
+            "eDNA: ",
+            this.state.remoteControlValues.edna,
+        );
+    }
+
+    /**
+    toggleeDNA(bot_id: number) {
+        let current_edna_state = this.getPodStatus().bots[bot_id].edna_on;
+        let new_engineering: Engineering; 
+        let bots = this.getPodStatus().bots;
+        console.log(bots);
+
+        console.log("Bot: ", bot_id, "Status: ", current_edna_state);
+
+        if (current_edna_state === true) {
+            new_engineering = {
+                bot_id: bot_id,
+                edna: {
+                    edna_state: eDNAState.EDNA_OFF,
+                }
+            }
+
+            bots[bot_id].engineering = new_engineering;
+        } else {
+            new_engineering = {
+                bot_id: bot_id,
+                edna: {
+                    edna_state: eDNAState.ENDA_ON,
+                },
+            }
+
+            bots[bot_id].engineering = new_engineering;
+        }
+
+        console.log("Bot: ", bot_id, "eDNA: ", new_engineering.edna, "Status: ", bots[bot_id].edna_on);
+
+        console.log(bots);
+        
+        this.api.postEngineering(new_engineering);
+    }
+
     toggleeDNA(bot_id: number) {
         const bots = this.getPodStatus().bots;
         const bot = bots[bot_id];
@@ -2929,6 +2989,7 @@ export default class CommandControl extends React.Component {
         console.log("eDNA Turned on?: " + bots[bot_id].edna_on);
         console.log("Selected Bot: " + bots[bot_id].bot_id);
     }
+    */
     //
     // RC Mode (End)
     //

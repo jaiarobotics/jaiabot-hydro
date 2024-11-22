@@ -1185,7 +1185,7 @@ export interface Echo {
 
 export enum eDNAState {
     EDNA_OFF = 0,
-    ENDA_ON = 1,
+    EDNA_ON = 1,
 }
 
 export interface eDNA {
