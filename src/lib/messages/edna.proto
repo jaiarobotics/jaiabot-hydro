@@ -18,14 +18,14 @@ message eDNACommand
 
 enum eDNAState
 {
-    EDNA_START = 0;
-    EDNA_STOP = 1;
+    EDNA_OFF = 0;
+    EDNA_ON = 1;
     EDNA_RUNNING = 2;
 }
 
 message eDNAData
 {
-    optional eDNAState edna_state = 1 [default = EDNA_STOP];
+    optional eDNAState edna_state = 1 [default = EDNA_OFF];
 }
 
 message eDNAIssue

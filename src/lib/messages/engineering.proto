@@ -131,7 +131,7 @@ message eDNA
 
     optional bool start_edna = 1 [default = false];
     optional bool stop_edna = 2 [default = false];
-    optional eDNAState edna_state = 3 [default = EDNA_STOP];
+    optional eDNAState edna_state = 3 [default = EDNA_OFF];
 }
 
 message Engineering

@@ -13,6 +13,7 @@ import {
     PIDControl,
     RFDisableOptions,
     PIDSettings,
+    eDNAState,
 } from "./shared/JAIAProtobuf";
 import { JaiaAPI } from "../../common/JaiaAPI";
 import { getElementById } from "./shared/Utilities";
@@ -67,7 +68,6 @@ export class PIDGainsPanel extends React.Component {
 
     render() {
         let botStatusRate = Object.keys(BotStatusRate);
-
         let bots = this.state.bots;
 
         // No bots in list
@@ -78,6 +78,10 @@ export class PIDGainsPanel extends React.Component {
         // If we haven't selected a bot yet, and there are bots available, then select the lowest indexed bot
         if (this.botId == null) {
             this.botId = Number(Object.keys(bots)[0]);
+        }
+
+        function toggleeDNA(bot_id: number) {
+            console.log(bot_id, bots[self.botId].engineering);
         }
 
         let self = this;
@@ -109,6 +113,20 @@ export class PIDGainsPanel extends React.Component {
 
         //console.log(engineering);
 
+        if (engineering?.edna === undefined) {
+            engineering = {
+                ...engineering,
+                bot_id: self.botId,
+                edna: {
+                    edna_state: eDNAState.EDNA_OFF,
+                },
+            };
+
+            this.props.api.postEngineeringPanel(engineering);
+        }
+
+        //console.log(engineering);
+
         let bot_status_rate = engineering?.bot_status_rate ?? "BotStatusRate_1_Hz";
         let showRate = "N/A";
 
@@ -116,6 +134,28 @@ export class PIDGainsPanel extends React.Component {
             if (bot_status_rate != null || bot_status_rate != undefined) {
                 let splitRate = bot_status_rate.split("_");
                 showRate = splitRate[1] + "_" + splitRate[2];
+            }
+        }
+
+        function ednaOnButton(engineering: Engineering) {
+            if (engineering) {
+                //console.log("After button: ", engineering);
+                const ednaActiveClass =
+                    engineering.edna.edna_state === eDNAState.ENDA_ON
+                        ? " edna-active"
+                        : " edna-inactive";
+                return (
+                    <div className="panel">
+                        <Button
+                            className={"button-jcc engineering-panel-button" + ednaActiveClass}
+                            onClick={() => toggleeDNA(engineering.bot_id)}
+                        >
+                            eDNA Pump
+                        </Button>
+                    </div>
+                );
+            } else {
+                return <div></div>;
             }
         }
 
@@ -493,6 +533,7 @@ export class PIDGainsPanel extends React.Component {
         return (
             <div className="panel">
                 {botSelector}
+                {ednaOnButton(engineering)}
                 <Button
                     className="button-jcc engineering-panel-btn"
                     type="button"

@@ -217,10 +217,7 @@ export function SettingsPanel(props: Props) {
     const ednaOnButton = (
         <div className="panel">
             {botSelector}
-            <Button
-                className={"button-jcc engineering-panel-button" + ednaActiveClass}
-                onClick={() => props.toggleeDNA(bots[botId].bot_id)}
-            >
+            <Button className={"button-jcc engineering-panel-button" + ednaActiveClass}>
                 eDNA Pump
             </Button>
         </div>

@@ -413,7 +413,7 @@ export default class CommandControl extends React.Component {
                     timeout: 1,
                 },
                 edna: {
-                    edna_state: 0,
+                    edna_state: eDNAState.EDNA_OFF,
                 },
             },
             rcDives: {},
@@ -2885,6 +2885,20 @@ export default class CommandControl extends React.Component {
         this.setState({ rcDives: newRCDives });
     }
 
+    createeDNAField(bot_id: number) {
+        let engineering: Engineering = {
+            bot_id: bot_id,
+            query_engineering_status: true,
+            edna: {
+                edna_state: eDNAState.EDNA_OFF,
+            },
+        };
+
+        this.api.postEngineering(engineering);
+        console.log(engineering);
+        return engineering;
+    }
+
     /**
      * Used to flip the state of the eDNA pump. Used within the RCControllerPanel
      *
@@ -2892,21 +2906,26 @@ export default class CommandControl extends React.Component {
      * @returns {void}
      */
     toggleeDNA(bot_id: number) {
-        let neweDNA = cloneDeep(this.state.remoteControlValues);
-        neweDNA.bot_id = bot_id;
-
         const bots = this.getPodStatus().bots;
+        const bot = bots[bot_id];
+        let engineering: Engineering;
 
-        if (neweDNA.edna.edna_state === 0) {
-            neweDNA.edna.edna_state = 1;
+        if (bot.engineering === undefined || bot.engineering.edna === undefined) {
+            engineering = this.createeDNAField(bot_id);
+        }
+
+        let new_engineering = engineering;
+
+        if (engineering.edna.edna_state === 0 || engineering.edna === undefined) {
+            new_engineering.edna.edna_state = 1;
             bots[bot_id].edna_on = true;
         } else {
-            neweDNA.edna.edna_state = 0;
+            new_engineering.edna.edna_state = 0;
             bots[bot_id].edna_on = false;
         }
 
-        this.setState({ remoteControlValues: neweDNA });
-        this.api.postEngineering(neweDNA);
+        this.setState({ remoteControlValues: new_engineering });
+        this.api.postEngineering(new_engineering);
         console.log("eDNA Turned on?: " + bots[bot_id].edna_on);
         console.log("Selected Bot: " + bots[bot_id].bot_id);
     }
