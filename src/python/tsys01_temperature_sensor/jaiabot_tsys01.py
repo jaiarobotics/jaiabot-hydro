@@ -7,7 +7,7 @@ from time import sleep
 from jaiabot.messages.tsys01_pb2 import TSYS01Data
 
 parser = argparse.ArgumentParser(description='Read temperature from TSYS01 temperature sensor and publish it over UDP')
-parser.add_argument('-p', '--port', dest='port', default=20005, help='Port to access temperature readings from TSYS01')
+parser.add_argument('-p', '--port', dest='port', help='Port to access temperature readings from TSYS01')
 args = parser.parse_args()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

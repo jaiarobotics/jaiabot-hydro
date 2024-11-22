@@ -7,6 +7,7 @@ from string import Template
 import shutil
 import subprocess
 from typing import Dict
+import common.udp
 
 # defaults based on $PATH settings
 script_dir=os.path.dirname(os.path.realpath(__file__))
@@ -546,7 +547,7 @@ if jaia_temperature_sensor_type.value == 'tsys01':
         'description': 'JaiaBot TSYS01 Temperature Sensor Python Driver',
         'template': 'py-app.service.in',
         'subdir': 'tsys01_temperature_sensor',
-        'args': '',
+        'args': f'--port {common.udp.tsys01_py_udp_port()}',
         'error_on_fail': 'ERROR__FAILED__PYTHON_JAIABOT_TSYS01_TEMPERATURE_SENSOR_DRIVER',
         'runs_on': Type.BOT,
         'runs_when': Mode.RUNTIME,
