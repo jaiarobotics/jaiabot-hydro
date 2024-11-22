@@ -97,7 +97,9 @@ job-template-amd64: &job-template-amd64
         command: mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug -Denable_testing=ON .. && cmake --build . -- -j4
     - run: &run-tests
         name: Run tests
-        command: cd build && ctest --output-on-failure
+        command: |
+          cd build && ctest --output-on-failure
+          cd intermediate/web && npm test
 
 job-template-deb-amd64: &job-template-deb-amd64
   <<: *job-template-amd64
@@ -186,6 +188,7 @@ filter-template-debian-builds: &filter-template-debian-builds
     branches:
       only:
         - "1.y"
+        - "sea-trials-november-2024"
 
 # which branches to run the normal source build
 filter-template-normal-builds: &filter-template-normal-builds

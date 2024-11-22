@@ -1,8 +1,7 @@
 import React from "react";
 import Map from "ol/Map";
-import turf from "@turf/turf";
 import { Feature as GjFeature, LineString as GjLineString } from "geojson";
-import JaiaToggle from "./JaiaToggle";
+import JaiaToggle from "./JaiaToggle/JaiaToggle";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import {
     BotStatus,

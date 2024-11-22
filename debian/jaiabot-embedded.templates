@@ -115,3 +115,10 @@ Type: select
 Choices: bar30, tsys01, none
 Default: bar30
 Description: What temperature sensor do you want to use?
+
+Template: jaiabot-embedded/motor_harness_type
+Type: select
+Choices: rpm_and_thermistor, none
+Default: none
+Description: What type of motor harness does your bot have?
+
