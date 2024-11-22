@@ -40,7 +40,7 @@ jaiabot::apps::MotorStatusThread::MotorStatusThread(
     const jaiabot::config::MotorStatusConfig& cfg)
     : HealthMonitorThread(cfg, "motor_status", 5.0 * boost::units::si::hertz)
 {
-    status_.set_motor_harness_info_type(cfg.motor_harness_info_type());
+    status_.set_motor_harness_type(cfg.motor_harness_type());
 
     interthread().subscribe<jaiabot::groups::motor_udp_in>([this](const goby::middleware::protobuf::IOData& data) {
         jaiabot::protobuf::Motor motor;
@@ -78,12 +78,12 @@ jaiabot::apps::MotorStatusThread::MotorStatusThread(
             {
                 if (arduino_response.motor() > 1500)
                 {
-                    // motor is positive 
+                    // motor is spinning in forward direction
                     status_.set_rpm(std::abs(rpm_value_));
                 }
                 else if (arduino_response.motor() < 1500)
                 {
-                    // motor is negative
+                    // motor is spinning in reverse direction
                     status_.set_rpm(-std::abs(rpm_value_));
                 }
                 else
@@ -105,8 +105,8 @@ void jaiabot::apps::MotorStatusThread::issue_status_summary()
 
 void jaiabot::apps::MotorStatusThread::send_rpm_query()
 {
-    glog.is_debug2() && glog << group(thread_name()) << "Senging RPM Query: " << std::endl;
-    // Just send an empty packet to provide the python driver with a return address
+    glog.is_debug2() && glog << group(thread_name()) << "Sending RPM Query: " << std::endl;
+    // send an empty packet to provide the python driver with a return address
     auto io_data = std::make_shared<goby::middleware::protobuf::IOData>();
     io_data->set_data("hello\n");
     interthread().publish<jaiabot::groups::motor_udp_out>(io_data);
@@ -119,7 +119,7 @@ void jaiabot::apps::MotorStatusThread::health(goby::middleware::protobuf::Thread
     if (last_motor_rpm_report_time_ + std::chrono::seconds(cfg().motor_rpm_report_timeout_seconds()) <
         goby::time::SteadyClock::now())
     {
-        glog.is_warn() && glog << "Timeout on rpm driver" << std::endl;
+        glog.is_warn() && glog << "Timeout on RPM listener" << std::endl;
         health_state = goby::middleware::protobuf::HEALTH__DEGRADED;
         health.MutableExtension(jaiabot::protobuf::jaiabot_thread)
             ->add_warning(protobuf::WARNING__NOT_RESPONDING__JAIABOT_RPM_DRIVER);

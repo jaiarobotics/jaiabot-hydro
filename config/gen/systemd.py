@@ -59,7 +59,7 @@ parser.add_argument('--imu_install_type', choices=['embedded', 'retrofit', 'none
 parser.add_argument('--arduino_type', choices=['spi', 'usb', 'none'], help='If set, configure services for arduino type')
 parser.add_argument('--bot_type', choices=['hydro', 'echo', 'none'], help='If set, configure services for bot type')
 parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for data offload ignore type')
-parser.add_argument('--motor_harness_info_type', choices=['rpm_and_thermistor, none'], help='If set, configure services for motor harness info type')
+parser.add_argument('--motor_harness_type', choices=['rpm_and_thermistor, none'], help='If set, configure services for motor harness type')
 
 args=parser.parse_args()
 
@@ -103,9 +103,9 @@ class DATA_OFFLOAD_IGNORE_TYPE(Enum):
     TASKPACKET = 'TASKPACKET'
     NONE = 'NONE'
 
-class MOTOR_HARNESS_INFO_TYPE(Enum):
-    NONE = 'NONE'
+class MOTOR_HARNESS_TYPE(Enum):
     RPM_AND_THERMISTOR = 'RPM_AND_THERMISTOR'
+    NONE = 'NONE'
 
 # Set the arduino type based on the argument
 # Used to set the serial port device
@@ -165,10 +165,10 @@ if args.data_offload_ignore_type == 'goby':
 elif args.data_offload_ignore_type == 'taskpacket':
     jaia_data_offload_ignore_type = DATA_OFFLOAD_IGNORE_TYPE.TASKPACKET
 
-jaia_motor_harness_info_type = DATA_OFFLOAD_IGNORE_TYPE.NONE
+jaia_motor_harness_type = DATA_OFFLOAD_IGNORE_TYPE.NONE
 
-if args.motor_harness_info_type == 'rpm_and_thermistor':
-    jaia_motor_harness_info_type = MOTOR_HARNESS_INFO_TYPE.RPM_AND_THERMISTOR
+if args.motor_harness_type == 'rpm_and_thermistor':
+    jaia_motor_harness_type = MOTOR_HARNESS_TYPE.RPM_AND_THERMISTOR
 
 # make the output directories, if they don't exist
 os.makedirs(os.path.dirname(args.env_file), exist_ok=True)
@@ -218,7 +218,7 @@ subprocess.run('bash -ic "' +
                'export jaia_arduino_type=' + str(jaia_arduino_type.value) + '; ' +
                'export jaia_bot_type=' + str(jaia_bot_type.value) + '; ' +
                'export jaia_data_offload_ignore_type=' + str(jaia_data_offload_ignore_type.value) + '; ' +
-               'export jaia_motor_harness_info_type=' + str(jaia_motor_harness_info_type.value) + '; ' +
+               'export jaia_motor_harness_type=' + str(jaia_motor_harness_type.value) + '; ' +
                'source ' + args.gen_dir + '/../preseed.goby; env | egrep \'^jaia|^LD_LIBRARY_PATH\' > /tmp/runtime.env; cp --backup=numbered /tmp/runtime.env ' + args.env_file + '; rm /tmp/runtime.env"',
                check=True, shell=True)
 
@@ -531,12 +531,12 @@ if jaia_bot_type.value == 'echo':
     ] 
     jaiabot_apps.extend(jaiabot_apps_echo)
 
-if jaia_motor_harness_info_type.value == 'RPM_AND_THERMISTOR':
-    jaiabot_apps_motor_harness_info_type = [
+if jaia_motor_harness_type.value == 'RPM_AND_THERMISTOR':
+    jaiabot_apps_motor_harness_type = [
         {'exe': 'rpm.py',
         'description': 'JaiaBot Motor Python Driver',
         'template': 'py-app.service.in',
-        'user': 'root', # must run as root to allow interaction with GPIO Pin
+        'user': 'root', # must run as root to allow interaction with GPIO pin
         'group': 'root',
         'subdir': 'motor',
         'args': '',
@@ -546,7 +546,7 @@ if jaia_motor_harness_info_type.value == 'RPM_AND_THERMISTOR':
         'wanted_by': 'jaiabot_health.service',
         'restart': 'on-failure'}
     ] 
-    jaiabot_apps.extend(jaiabot_apps_motor_harness_info_type)
+    jaiabot_apps.extend(jaiabot_apps_motor_harness_type)
 
 jaia_firmware = [
     {'exe': 'hub-button-led-poweroff.py',

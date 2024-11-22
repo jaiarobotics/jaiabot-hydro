@@ -284,7 +284,7 @@ enum Warning
     WARNING__SYSTEM__DATA_DISK_SPACE_LOW = 506
         [(jaia.ev).rest_api.presence = GUARANTEED];
 
-    // From Motor Status Thread
+    // from Motor Status Thread
     WARNING__NOT_RESPONDING__JAIABOT_RPM_DRIVER = 600
         [(jaia.ev).rest_api.presence = GUARANTEED];
     WARNING__NOT_RESPONDING__JAIABOT_ARDUINO_MOTOR_TEMP = 601

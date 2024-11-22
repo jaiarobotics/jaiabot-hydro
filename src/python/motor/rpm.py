@@ -12,6 +12,12 @@ args = parser.parse_args()
 import RPi.GPIO as GPIO
 import time
 
+# RPM Calculation Overview:
+# The motor has 4 quadrants to complete one revolution.
+# One quadrant is equal to this pattern: High -> Low -> High.
+# In one revolution there is 12 state changes.
+# We calculate the RPM at 5Hz.
+
 RPM_PIN = 27
 REVOLUTION_CONSTANT = 4.0
 
@@ -29,8 +35,6 @@ def calculate_rpm():
         global rpm
         state_change_count = 0
         start_interval = time.time()
-        current_state = "HIGH"
-        prev_state = "HIGH"
 
         while True:
             now = time.time()
@@ -55,11 +59,9 @@ def query_rpm():
         motor_data.rpm = rpm
         try:
             data, addr = sock.recvfrom(buffer_size)
-            #print("Sending motor data")
             sock.sendto(motor_data.SerializeToString(), addr)
         except Exception as e:
             print(e)
-
 
 def main():
     port_thread = Thread(target=query_rpm, name="port_thread", daemon=True)

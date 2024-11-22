@@ -80,7 +80,7 @@ message MotorStatusConfig
 
     optional int32 motor_rpm_report_timeout_seconds = 10 [default = 40];
     optional int32 motor_thermistor_report_timeout_seconds = 11 [default = 40];
-    optional jaiabot.protobuf.MotorHarnessInfoType motor_harness_info_type = 12 [default = NONE];
+    optional jaiabot.protobuf.MotorHarnessType motor_harness_type = 12 [default = NONE];
 }
 
 message Health

@@ -50,7 +50,7 @@ if [ ! -z "$jaiabot_systemd_type" ]; then
     if [[ "$jaiabot_systemd_type" == *"bot"* ]]; then
 
         cd ${HOME}/jaiabot/config/gen
-        ./systemd-local.sh ${jaiabot_systemd_type} --bot_index $jaia_bot_index --fleet_index $jaia_fleet_index --electronics_stack $jaia_electronics_stack --imu_type $jaia_imu_type --imu_install_type $jaia_imu_install_type --arduino_type $jaia_arduino_type --bot_type ${jaia_bot_type,,} $jaia_simulation --enable --motor_harness_info_type $jaia_motor_harness_info_type
+        ./systemd-local.sh ${jaiabot_systemd_type} --bot_index $jaia_bot_index --fleet_index $jaia_fleet_index --electronics_stack $jaia_electronics_stack --imu_type $jaia_imu_type --imu_install_type $jaia_imu_install_type --arduino_type $jaia_arduino_type --bot_type ${jaia_bot_type,,} $jaia_simulation --enable --motor_harness_type ${jaia_motor_harness_type,,}
 
     else
 

@@ -31,5 +31,5 @@ linux_hw {
 }
 
 motor {
-    motor_harness_info_type: $motor_harness_info_type
+    motor_harness_type: $motor_harness_type
 }
