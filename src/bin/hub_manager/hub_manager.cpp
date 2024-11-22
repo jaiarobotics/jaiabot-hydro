@@ -827,6 +827,7 @@ void jaiabot::apps::HubManager::handle_command(const jaiabot::protobuf::Command&
                                      << ", Total goal size: " << command.plan().goal_size()
                                      << ", Goal index: " << goal_index << std::endl;
 
+            // test 1
             // Loop through goals and add to fragment
             for (; goal_index < command.plan().goal_size(); goal_index++)
             {
