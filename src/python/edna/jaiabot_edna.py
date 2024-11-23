@@ -43,22 +43,25 @@ def do_port_loop(edna: eDNA):
             command = eDNACommand()
             command.ParseFromString(data)
             log.warning(f'Received command:\n{command}')
-        
+            
+            # Define acknowledgment messaege
+            data = eDNAData()
+
             # Execute the command    
             if command.type == eDNACommand.CMD_START:
                 # Turn pump on for CMD_START
                 log.warning("Start eDNA")
                 edna.start_edna()
+                data.edna_state = 1
             elif command.type == eDNACommand.CMD_END:
                 # Turn pump on for CMD_END
                 log.warning("End eDNA")
                 edna.stop_edna()
+                data.edna_state = 0
             else: 
                 # Handle CMD_STATUS case
                 pass
 
-            data = eDNAData()
-            data.edna_state = 2
             sock.sendto(data.SerializeToString(), addr)
 
         except Exception as e:

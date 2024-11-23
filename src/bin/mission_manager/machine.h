@@ -569,7 +569,7 @@ struct MissionManagerStateMachine
     std::string data_time_string_{""};
     int32_t hub_id_{0};
     std::string data_offload_exclude_{""};
-    bool edna_active_{false};
+    bool edna_active_;
 };
 
 struct PreDeployment

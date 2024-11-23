@@ -69,31 +69,9 @@ export class PIDGainsPanel extends React.Component {
         };
     }
 
-    ednaOnButton(engineering: Engineering) {
-        if (engineering) {
-            //console.log("After button: ", engineering);
-            const ednaActiveClass =
-                engineering.edna.edna_state === eDNAState.EDNA_ON
-                    ? " edna-active"
-                    : " edna-inactive";
-            return (
-                <div className="panel">
-                    <Button
-                        className={"button-jcc engineering-panel-button" + ednaActiveClass}
-                        onClick={this.toggleeDNA.bind(this)}
-                    >
-                        eDNA Pump
-                    </Button>
-                </div>
-            );
-        } else {
-            console.log("No engineering");
-            return <div></div>;
-        }
-    }
-
     render() {
         let botStatusRate = Object.keys(BotStatusRate);
+        let ednaStateOptions = Object.keys([true, false]);
         let bots = this.state.bots;
 
         // No bots in list
@@ -133,34 +111,7 @@ export class PIDGainsPanel extends React.Component {
 
         let engineering = bots[self.botId]?.engineering;
 
-        //console.log(engineering);
-        /**
-        if (engineering?.edna === undefined) {
-            let engineeringCommand: Engineering = {
-                bot_id: this.botId,
-                query_engineering_status: true,
-                edna: {
-                    start_edna: false,
-                    stop_edna: true,
-                    edna_state: eDNAState.EDNA_OFF,
-                }
-            };
-
-            engineering = {
-                ...engineering,
-                edna: {
-                    start_edna: false,
-                    stop_edna: true,
-                    edna_state: eDNAState.EDNA_OFF,
-                }
-            }
-
-            console.log("Engineering: ", engineering);
-            //this.props.api.postEngineering(engineeringCommand);
-        }
-        */
-
-        //console.log(engineering);
+        console.log(engineering?.edna?.edna_active);
 
         let bot_status_rate = engineering?.bot_status_rate ?? "BotStatusRate_1_Hz";
         let showRate = "N/A";
@@ -547,9 +498,7 @@ export class PIDGainsPanel extends React.Component {
             <div className="panel">
                 {botSelector}
                 <JaiaToggle
-                    checked={() =>
-                        this.props.bots[this.botId].engineering?.edna?.edna_active === true
-                    }
+                    checked={() => engineering?.edna?.edna_active ?? false}
                     onClick={this.toggleeDNA.bind(this)}
                     label={"eDNA"}
                 />
@@ -665,47 +614,20 @@ export class PIDGainsPanel extends React.Component {
 
     toggleeDNA() {
         this.props.control(() => {
+            this.queryEngineeringStatus();
+
             let botId = getValueOfInput("pid_gains_bot_selector");
-            let engineeringCommand: Engineering;
-            let new_pod_status = this.props.bots;
+            let engineering = this.props.bots[botId].engineering;
 
-            console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering.edna);
-            console.log(botId);
+            let engineeringCommand: Engineering = {
+                bot_id: botId,
+                query_engineering_status: true,
+                edna: {
+                    edna_active: !engineering.edna.edna_active,
+                },
+            };
 
-            if (
-                this.props.bots[botId].engineering?.edna === undefined ||
-                this.props.bots[botId].engineering?.edna?.edna_state === undefined
-            ) {
-                engineeringCommand = {
-                    bot_id: botId,
-                    edna: {
-                        edna_active: true,
-                    },
-                };
-                new_pod_status[botId].edna_on = false;
-            }
-
-            if (this.props.bots[botId].engineering.edna?.edna_active === true) {
-                engineeringCommand = {
-                    bot_id: botId,
-                    edna: {
-                        edna_active: false,
-                    },
-                };
-            } else {
-                engineeringCommand = {
-                    bot_id: botId,
-                    edna: {
-                        edna_active: true,
-                    },
-                };
-            }
-
-            new_pod_status[botId].edna_on = engineeringCommand.edna.edna_active;
-
-            //this.props.toggleeDNA(botId, new_engineering.edna.start_edna);
-
-            //this.props.bots[botId].engineering = new_engineering;
+            debug(JSON.stringify(engineeringCommand));
 
             this.props.api.postEngineeringPanel(engineeringCommand).then((response) => {
                 if (response.message) {
@@ -716,7 +638,6 @@ export class PIDGainsPanel extends React.Component {
                     success("eDNA Pump Deactivated");
                 }
             });
-            console.log("Bot: ", botId, "eDNA: ", this.props.bots[botId].engineering.edna);
         });
     }
 
@@ -749,9 +670,6 @@ export class PIDGainsPanel extends React.Component {
                 },
                 rf_disable_options: {
                     rf_disable_timeout_mins: getValueOfInput("rf_disable_timeout_mins_input"),
-                },
-                edna: {
-                    edna_active: true,
                 },
             };
 

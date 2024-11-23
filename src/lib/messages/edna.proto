@@ -20,7 +20,6 @@ enum eDNAState
 {
     EDNA_OFF = 0;
     EDNA_ON = 1;
-    EDNA_RUNNING = 2;
 }
 
 message eDNAData

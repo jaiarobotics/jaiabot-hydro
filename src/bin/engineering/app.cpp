@@ -110,7 +110,7 @@ jaiabot::apps::JaiabotEngineering::JaiabotEngineering() : ApplicationBase(0.5 * 
                 }
             });
 
-        // Subscribe to the eDNA driver so that its RC control works
+        // Subscribe to the eDNA driver
         interprocess().subscribe<jaiabot::groups::engineering_status>(
             [this](const jaiabot::protobuf::eDNAData& edna_data)
             {
@@ -215,6 +215,15 @@ jaiabot::apps::JaiabotEngineering::JaiabotEngineering() : ApplicationBase(0.5 * 
                     {
                         latest_engineering.mutable_bottom_depth_safety_params()->set_safety_depth(
                             engineering_status.bottom_depth_safety_params().safety_depth());
+                    }
+                }
+
+                if (engineering_status.has_edna())
+                {
+                    if (engineering_status.edna().has_edna_active())
+                    {
+                        latest_engineering.mutable_edna()->set_edna_active(
+                            engineering_status.edna().edna_active());
                     }
                 }
             });

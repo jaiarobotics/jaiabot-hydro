@@ -129,7 +129,7 @@ message eDNA
         unit_system: "si"
     };
 
-    optional bool edna_active = 1 [default = false];
+    optional bool edna_active = 1;
     optional eDNAState edna_state = 2 [default = EDNA_OFF];
 }
 
