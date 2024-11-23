@@ -614,14 +614,11 @@ export class PIDGainsPanel extends React.Component {
 
     toggleeDNA() {
         this.props.control(() => {
-            this.queryEngineeringStatus();
-
             let botId = getValueOfInput("pid_gains_bot_selector");
             let engineering = this.props.bots[botId].engineering;
 
             let engineeringCommand: Engineering = {
                 bot_id: botId,
-                query_engineering_status: true,
                 edna: {
                     edna_active: !engineering.edna.edna_active,
                 },
