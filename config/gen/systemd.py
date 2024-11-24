@@ -60,7 +60,7 @@ parser.add_argument('--arduino_type', choices=['spi', 'usb', 'none'], help='If s
 parser.add_argument('--bot_type', choices=['hydro', 'echo', 'none'], help='If set, configure services for bot type')
 parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for arduino type')
 parser.add_argument('--temperature_sensor_type', choices=['bar30', 'tsys01', 'none'], help='If set, configure services for temperature sensor')
-parser.add_argument('--motor_harness_type', choices=['rpm_and_thermistor, none'], help='If set, configure services for motor harness type')
+parser.add_argument('--motor_harness_type', choices=['rpm_and_thermistor', 'none'], help='If set, configure services for motor harness type')
 
 args=parser.parse_args()
 
@@ -178,7 +178,7 @@ elif args.temperature_sensor_type == 'tsys01':
 else:
     jaia_temperature_sensor_type = TEMPERATURE_SENSOR_TYPE.NONE
 
-jaia_motor_harness_type = DATA_OFFLOAD_IGNORE_TYPE.NONE
+jaia_motor_harness_type = MOTOR_HARNESS_TYPE.NONE
 
 if args.motor_harness_type == 'rpm_and_thermistor':
     jaia_motor_harness_type = MOTOR_HARNESS_TYPE.RPM_AND_THERMISTOR
