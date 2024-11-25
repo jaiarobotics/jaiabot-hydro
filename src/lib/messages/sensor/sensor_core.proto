@@ -18,17 +18,13 @@ message SensorRequest
         (dccl.field) = { units { prefix: "micro" derived_dimensions: "time" } }
     ];
 
-    enum RequestType
-    {
-        REQUEST_SENSORS_METADATA = 1;
-        CONFIGURE_SENSOR = 2;
-    }
-
-    required RequestType type = 10;
-
     oneof request_data
     {
-        Configuration cfg = 11;
+        bool request_metadata = 11;
+        Configuration cfg = 12;
+
+        // change name to VendorSensor format
+        //  EchoCommand echo_command = 13;
     }
 }
 
@@ -47,5 +43,8 @@ message SensorData
         Metadata metadata = 11;
         AtlasScientificEZOEC ezo_ec = 12;
         BlueRoboticsBar30 bar30 = 13;
+
+        // change name to VendorSensor format
+        // EchoData echo_data = 14;
     }
 }

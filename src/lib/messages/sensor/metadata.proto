@@ -10,10 +10,9 @@ message Metadata
     option (dccl.msg) = {
         unit_system: "si"
     };
-    
-    required int32 id = 1;
-    required Sensor sensor = 2;
-    required int32 sensor_version = 3;
+
+    required Sensor sensor = 1;
+    required int32 sensor_version = 2;
 
     message Calibration
     {
@@ -31,8 +30,8 @@ message Metadata
         }
         repeated Cal value = 3;
     }
-    required Calibration calibration = 4;
-    required uint64 time_purchased = 5 [
+    required Calibration calibration = 3;
+    required uint64 time_purchased = 4 [
         (dccl.field) = { units { prefix: "micro" derived_dimensions: "time" } }
     ];
 
@@ -42,5 +41,5 @@ message Metadata
         required string value = 2;
     }
 
-    repeated MetadataValue metadata = 6;
+    repeated MetadataValue metadata = 5;
 }
