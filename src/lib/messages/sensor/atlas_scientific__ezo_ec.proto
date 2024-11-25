@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package jaiabot.sensor.protobuf;
+
+message AtlasScientificEZOEC
+{
+    optional double ec = 1; // uS/cm
+    optional double tds = 2; // ppm
+    optional double sal = 3; // PSS
+    optional double sg = 4; // ratio
+}

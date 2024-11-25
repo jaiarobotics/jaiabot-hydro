@@ -25,8 +25,14 @@ protobuf_generate_cpp_full(PROTO_SRCS PROTO_HDRS "jaiabot/messages" ${project_IN
   echo.proto
   rest_api.proto
   option_extensions.proto
-  sensors/pressure_temperature.proto
-  sensors/salinity.proto
+  sensor/pressure_temperature.proto
+  sensor/salinity.proto
+  sensor/sensor_core.proto
+  sensor/configuration.proto
+  sensor/metadata.proto
+  sensor/catalog.proto
+  sensor/atlas_scientific__ezo_ec.proto
+  sensor/blue_robotics__bar30.proto
  )
 
 add_library(jaiabot_messages SHARED ${PROTO_SRCS} ${PROTO_HDRS})
@@ -37,7 +43,7 @@ project_install_lib(jaiabot_messages)
 protobuf_generate_nanopb_c_full(PROTO_C_SRCS PROTO_C_HDRS "jaiabot/messages" ${project_INC_DIR}
   arduino.proto
   feather.proto
-  sensors/example.proto
+  sensor/example.proto
   )
 
 add_library(jaiabot_messages_c SHARED ${PROTO_C_SRCS} ${PROTO_C_HDRS})

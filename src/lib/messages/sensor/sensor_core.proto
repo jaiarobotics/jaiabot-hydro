@@ -1,0 +1,51 @@
+syntax = "proto2";
+
+import "dccl/option_extensions.proto";
+import "jaiabot/messages/sensor/metadata.proto";
+import "jaiabot/messages/sensor/configuration.proto";
+import "jaiabot/messages/sensor/atlas_scientific__ezo_ec.proto";
+import "jaiabot/messages/sensor/blue_robotics__bar30.proto";
+
+package jaiabot.sensor.protobuf;
+
+message SensorRequest
+{
+    option (dccl.msg) = {
+        unit_system: "si"
+    };
+
+    required uint64 time = 1 [
+        (dccl.field) = { units { prefix: "micro" derived_dimensions: "time" } }
+    ];
+
+    enum RequestType
+    {
+        REQUEST_SENSORS_METADATA = 1;
+        CONFIGURE_SENSOR = 2;
+    }
+
+    required RequestType type = 10;
+
+    oneof request_data
+    {
+        Configuration cfg = 11;
+    }
+}
+
+message SensorData
+{
+    option (dccl.msg) = {
+        unit_system: "si"
+    };
+
+    required uint64 time = 1 [
+        (dccl.field) = { units { prefix: "micro" derived_dimensions: "time" } }
+    ];
+
+    oneof data
+    {
+        Metadata metadata = 11;
+        AtlasScientificEZOEC ezo_ec = 12;
+        BlueRoboticsBar30 bar30 = 13;
+    }
+}
