@@ -124,7 +124,7 @@ void jaiabot::apps::MotorStatusThread::health(goby::middleware::protobuf::Thread
         glog.is_warn() && glog << "Timeout on RPM listener" << std::endl;
         health_state = goby::middleware::protobuf::HEALTH__DEGRADED;
         health.MutableExtension(jaiabot::protobuf::jaiabot_thread)
-            ->add_warning(protobuf::WARNING__NOT_RESPONDING__JAIABOT_RPM_DRIVER);
+            ->add_warning(protobuf::WARNING__NOT_RESPONDING__JAIABOT_RPM_LISTENER);
     }
 
     if (last_motor_thermistor_report_time_ +
