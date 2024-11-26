@@ -162,16 +162,16 @@ function(PROTOBUF_GENERATE_NANOPB_C_FULL SRCS HDRS ADD_REL_DIR  C_OUT_DIR)
     get_filename_component(FIL_DIR ${REL_FIL} DIRECTORY BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})     
 
     set(FULL_OUT_DIR "${C_OUT_DIR}")
+    set(FULL_OUT_DIR "${FULL_OUT_DIR}/nanopb")
     if(ADD_REL_DIR)
       set(FULL_OUT_DIR "${FULL_OUT_DIR}/${ADD_REL_DIR}")
     endif()
-    set(FULL_OUT_DIR "${FULL_OUT_DIR}/nanopb")
     if(FIL_DIR)
       set(FULL_OUT_DIR "${FULL_OUT_DIR}/${FIL_DIR}")
     endif()
 
     set(NANOPB_FULL_OUT_DIR "${FULL_OUT_DIR}")
-
+    
     list(APPEND ${SRCS} "${NANOPB_FULL_OUT_DIR}/${FIL_WE}.pb.c")
     list(APPEND ${HDRS} "${NANOPB_FULL_OUT_DIR}/${FIL_WE}.pb.h")   
 
@@ -179,14 +179,17 @@ function(PROTOBUF_GENERATE_NANOPB_C_FULL SRCS HDRS ADD_REL_DIR  C_OUT_DIR)
     # files correctly for later inclusion into other protos (Protobuf is picky about this)
     set(NANOPB_FIL_DEST ${NANOPB_FULL_OUT_DIR}/${FIL_WE}.proto)
 
-    message("${NANOPB_FULL_OUT_DIR}/${FIL_WE}.options")
+    set(NANOPB_FIL_OPTIONS "")
+    if(EXISTS "${NANOPB_FULL_OUT_DIR}/${FIL_WE}.options")
+      set(NANOPB_FIL_OPTIONS ${NANOPB_FULL_OUT_DIR}/${FIL_WE}.options)
+    endif()
     
     add_custom_command(
       OUTPUT "${NANOPB_FULL_OUT_DIR}/${FIL_WE}.pb.c"
              "${NANOPB_FULL_OUT_DIR}/${FIL_WE}.pb.h"
       COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
       ARGS ${ALL_PROTOBUF_INCLUDE_DIRS} -I${NANOPB_FULL_OUT_DIR} --nanopb_out=-I${C_OUT_DIR}:${C_OUT_DIR} ${NANOPB_FIL_DEST} 
-      DEPENDS ${NANOPB_FIL_DEST} ${NANOPB_FULL_OUT_DIR}/${FIL_WE}.options
+      DEPENDS ${NANOPB_FIL_DEST} ${NANOPB_FIL_OPTIONS}
       COMMENT "Running C nanopb protocol buffer compiler on ${FIL}"
       VERBATIM )
     

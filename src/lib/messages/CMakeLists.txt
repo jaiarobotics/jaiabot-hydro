@@ -1,3 +1,14 @@
+set(SENSOR_MESSAGES
+  sensor/pressure_temperature.proto
+  sensor/salinity.proto
+  sensor/sensor_core.proto
+  sensor/configuration.proto
+  sensor/metadata.proto
+  sensor/catalog.proto
+  sensor/atlas_scientific__ezo_ec.proto
+  sensor/blue_robotics__bar30.proto
+)
+
 protobuf_generate_cpp_full(PROTO_SRCS PROTO_HDRS "jaiabot/messages" ${project_INC_DIR}
   example.proto
   geographic_coordinate.proto
@@ -25,14 +36,7 @@ protobuf_generate_cpp_full(PROTO_SRCS PROTO_HDRS "jaiabot/messages" ${project_IN
   echo.proto
   rest_api.proto
   option_extensions.proto
-  sensor/pressure_temperature.proto
-  sensor/salinity.proto
-  sensor/sensor_core.proto
-  sensor/configuration.proto
-  sensor/metadata.proto
-  sensor/catalog.proto
-  sensor/atlas_scientific__ezo_ec.proto
-  sensor/blue_robotics__bar30.proto
+  ${SENSOR_MESSAGES}
  )
 
 add_library(jaiabot_messages SHARED ${PROTO_SRCS} ${PROTO_HDRS})
@@ -40,14 +44,27 @@ target_link_libraries(jaiabot_messages ${PROTOBUF_LIBRARIES} goby)
 
 project_install_lib(jaiabot_messages)
 
+# we need to generate a nanopb version of these external messages
+configure_file(${DCCL_INCLUDE_DIR}/dccl/option_extensions.proto ${project_INC_DIR}/nanopb/dccl/option_extensions.proto COPYONLY)
+protobuf_generate_nanopb_c_full(EXT_PROTO_C_SRCS EXT_PROTO_C_HDRS "dccl" ${project_INC_DIR}
+  option_extensions.proto
+  )
+
 protobuf_generate_nanopb_c_full(PROTO_C_SRCS PROTO_C_HDRS "jaiabot/messages" ${project_INC_DIR}
   arduino.proto
   feather.proto
-  sensor/example.proto
+  ${SENSOR_MESSAGES}
   )
 
-add_library(jaiabot_messages_c SHARED ${PROTO_C_SRCS} ${PROTO_C_HDRS})
+add_library(jaiabot_messages_c SHARED ${EXT_PROTO_C_SRCS} ${EXT_PROTO_C_HDRS} ${PROTO_C_SRCS} ${PROTO_C_HDRS})
 target_link_libraries(jaiabot_messages_c nanopb::protobuf-nanopb-static)
+
+# make sure we don't accidentally include C++ headers for generated protobufs by clearing and re-adding only desired include directories in the correct order (so nanopb generated headers come before others)
+set_target_properties(jaiabot_messages_c PROPERTIES INCLUDE_DIRECTORIES "")
+target_include_directories(jaiabot_messages_c
+    PRIVATE ${project_INC_DIR}/nanopb
+    PRIVATE ${project_INC_DIR}
+)
 
 project_install_lib(jaiabot_messages_c)
 
