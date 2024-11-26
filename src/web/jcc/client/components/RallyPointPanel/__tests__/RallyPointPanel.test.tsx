@@ -26,6 +26,7 @@ type TestParams = {
 
 const testCases: TestParams[] = [
     {
+        // getByTestId should be used as last resort
         description: "Test Go To Button using test-id",
         getMethod: () => screen.getByTestId("go-to-rally-point-id"),
         callBackMethod: mockGoToRallyPoint,
@@ -41,6 +42,7 @@ const testCases: TestParams[] = [
         callBackMethod: mockGoToRallyPoint,
     },
     {
+        // getByTestId should be used as last resort
         description: "Test Delete Button using test-id",
         getMethod: () => screen.getByTestId("delete-rally-point-id"),
         callBackMethod: mockDeleteRallyPoint,
@@ -63,6 +65,8 @@ describe("RallyPointPanel: Button Interaction Tests", () => {
         jest.clearAllMocks();
     });
     test.each(testCases)("$description", async ({ getMethod, callBackMethod }) => {
+        // Examples of testing buttons using various get methods
+
         // Render the Rally Point Panel with mock props
         render(<RallyPointPanel {...mockProps} />);
 
@@ -73,9 +77,10 @@ describe("RallyPointPanel: Button Interaction Tests", () => {
         // Click the button
         await userEvent.click(buttonElement);
 
-        // Verify that the callback was called
+        // Verify that the callback was called with the correct argument
         await waitFor(() => {
             expect(callBackMethod).toHaveBeenCalledTimes(1);
+            expect(callBackMethod).toHaveBeenLastCalledWith(mockProps.selectedRallyFeature);
         });
     });
 });

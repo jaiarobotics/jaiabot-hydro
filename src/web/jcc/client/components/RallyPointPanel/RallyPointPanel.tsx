@@ -34,6 +34,7 @@ export function RallyPointPanel(props: Props) {
                         </div>
                         <Button
                             aria-label="Go To Rally Point Label"
+                            // testid to be used as last resort
                             data-testid="go-to-rally-point-id"
                             title="Go To Rally Point Button"
                             className={"button-jcc"}
@@ -43,6 +44,7 @@ export function RallyPointPanel(props: Props) {
                         </Button>
                         <Button
                             aria-label="Delete Rally Point Label"
+                            // testid to be used as last resort
                             data-testid="delete-rally-point-id"
                             title="Delete Rally Point Button"
                             className={"button-jcc"}
