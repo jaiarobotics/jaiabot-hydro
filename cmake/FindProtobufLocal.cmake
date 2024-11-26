@@ -92,18 +92,19 @@ function(PROTOBUF_GENERATE_CPP_FULL SRCS HDRS ADD_REL_DIR CPP_OUT_DIR)
   foreach(FIL ${ARGN})
     # full file name (relative to current source directory)
     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
+    get_filename_component(ABS_DIR ${ABS_FIL} DIRECTORY)
     # relative file name (need to do this in case an absolute path is passed in)
     STRING(REGEX REPLACE "^${CMAKE_CURRENT_SOURCE_DIR}/" "" REL_FIL ${ABS_FIL})
     # name without extension, e.g. for "foo.proto", ${FIL_WE} is "foo"
     get_filename_component(FIL_WE ${REL_FIL} NAME_WE)
     # relative directory to current source directory, e.g. for "dir/foo.proto", ${FIL_DIR} is "dir"
-    get_filename_component(FIL_DIR ${REL_FIL} DIRECTORY BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})     
+    get_filename_component(FIL_DIR ${REL_FIL} DIRECTORY BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
     
     set(FULL_OUT_DIR "${CPP_OUT_DIR}")
     if(ADD_REL_DIR)
       set(FULL_OUT_DIR "${FULL_OUT_DIR}/${ADD_REL_DIR}")
     endif()
-    if(FIL_DIR)
+    if(FIL_DIR AND NOT FIL_DIR STREQUAL ABS_DIR)
       set(FULL_OUT_DIR "${FULL_OUT_DIR}/${FIL_DIR}")
     endif()
 
@@ -179,17 +180,12 @@ function(PROTOBUF_GENERATE_NANOPB_C_FULL SRCS HDRS ADD_REL_DIR  C_OUT_DIR)
     # files correctly for later inclusion into other protos (Protobuf is picky about this)
     set(NANOPB_FIL_DEST ${NANOPB_FULL_OUT_DIR}/${FIL_WE}.proto)
 
-    set(NANOPB_FIL_OPTIONS "")
-    if(EXISTS "${NANOPB_FULL_OUT_DIR}/${FIL_WE}.options")
-      set(NANOPB_FIL_OPTIONS ${NANOPB_FULL_OUT_DIR}/${FIL_WE}.options)
-    endif()
-    
     add_custom_command(
       OUTPUT "${NANOPB_FULL_OUT_DIR}/${FIL_WE}.pb.c"
              "${NANOPB_FULL_OUT_DIR}/${FIL_WE}.pb.h"
       COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
       ARGS ${ALL_PROTOBUF_INCLUDE_DIRS} -I${NANOPB_FULL_OUT_DIR} --nanopb_out=-I${C_OUT_DIR}:${C_OUT_DIR} ${NANOPB_FIL_DEST} 
-      DEPENDS ${NANOPB_FIL_DEST} ${NANOPB_FIL_OPTIONS}
+      DEPENDS ${NANOPB_FIL_DEST}
       COMMENT "Running C nanopb protocol buffer compiler on ${FIL}"
       VERBATIM )
     

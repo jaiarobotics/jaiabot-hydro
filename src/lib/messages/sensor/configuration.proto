@@ -1,5 +1,6 @@
 syntax = "proto2";
 
+import "nanopb.proto";
 import "jaiabot/messages/sensor/catalog.proto";
 
 package jaiabot.sensor.protobuf;
@@ -9,12 +10,12 @@ message Configuration
     required int32 id = 1;
     required Sensor sensor = 2;
 
-    optional double sample_freq = 3; // hertz
-    
+    optional double sample_freq = 3;  // hertz
+
     message Cfg
     {
-        required string key = 1;
-        required string value = 2;
+        required string key = 1 [(nanopb).max_size = 16];
+        required string value = 2 [(nanopb).max_size = 64];
     }
-    repeated Cfg cfg = 5;
+    repeated Cfg cfg = 5 [(nanopb).max_count = 16];
 }
