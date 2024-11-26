@@ -540,7 +540,7 @@ if jaia_motor_harness_type.value == 'RPM_AND_THERMISTOR':
         'group': 'root',
         'subdir': 'motor',
         'args': '',
-        'error_on_fail': 'ERROR__FAILED__PYTHON_JAIABOT_MOTOR_DRIVER',
+        'error_on_fail': 'ERROR__FAILED__PYTHON_JAIABOT_MOTOR_LISTENER',
         'runs_on': Type.BOT,
         'runs_when': Mode.RUNTIME,
         'wanted_by': 'jaiabot_health.service',
