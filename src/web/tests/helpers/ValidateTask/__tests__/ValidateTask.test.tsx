@@ -1,19 +1,19 @@
 import { validateTask } from "../ValidateTask";
 import { MissionTask, TaskType } from "../../../../shared/JAIAProtobuf";
-import testCases from "./testCases.json";
+import testCases from "./missionTaskTestCases.json";
 
-type TestParams = {
+type TaskParams = {
     description: string;
     task: MissionTask;
 };
 
-type TestCases = {
-    validTaskTestCases: TestParams[];
-    invalidTaskTestCases: TestParams[];
+type TaskTestCases = {
+    validTaskTestCases: TaskParams[];
+    invalidTaskTestCases: TaskParams[];
 };
 
-const validTaskTestCases = (testCases as TestCases).validTaskTestCases;
-const invalidTaskTestCases = (testCases as TestCases).invalidTaskTestCases;
+const validTaskTestCases = (testCases as TaskTestCases).validTaskTestCases;
+const invalidTaskTestCases = (testCases as TaskTestCases).invalidTaskTestCases;
 
 describe("ValidateTask Unit Tests", () => {
     test.each(validTaskTestCases)("$description", ({ task }) => {
