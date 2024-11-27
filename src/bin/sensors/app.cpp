@@ -56,7 +56,7 @@ class Sensors : public zeromq::MultiThreadApplication<config::Sensors>
   private:
     void loop() override;
     void query_metadata();
-    void send_to_mcu(const sensor::protobuf::SensorRequest& request);
+    void send_to_mcu(sensor::protobuf::SensorRequest request);
     void receive_from_mcu(const goby::middleware::protobuf::IOData& io_msg);
     void receive_metadata_from_mcu(const sensor::protobuf::Metadata& metadata);
 
@@ -102,7 +102,7 @@ jaiabot::apps::Sensors::Sensors()
 
 void jaiabot::apps::Sensors::loop()
 {
-    while (drivers_launched_.size() == 0)
+    if (drivers_launched_.size() == 0)
     {
         // keep querying the MCU until it responds with at least one sensor
         query_metadata();
@@ -116,8 +116,10 @@ void jaiabot::apps::Sensors::query_metadata()
     send_to_mcu(request);
 }
 
-void jaiabot::apps::Sensors::send_to_mcu(const sensor::protobuf::SensorRequest& request)
+void jaiabot::apps::Sensors::send_to_mcu(sensor::protobuf::SensorRequest request)
 {
+    request.set_time_with_units(goby::time::SystemClock::now<goby::time::MicroTime>());
+
     glog.is_verbose() && glog << "Sending request to MCU: " << request.ShortDebugString()
                               << std::endl;
 
@@ -153,19 +155,20 @@ void jaiabot::apps::Sensors::receive_from_mcu(const goby::middleware::protobuf::
         if (encoded.size() < bytes_in_crc32)
             throw(std::runtime_error("Message is too small"));
 
-        uint32_t computed_crc = compute_crc32(encoded.begin(), encoded.end() - bytes_in_crc32);
+        //// TODO - verify CRC check code
+        // uint32_t computed_crc = compute_crc32(encoded.begin(), encoded.end() - bytes_in_crc32);
 
-        uint32_t provided_crc = 0;
+        // uint32_t provided_crc = 0;
 
-        std::size_t i = 0;
-        for (auto it = encoded.rbegin(), end = encoded.rbegin() + bytes_in_crc32; it != end;
-             ++it, ++i)
-            provided_crc |= (*it) << (i * bits_in_byte);
+        // std::size_t i = 0;
+        // for (auto it = encoded.rbegin(), end = encoded.rbegin() + bytes_in_crc32; it != end;
+        //      ++it, ++i)
+        //     provided_crc |= (*it) << (i * bits_in_byte);
 
-        if (computed_crc != provided_crc)
-            throw(std::runtime_error("Computed CRC (" + std::to_string(computed_crc) +
-                                     ") does not equal CRC on message (" +
-                                     std::to_string(provided_crc) + ")"));
+        // if (computed_crc != provided_crc)
+        //     throw(std::runtime_error("Computed CRC (" + std::to_string(computed_crc) +
+        //                              ") does not equal CRC on message (" +
+        //                              std::to_string(provided_crc) + ")"));
 
         sensor::protobuf::SensorData sensor_data;
         sensor_data.ParseFromArray(encoded.data(), encoded.size() - bytes_in_crc32);
