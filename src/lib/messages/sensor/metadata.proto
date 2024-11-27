@@ -2,6 +2,7 @@ syntax = "proto2";
 
 import "dccl/option_extensions.proto";
 import "jaiabot/messages/sensor/catalog.proto";
+import "nanopb.proto";
 
 package jaiabot.sensor.protobuf;
 
@@ -25,10 +26,10 @@ message Metadata
 
         message Cal
         {
-            required string key = 1;
-            required double value = 2;
+            required string key = 1 [(nanopb).max_size = 16];
+            required double value = 2 [(nanopb).max_size = 64];
         }
-        repeated Cal value = 3;
+        repeated Cal value = 3  [(nanopb).max_count = 16];
     }
     required Calibration calibration = 3;
     required uint64 time_purchased = 4 [
@@ -37,10 +38,10 @@ message Metadata
 
     message MetadataValue
     {
-        required string key = 1;
-        required string value = 2;
+        required string key = 1 [(nanopb).max_size = 16];
+        required string value = 2 [(nanopb).max_size = 64];
     }
 
-    repeated MetadataValue metadata = 5;
+    repeated MetadataValue metadata = 5 [(nanopb).max_count = 16];
 }
 

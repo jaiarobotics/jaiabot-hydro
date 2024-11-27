@@ -12,6 +12,9 @@ set(SENSOR_MESSAGES
   sensor/catalog.proto
   sensor/atlas_scientific__ezo_ec.proto
   sensor/blue_robotics__bar30.proto
+  sensor/atlas_scientific__ezo_do.proto
+  sensor/atlas_scientific__ezo_ph.proto
+  sensor/turner__c_fluor.proto
   )
 
 
