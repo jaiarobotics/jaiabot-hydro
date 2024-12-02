@@ -80,7 +80,7 @@ export class TaskData {
             properties: {
                 title: "Depth Contours",
             },
-            zIndex: 25,
+            zIndex: 43, // We want this to appear above the custom GeoTIFF layer(s)
             opacity: 0.5,
             source: null,
             visible: false,
