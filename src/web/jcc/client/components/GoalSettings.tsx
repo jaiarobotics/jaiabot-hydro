@@ -2,7 +2,7 @@ import React, { ChangeEvent } from "react";
 
 import { Map } from "ol";
 
-import JaiaToggle from "./JaiaToggle";
+import JaiaToggle from "./JaiaToggle/JaiaToggle";
 import { Goal } from "./shared/JAIAProtobuf";
 import { CustomAlert } from "./shared/CustomAlert";
 import { TaskSettingsPanel } from "./TaskSettingsPanel/TaskSettingsPanel";
