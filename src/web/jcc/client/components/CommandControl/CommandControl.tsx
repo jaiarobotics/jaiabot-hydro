@@ -24,7 +24,7 @@ import { BotListPanel } from "../BotListPanel";
 import { Interactions } from "../Interactions";
 import { GlobalActions } from "../../../../context/actions/GlobalActions";
 import { SettingsPanel } from "../SettingsPanel";
-import { RallyPointPanel } from "../RallyPointPanel";
+import { RallyPointPanel } from "../RallyPointPanel/RallyPointPanel";
 import { TaskPacketPanel } from "../TaskPacketPanel";
 import { SurveyExclusions } from "../SurveyExclusions";
 import { LoadMissionPanel } from "../LoadMissionPanel";
