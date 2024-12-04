@@ -80,8 +80,16 @@ class AdafruitBNO085(IMU):
                         quaternion=quaternion,
                         angular_velocity=angular_velocity)
 
+        except RuntimeError as error:
+            if len(error.args) == 2:
+                log.warning(f"Error trying to get data: {error.args[0]} (Code {error.args[1]})")
+                if error.args[0] == 'Unprocessable Batch bytes':
+                    self.is_setup = False
+                    log.warning("Retry connecting to IMU")
+            else:
+                log.warning(f"Unexpected RuntimeError: {error}")
         except Exception as error:
-            log.warning(f"Error trying to get data: {error}")
+            log.warning(f"Unexpected error: {error}")
 
     def takeReading(self):
         """Thread-safe takeReading function.  Call to take a reading.
