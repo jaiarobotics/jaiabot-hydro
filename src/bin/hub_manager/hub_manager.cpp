@@ -916,7 +916,7 @@ void jaiabot::apps::HubManager::start_dataoffload(int bot_id)
                                   " " + cfg().log_offload_dir() + " " + bot_ip + " 2>&1";
 
     auto offload_func = [this, offload_command]() {
-        // reset offload global variables
+        // reset data offload global variables
         offload_complete_ = false;
         offload_success_ = false;
 
