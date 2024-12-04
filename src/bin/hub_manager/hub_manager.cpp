@@ -905,7 +905,6 @@ void jaiabot::apps::HubManager::start_dataoffload(int bot_id)
 {
     glog.is_verbose() && glog << "Starting offload for bot " << bot_id << std::endl;
     current_offload_bot_id_ = bot_id;
-    offload_success_ = false;
 
     std::string bot_ip = cfg().class_b_network() + "." + std::to_string(cfg().fleet_id()) + "." +
                          std::to_string((cfg().bot_start_ip() + bot_id));
@@ -917,6 +916,10 @@ void jaiabot::apps::HubManager::start_dataoffload(int bot_id)
                                   " " + cfg().log_offload_dir() + " " + bot_ip + " 2>&1";
 
     auto offload_func = [this, offload_command]() {
+        // reset data offload global variables
+        offload_complete_ = false;
+        offload_success_ = false;
+
         glog.is_debug1() && glog << "Offloading data with command: [" << offload_command << "]"
                                  << std::endl;
 
@@ -995,6 +998,5 @@ void jaiabot::apps::HubManager::start_dataoffload(int bot_id)
         offload_complete_ = true;
     };
 
-    offload_complete_ = false;
     offload_thread_.reset(new std::thread(offload_func));
 }
