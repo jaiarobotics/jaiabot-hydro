@@ -33,6 +33,8 @@
 
 #define NOW (goby::time::SystemClock::now<goby::time::MicroTime>())
 
+float THROTTLE_FOR_ZERO_NET_BUOYANCY = -35.0; // throttle that equalizes the buoyancy force of bot
+
 using namespace std;
 using goby::glog;
 namespace si = boost::units::si;
@@ -59,6 +61,11 @@ jaiabot::apps::BotPidControl::BotPidControl()
 
         // Publish for querying
         interprocess().publish<jaiabot::groups::engineering_status>(bounds_);
+    }
+
+    if (bounds_.motor().has_throttle_zero_net_buoyancy())
+    {
+        THROTTLE_FOR_ZERO_NET_BUOYANCY = bounds_.motor().throttle_zero_net_buoyancy();
     }
 
     glog.is_verbose() && glog << "BotPidControl starting" << std::endl;
@@ -116,7 +123,7 @@ jaiabot::apps::BotPidControl::BotPidControl()
     }
     throttle_depth_pid_->set_auto();
     throttle_depth_pid_->set_direction(E_PID_REVERSE);
-    throttle_depth_pid_->set_limits(-100.0, 0.0);
+    throttle_depth_pid_->set_limits(-100.0, -THROTTLE_FOR_ZERO_NET_BUOYANCY);
 
     if (cfg().has_heading_pid_gains())
     {
@@ -330,7 +337,7 @@ void jaiabot::apps::BotPidControl::publish_low_control()
             if (throttle_depth_pid_->need_compute())
             {
                 throttle_depth_pid_->compute();
-                throttle_ = throttle_;
+                throttle_ = throttle_ + THROTTLE_FOR_ZERO_NET_BUOYANCY;
             }
 
             glog.is_debug2() && glog << group("main") << "target_depth = " << target_depth_
