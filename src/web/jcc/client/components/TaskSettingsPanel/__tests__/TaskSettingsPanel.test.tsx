@@ -30,10 +30,9 @@ type TaskParams = {
 
 type TaskTestCases = {
     validTaskTestCases: TaskParams[];
-    invalidTaskTestCases: TaskParams[];
 };
 
-// Use all Valid Test Cases
+// Use all of the Valid Task Test Cases
 const validTaskTestCases = (testCases as TaskTestCases).validTaskTestCases;
 
 describe("TaskSettingsPanel: Should update task type correctly for all options", () => {
