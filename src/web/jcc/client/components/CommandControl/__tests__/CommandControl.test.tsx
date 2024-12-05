@@ -7,7 +7,7 @@ import {
     HubAccordionStates,
 } from "../../../../../context/GlobalContext";
 import { JaiaAPI } from "../../../../common/JaiaAPI";
-//import * as JaiaAPI from "../../../../common/JaiaAPI";
+import { CustomLayerGroupFactory } from "../../CustomLayers";
 
 const mockSelectedPodElement1: SelectedPodElement = {
     type: PodElement.HUB,
@@ -37,7 +37,7 @@ const mockProps1: Props = {
     globalDispatch: mockGlobalDispatch,
 };
 
-// Mock the entire module but only replace the `hit` method on the `jaiaAPI` instance
+// Mock JaiaAPI, replace the `hit` method on the `jaiaAPI` instance
 jest.mock("../../../../common/JaiaAPI", () => {
     // Import the real module to access the original `jaiaAPI` instance
     const originalModule = jest.requireActual("../../../../common/JaiaAPI");
@@ -52,6 +52,21 @@ jest.mock("../../../../common/JaiaAPI", () => {
     return {
         ...originalModule, // Spread the real module
         jaiaAPI: originalModule.jaiaAPI, // Keep the original `jaiaAPI` instance with the mocked `hit`
+    };
+});
+
+// Mock the CustomLayers, replace  createCustomLayerGroup
+jest.mock("../../CustomLayers", () => {
+    // Create a mock class for `CustomLayerGroupFactory`
+    const MockCustomLayerGroupFactory = jest.fn().mockImplementation(() => ({
+        // Mock all methods or properties used by the module under test
+        createCustomLayerGroup: jest.fn().mockResolvedValue(undefined), // Example method
+        on: jest.fn(), // Mock event subscription
+        off: jest.fn(), // Mock event unsubscription
+    }));
+
+    return {
+        CustomLayerGroupFactory: MockCustomLayerGroupFactory,
     };
 });
 
