@@ -6,7 +6,7 @@ import {
     PodElement,
     HubAccordionStates,
 } from "../../../../../context/GlobalContext";
-import { jaiaAPI } from "../../../../common/JaiaAPI";
+import { JaiaAPI } from "../../../../common/JaiaAPI";
 //import * as JaiaAPI from "../../../../common/JaiaAPI";
 
 const mockSelectedPodElement1: SelectedPodElement = {
@@ -37,26 +37,26 @@ const mockProps1: Props = {
     globalDispatch: mockGlobalDispatch,
 };
 
-// Mock the instance of JaiaAPT with mocked hit method
+// Mock the entire module but only replace the `hit` method on the `jaiaAPI` instance
 jest.mock("../../../../common/JaiaAPI", () => {
+    // Import the real module to access the original `jaiaAPI` instance
+    const originalModule = jest.requireActual("../../../../common/JaiaAPI");
+
+    // Mock the `hit` method on the existing `jaiaAPI` instance
+    // Provide a mocked response for the `hit` method
+    originalModule.jaiaAPI.hit = jest
+        .fn()
+        .mockResolvedValue({ code: 200, msg: "Mocked Success", bots: [], hubs: [] });
+
+    // Return the original module but with the mocked `hit` method on `jaiaAPI`
     return {
-        // Replace the original `apiInstance` with the custom instance
-        jaiaAPI: {
-            hit: jest.fn(), // Mock the `hit` method on the instance
-        },
+        ...originalModule, // Spread the real module
+        jaiaAPI: originalModule.jaiaAPI, // Keep the original `jaiaAPI` instance with the mocked `hit`
     };
 });
 
 describe("JaiaAbout integration tests", () => {
     test("JaiaAbout panel opens when Jaia info button is clicked", async () => {
-        // Arrange: Mock the `hit` method to return mock data
-        (jaiaAPI.hit as jest.Mock).mockResolvedValue({
-            ok: true,
-            json: jest
-                .fn()
-                .mockResolvedValue({ code: 200, msg: "Mocked Success", bots: [], hubs: [] }),
-        });
-
         await act(async () => {
             render(<CommandControl {...mockProps1} />);
         });
