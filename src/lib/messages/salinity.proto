@@ -14,4 +14,6 @@ message SalinityData
     required double total_dissolved_solids = 2;
     required double salinity = 3;
     required double specific_gravity = 4;
+    required double temperature = 5;
+    required double pressure = 6;
 }

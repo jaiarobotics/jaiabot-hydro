@@ -53,7 +53,7 @@ class Sensor:
             S = self.device.salinity()
             SG = 0.0
 
-            return [EC, TDS, S, SG]
+            return [EC, TDS, S, SG] 
         else:
             raise SensorError()
 

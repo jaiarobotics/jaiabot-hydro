@@ -147,6 +147,21 @@ jaiabot::apps::AtlasSalinityPublisher::AtlasSalinityPublisher()
             }
         }
     });
+
+    interprocess().subscribe<jaiabot::groups::pressure_temperature>(
+        [this](const goby::middleware::protobuf::IOData& data)
+        {
+            auto s = std::string(data.data());
+            auto fields = split(s, ",");
+
+            int index = 0;
+            auto date_string = fields[index++];
+
+            jaiabot::protobuf::SalinityData output;
+
+            output.set_pressure(std::stod(fields[2]));
+            output.set_temperature(std::stod(fields[3]));
+        })
 }
 
 void jaiabot::apps::AtlasSalinityPublisher::loop()
