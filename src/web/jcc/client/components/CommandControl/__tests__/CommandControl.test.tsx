@@ -6,8 +6,8 @@ import {
     PodElement,
     HubAccordionStates,
 } from "../../../../../context/GlobalContext";
-//import { jaiaAPI } from "../../../../common/JaiaAPI";
-import * as JaiaAPI from "../../../../common/JaiaAPI";
+import { jaiaAPI } from "../../../../common/JaiaAPI";
+//import * as JaiaAPI from "../../../../common/JaiaAPI";
 
 const mockSelectedPodElement1: SelectedPodElement = {
     type: PodElement.HUB,
@@ -37,25 +37,38 @@ const mockProps1: Props = {
     globalDispatch: mockGlobalDispatch,
 };
 
-// Mock the entire module. Automatically mocks all exported functions
-jest.mock("../../../../common/JaiaAPI");
-// Create a Mocked instance of jaiaAPI with debug turned on
-/* This was an example of mocking the instance instead of the class
-
+/* Tried to mock the instance of JaiaAPT with mocked hit method
 jest.mock("../../../../common/JaiaAPI", () => {
-       // Create a new instance of `Api` with different parameters
-       const mockApiInstance = new (jest.requireActual('../../../../common/JaiaAPI').JaiaAPI)("Mock Jaia API",'/', true);
-    
        return {
            // Replace the original `apiInstance` with the custom instance
-           jaiaAPI: mockApiInstance,
+           jaiaAPI: {
+            hit: jest.fn(), // Mock the `hit` method on the instance
+        },
        }; 
 });
-
 */
+global.fetch = jest.fn();
 
 describe("JaiaAbout integration tests", () => {
     test("JaiaAbout panel opens when Jaia info button is clicked", async () => {
+        // Arrange: Mock the `hit` method to return mock data
+        /*
+        (jaiaAPI.hit as jest.Mock).mockResolvedValue({
+            data: { status: 'OK' },
+        });
+        */
+
+        // Tried to mock fetch globally instead of mocking JaiaAPI.hit
+        // This got rid of most errors, still need to resolve fetching of GeoTiffs
+
+        // Arrange: Mock fetch to resolve with a successful response
+        (fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: jest
+                .fn()
+                .mockResolvedValue({ code: 200, msg: "Mocked Success", bots: [], hubs: [] }),
+        });
+
         await act(async () => {
             render(<CommandControl {...mockProps1} />);
         });
