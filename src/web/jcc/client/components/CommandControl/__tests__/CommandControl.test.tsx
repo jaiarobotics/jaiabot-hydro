@@ -1,5 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-
+import { act, render, screen, fireEvent } from "@testing-library/react";
 import CommandControl, { Props } from "../CommandControl";
 import {
     GlobalContextType,
@@ -7,6 +6,8 @@ import {
     PodElement,
     HubAccordionStates,
 } from "../../../../../context/GlobalContext";
+//import { jaiaAPI } from "../../../../common/JaiaAPI";
+import * as JaiaAPI from "../../../../common/JaiaAPI";
 
 const mockSelectedPodElement1: SelectedPodElement = {
     type: PodElement.HUB,
@@ -36,9 +37,28 @@ const mockProps1: Props = {
     globalDispatch: mockGlobalDispatch,
 };
 
+// Mock the entire module. Automatically mocks all exported functions
+jest.mock("../../../../common/JaiaAPI");
+// Create a Mocked instance of jaiaAPI with debug turned on
+/* This was an example of mocking the instance instead of the class
+
+jest.mock("../../../../common/JaiaAPI", () => {
+       // Create a new instance of `Api` with different parameters
+       const mockApiInstance = new (jest.requireActual('../../../../common/JaiaAPI').JaiaAPI)("Mock Jaia API",'/', true);
+    
+       return {
+           // Replace the original `apiInstance` with the custom instance
+           jaiaAPI: mockApiInstance,
+       }; 
+});
+
+*/
+
 describe("JaiaAbout integration tests", () => {
-    test("JaiaAbout panel opens when Jaia info button is clicked", () => {
-        render(<CommandControl {...mockProps1} />);
+    test("JaiaAbout panel opens when Jaia info button is clicked", async () => {
+        await act(async () => {
+            render(<CommandControl {...mockProps1} />);
+        });
         const jaiaInfoButton = screen.getByRole("img", { name: "Jaia info button" });
         fireEvent.click(jaiaInfoButton);
         const panelElement = screen.getByTestId("jaia-about-panel");
