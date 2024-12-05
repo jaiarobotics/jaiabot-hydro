@@ -37,32 +37,20 @@ const mockProps1: Props = {
     globalDispatch: mockGlobalDispatch,
 };
 
-/* Tried to mock the instance of JaiaAPT with mocked hit method
+// Mock the instance of JaiaAPT with mocked hit method
 jest.mock("../../../../common/JaiaAPI", () => {
-       return {
-           // Replace the original `apiInstance` with the custom instance
-           jaiaAPI: {
+    return {
+        // Replace the original `apiInstance` with the custom instance
+        jaiaAPI: {
             hit: jest.fn(), // Mock the `hit` method on the instance
         },
-       }; 
+    };
 });
-*/
-global.fetch = jest.fn();
 
 describe("JaiaAbout integration tests", () => {
     test("JaiaAbout panel opens when Jaia info button is clicked", async () => {
         // Arrange: Mock the `hit` method to return mock data
-        /*
         (jaiaAPI.hit as jest.Mock).mockResolvedValue({
-            data: { status: 'OK' },
-        });
-        */
-
-        // Tried to mock fetch globally instead of mocking JaiaAPI.hit
-        // This got rid of most errors, still need to resolve fetching of GeoTiffs
-
-        // Arrange: Mock fetch to resolve with a successful response
-        (fetch as jest.Mock).mockResolvedValue({
             ok: true,
             json: jest
                 .fn()
