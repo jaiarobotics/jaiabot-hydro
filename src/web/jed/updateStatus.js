@@ -59,10 +59,6 @@ function updateStatus(status) {
 
         innerHTML += "<td>" + (bot.salinity?.toFixed(1) || "?") + "</td>";
 
-        innerHTML += "<td>" + (bot.vcc_voltage?.toFixed(1) || "?") + "</td>";
-        innerHTML += "<td>" + (bot.vcc_current?.toFixed(1) || "?") + "</td>";
-        innerHTML += "<td>" + (bot.vv_current?.toFixed(1) || "?") + "</td>";
-
         innerHTML += "<td>" + Math.max(0.0, bot.portalStatusAge / 1e6).toFixed(0) + "</td>";
 
         const lastCommandTime = bot.last_command_time
