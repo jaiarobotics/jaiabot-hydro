@@ -118,7 +118,12 @@ Description: What type of motor harness does your bot have?
 
 Template: jaiabot-embedded/temperature_sensor_type
 Type: select
-Choices: bar30, tsys01, none
+Choices: bar02, bar30, tsys01, none
 Default: bar30
 Description: What temperature sensor do you want to use?
 
+Template: jaiabot-embedded/pressure_sensor_type
+Type: select
+Choices: bar02, bar30, none
+Default: bar30
+Description: What pressure sensor do you have?

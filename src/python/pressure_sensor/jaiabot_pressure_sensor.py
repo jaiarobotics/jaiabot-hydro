@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from time import sleep
+from enum import Enum
 from datetime import datetime
 import random
 import sys
@@ -10,6 +11,7 @@ import logging
 parser = argparse.ArgumentParser(description='Read temperature and pressure from a Bar30 sensor, and publish them over UDP port')
 parser.add_argument('-p', '--port', metavar='port', default=20001, type=int, help='port to publish T & P')
 parser.add_argument('-l', dest='logging_level', default='INFO', type=str, help='Logging level (CRITICAL, ERROR, WARNING, INFO, DEBUG), default is INFO')
+parser.add_argument('-t', dest='sensor_type', default='bar30', help='Type of Blue Robotics pressure-temperature sensor')
 parser.add_argument('--simulator', action='store_true')
 args = parser.parse_args()
 
@@ -17,60 +19,51 @@ logging.basicConfig(format='%(asctime)s %(levelname)10s %(message)s')
 log = logging.getLogger('pressure')
 log.setLevel(args.logging_level)
 
-
 try:
     import ms5837
 except ModuleNotFoundError as e:
     log.warning(e)
     log.warning('So, no physical device will be available')
 
+class SensorType(Enum):
+    BAR02 = ('bar02', 1)
+    BAR30 = ('bar30', 2)
+
+    def __init__(self, name, num):
+        self.name = name
+        self.num = num
 
 class SensorError(Exception):
     pass
 
-
 class Sensor:
-
     def __init__(self):
         self.is_setup = False
         self.pressure_0 = None
-        self.sensor_version = None
+        self.sensor_type = None
 
     def setup(self):
         if not self.is_setup:
-
-            # Figure out which sensor we're dealing with
-            bar02 = ms5837.MS5837_02BA()
-            if not bar02.init():
-                raise SensorError()
-            if not bar02.read():
-                raise SensorError()
-            p_bar02 = bar02.pressure()
-            del(bar02)
-
-            bar30 = ms5837.MS5837_30BA()
-            if not bar30.init():
-                raise SensorError()
-            if not bar30.read():
-                raise SensorError()
-            p_bar30 = bar30.pressure()
-            del(bar30)
-
-            ATM = 1013.25
-
-            if abs(p_bar30 - ATM) < abs(p_bar02 - ATM):
-                log.info('Auto-detected bar30 sensor')
-                self.sensor = ms5837.MS5837_30BA()
-                self.sensor_version = "bar30"
-            else:
-                log.info('Auto-detected bar02 sensor')
+            
+            if args.sensor_type == SensorType.BAR02.name:
                 self.sensor = ms5837.MS5837_02BA()
-                self.sensor_version = "bar02"
-
-            if self.sensor.init():
-                self.is_setup = True
+                self.sensor_type = SensorType.BAR02.num
+                log.warning(f"Sensor Name: {SensorType.BAR02.name}")
+                log.warning(f"Sensor Num: {SensorType.BAR02.num}")
             else:
+                self.sensor = ms5837.MS5837_30BA()
+                self.sensor_type = SensorType.BAR30.num
+                log.warning(f"Sensor Name: {SensorType.BAR30.name}")
+                log.warning(f"Sensor Num: {SensorType.BAR30.num}")
+            
+            if not self.sensor.init():
+                log.error("Cannot initialize Blue Robotics pressure-temperature sensor.")
                 raise SensorError()
+            if not self.sensor.read():
+                log.error("Cannot read from Blue Robotics pressure-temperature sensor.")
+                raise SensorError()
+
+            self.is_setup = True
 
 
     def read(self):
@@ -128,7 +121,7 @@ while True:
         continue
 
     now = datetime.utcnow()
-    line = '%s,%s,%9.2f,%7.2f\n' % (now.strftime('%Y-%m-%dT%H:%M:%SZ'), sensor.sensor_version, p_mbar, t_celsius)
+    line = '%s,%s,%9.2f,%7.2f\n' % (now.strftime('%Y-%m-%dT%H:%M:%SZ'), sensor.sensor_type, p_mbar, t_celsius)
 
     log.debug(f'Send: {line}')
     sock.sendto(line.encode('utf8'), addr)
