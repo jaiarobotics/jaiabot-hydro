@@ -36,42 +36,14 @@ const mockProps1: Props = {
 };
 
 // Mock JaiaAPI, replace the hit method on the jaiaAPI instance
-jest.mock("../../../../common/JaiaAPI", () => {
-    // Import the real module to access the original jaiaAPI instance
-    const originalModule = jest.requireActual("../../../../common/JaiaAPI");
-
-    // Mock the hit method on the existing jaiaAPI instance
-    // Provide a mocked response for the hit method
-    originalModule.jaiaAPI.hit = jest
-        .fn()
-        .mockResolvedValue({ code: 200, msg: "Mocked Success", bots: [], hubs: [] });
-
-    // Return the original module but with the mocked hit method on jaiaAPI
-    return {
-        // Spread the real module
-        ...originalModule,
-        // Keep the original jaiaAPI instance with the mocked hit
-        jaiaAPI: originalModule.jaiaAPI,
-    };
-});
+jest.mock("../../../../common/JaiaAPI", () =>
+    require("../../../../../tests/__mocks__/jaiaAPI.mock.ts"),
+);
 
 // Mock the CustomLayers, replace  createCustomLayerGroup
-jest.mock("../../CustomLayers", () => {
-    // Create a mock class for CustomLayerGroupFactory
-    const MockCustomLayerGroupFactory = jest.fn().mockImplementation(() => ({
-        // Mock all methods or properties used by the module under test
-        // Example method
-        createCustomLayerGroup: jest.fn().mockResolvedValue(undefined),
-        // Mock event subscription
-        on: jest.fn(),
-        // Mock event unsubscription
-        off: jest.fn(),
-    }));
-
-    return {
-        CustomLayerGroupFactory: MockCustomLayerGroupFactory,
-    };
-});
+jest.mock("../../CustomLayers", () =>
+    require("../../../../../tests/__mocks__/customLayers.mock.ts"),
+);
 
 describe("JaiaAbout integration tests", () => {
     test("JaiaAbout panel opens when Jaia info button is clicked", async () => {
