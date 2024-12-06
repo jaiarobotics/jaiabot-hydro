@@ -59,7 +59,8 @@ parser.add_argument('--imu_install_type', choices=['embedded', 'retrofit', 'none
 parser.add_argument('--arduino_type', choices=['spi', 'usb', 'none'], help='If set, configure services for arduino type')
 parser.add_argument('--bot_type', choices=['hydro', 'echo', 'none'], help='If set, configure services for bot type')
 parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for arduino type')
-parser.add_argument('--temperature_sensor_type', choices=['bar30', 'tsys01', 'none'], help='If set, configure services for temperature sensor')
+parser.add_argument('--temperature_sensor_type', choices=['bar02', 'bar30', 'tsys01', 'none'], help='If set, configure services for temperature sensor')
+parser.add_argument('--pressure_sensor_type', choices=['bar02', 'bar30', 'none'], help='If set, configure services for pressure sensor')
 
 args=parser.parse_args()
 
@@ -104,8 +105,14 @@ class DATA_OFFLOAD_IGNORE_TYPE(Enum):
     NONE = 'NONE'
 
 class TEMPERATURE_SENSOR_TYPE(Enum):
+    BAR02 = 'bar02'
     BAR30 = 'bar30'
     TSYS01 = 'tsys01'
+    NONE = 'none'
+
+class PRESSURE_SENSOR_TYPE(Enum):
+    BAR02 = 'bar02'
+    BAR30 = 'bar30'
     NONE = 'none'
 
 # Set the arduino type based on the argument
@@ -166,12 +173,19 @@ if args.data_offload_ignore_type == 'goby':
 elif args.data_offload_ignore_type == 'taskpacket':
     jaia_data_offload_ignore_type = DATA_OFFLOAD_IGNORE_TYPE.TASKPACKET
 
-if args.temperature_sensor_type == 'bar30':
+if args.temperature_sensor_type == 'bar02':
+    jaia_temperature_sensor_type = TEMPERATURE_SENSOR_TYPE.BAR02
+elif args.temperature_sensor_type == 'bar30':
     jaia_temperature_sensor_type = TEMPERATURE_SENSOR_TYPE.BAR30
 elif args.temperature_sensor_type == 'tsys01':
     jaia_temperature_sensor_type = TEMPERATURE_SENSOR_TYPE.TSYS01
 else:
     jaia_temperature_sensor_type = TEMPERATURE_SENSOR_TYPE.NONE
+
+if args.pressure_sensor_type == 'bar02':
+    jaia_pressure_sensor_type = PRESSURE_SENSOR_TYPE.BAR02
+else:
+    jaia_pressure_sensor_type = PRESSURE_SENSOR_TYPE.BAR30
 
 # make the output directories, if they don't exist
 os.makedirs(os.path.dirname(args.env_file), exist_ok=True)
@@ -222,6 +236,7 @@ subprocess.run('bash -ic "' +
                'export jaia_bot_type=' + str(jaia_bot_type.value) + '; ' +
                'export jaia_data_offload_ignore_type=' + str(jaia_data_offload_ignore_type.value) + '; ' +
                'export jaia_temperature_sensor_type=' + str(jaia_temperature_sensor_type.value) + '; ' +
+               'export jaia_pressure_sensor_type=' + str(jaia_pressure_sensor_type.value) + '; ' +
                'source ' + args.gen_dir + '/../preseed.goby; env | egrep \'^jaia|^LD_LIBRARY_PATH\' > /tmp/runtime.env; cp --backup=numbered /tmp/runtime.env ' + args.env_file + '; rm /tmp/runtime.env"',
                check=True, shell=True)
 
@@ -409,7 +424,7 @@ jaiabot_apps = [
      'description': 'JaiaBot Pressure Sensor Python Driver',
      'template': 'py-app.service.in',
      'subdir': 'pressure_sensor',
-     'args': '',
+     'args': f'-t {jaia_pressure_sensor_type.value}',
      'error_on_fail': 'ERROR__FAILED__PYTHON_JAIABOT_PRESSURE_SENSOR',
      'runs_on': Type.BOT,
      'runs_when': Mode.RUNTIME,
