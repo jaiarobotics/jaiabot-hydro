@@ -7,10 +7,6 @@ import {
     HubAccordionStates,
 } from "../../../../../context/GlobalContext";
 
-//These imports don't seem to be used??
-import { JaiaAPI } from "../../../../common/JaiaAPI";
-import { CustomLayerGroupFactory } from "../../CustomLayers";
-
 const mockSelectedPodElement1: SelectedPodElement = {
     type: PodElement.HUB,
     id: 1,
@@ -52,8 +48,10 @@ jest.mock("../../../../common/JaiaAPI", () => {
 
     // Return the original module but with the mocked hit method on jaiaAPI
     return {
-        ...originalModule, // Spread the real module
-        jaiaAPI: originalModule.jaiaAPI, // Keep the original jaiaAPI instance with the mocked hit
+        // Spread the real module
+        ...originalModule,
+        // Keep the original jaiaAPI instance with the mocked hit
+        jaiaAPI: originalModule.jaiaAPI,
     };
 });
 
@@ -62,9 +60,12 @@ jest.mock("../../CustomLayers", () => {
     // Create a mock class for CustomLayerGroupFactory
     const MockCustomLayerGroupFactory = jest.fn().mockImplementation(() => ({
         // Mock all methods or properties used by the module under test
-        createCustomLayerGroup: jest.fn().mockResolvedValue(undefined), // Example method
-        on: jest.fn(), // Mock event subscription
-        off: jest.fn(), // Mock event unsubscription
+        // Example method
+        createCustomLayerGroup: jest.fn().mockResolvedValue(undefined),
+        // Mock event subscription
+        on: jest.fn(),
+        // Mock event unsubscription
+        off: jest.fn(),
     }));
 
     return {
