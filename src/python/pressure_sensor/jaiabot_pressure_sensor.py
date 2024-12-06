@@ -30,9 +30,13 @@ class SensorType(Enum):
     BAR02 = ('bar02', 1)
     BAR30 = ('bar30', 2)
 
-    def __init__(self, name, num):
-        self.name = name
-        self.num = num
+    @property
+    def name(self):
+        return self.value[0]
+
+    @property
+    def num(self):
+        return self.value[1]
 
 class SensorError(Exception):
     pass
@@ -49,13 +53,9 @@ class Sensor:
             if args.sensor_type == SensorType.BAR02.name:
                 self.sensor = ms5837.MS5837_02BA()
                 self.sensor_type = SensorType.BAR02.num
-                log.warning(f"Sensor Name: {SensorType.BAR02.name}")
-                log.warning(f"Sensor Num: {SensorType.BAR02.num}")
             else:
                 self.sensor = ms5837.MS5837_30BA()
                 self.sensor_type = SensorType.BAR30.num
-                log.warning(f"Sensor Name: {SensorType.BAR30.name}")
-                log.warning(f"Sensor Num: {SensorType.BAR30.num}")
             
             if not self.sensor.init():
                 log.error("Cannot initialize Blue Robotics pressure-temperature sensor.")
