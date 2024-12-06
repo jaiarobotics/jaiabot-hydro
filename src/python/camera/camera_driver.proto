@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+package jaiabot.protobuf;
+
+message CameraCommand
+{
+    enum CameraCommandType
+    {
+        START_IMAGES = 0;
+        STOP_IMAGES = 1;
+        START_VIDEO = 2;
+        STOP_VIDEO = 3;
+    }
+
+    required CameraCommandType type = 1;
+    optional double image_capture_interval = 2;
+}
+
+message CameraResponse
+{
+}

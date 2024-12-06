@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Define the base directory for recordings
+BASE_DIR="/home/pi/video_recordings"
+PID_FILE="/tmp/video_recording.pid"
+
+# Function to start recording
+start_recording() {
+    # Find the highest numbered folder and increment it for the new folder
+    NEXT_DIR=$(find "$BASE_DIR" -maxdepth 1 -type d -name 'recording_*' | \
+               sed 's|.*/recording_||' | sort -n | tail -n 1)
+    NEXT_DIR=$((NEXT_DIR + 1))
+    RECORD_DIR="${BASE_DIR}/recording_$NEXT_DIR"
+
+    # Create the new recording directory
+    mkdir -p "$RECORD_DIR"
+
+    # Define the output file paths
+    RAW_VIDEO="$RECORD_DIR/video.h264"
+    FINAL_VIDEO="$RECORD_DIR/video.mp4"
+
+    # Start recording with libcamera-vid
+    libcamera-vid -t 0 --output "$RAW_VIDEO" &
+    PID=$!
+
+    # Save the PID to a file for later reference
+    echo $PID > "$PID_FILE"
+
+    echo "Recording started. PID: $PID"
+    echo "Recording directory: $RECORD_DIR"
+}
+
+# Function to stop recording
+stop_recording() {
+    if [ ! -f "$PID_FILE" ]; then
+        echo "No recording process found. Is it running?"
+        exit 1
+    fi
+
+    # Read PID and kill the process
+    PID=$(cat "$PID_FILE")
+    kill "$PID" && rm "$PID_FILE"
+
+    echo "Recording stopped. Converting to MP4..."
+
+    # Convert raw video to MP4
+    RAW_VIDEO=$(find "$BASE_DIR" -name "video.h264" -type f -printf '%T@ %p\n' | sort -n | tail -n 1 | cut -d' ' -f2)
+    FINAL_VIDEO="${RAW_VIDEO%.h264}.mp4"
+    ffmpeg -i "$RAW_VIDEO" -c copy "$FINAL_VIDEO"
+
+    echo "Conversion completed: $FINAL_VIDEO"
+}
+
+# Check arguments
+case "$1" in
+    start)
+        start_recording
+        ;;
+    stop)
+        stop_recording
+        ;;
+    *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+        ;;
+esac
