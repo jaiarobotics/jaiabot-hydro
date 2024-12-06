@@ -111,30 +111,20 @@ jaiabot::apps::BlueRoboticsPressureSensorDriver::BlueRoboticsPressureSensorDrive
     launch_thread<GPSUDPThread>(cfg().udp_config());
 
     interprocess().subscribe<bar30_udp_in>(
-        [this](const goby::middleware::protobuf::IOData& bar_data) {
-            auto s = std::string(bar_data.data());
-            auto fields = split(s, ",");
+        [this](const goby::middleware::protobuf::IOData& sensor_data) {
+            jaiabot::protobuf::PressureTemperatureData pressure_temperature_data;
+            if (!pressure_temperature_data.ParseFromString(sensor_data.data()))
+            {
+                glog.is_warn() &&
+                    glog << "Could not deserialize PressureTemperatureData from UDP packet"
+                         << std::endl;
+                return;
+            }
 
-            using goby::util::seawater::bar;
-            namespace celsius = boost::units::celsius;
-            using boost::units::absolute;
+            glog.is_debug2() && glog << "Publishing PressureTemperatureData: "
+                                     << pressure_temperature_data.ShortDebugString() << std::endl;
 
-            auto date_string = fields[0];
-            auto version_string = fields[1];
-            auto p_mbar = std::stod(fields[2]) * si::milli * bar;
-            auto t_celsius = std::stod(fields[3]) * absolute<celsius::temperature>();
-
-            glog.is_verbose() && glog << group("bar30_test") << "p_mbar: " << p_mbar
-                                      << ", t_celsius: " << t_celsius
-                                      << ", version: " << version_string << std::endl;
-
-            protobuf::PressureTemperatureData data;
-
-            data.set_pressure_raw_with_units(p_mbar);
-            data.set_temperature_with_units(t_celsius);
-            data.set_version(version_string);
-
-            interprocess().publish<groups::pressure_temperature>(data);
+            interprocess().publish<groups::pressure_temperature>(pressure_temperature_data);
             last_blue_robotics_pressure_report_time_ = goby::time::SteadyClock::now();
         });
 

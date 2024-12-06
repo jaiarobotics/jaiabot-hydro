@@ -3,10 +3,11 @@ from time import sleep
 from enum import Enum
 from datetime import datetime
 import random
-import sys
 import argparse
 import socket
 import logging
+
+from jaiabot.messages.pressure_temperature_pb2 import PressureTemperatureData
 
 parser = argparse.ArgumentParser(description='Read temperature and pressure from a Bar30 sensor, and publish them over UDP port')
 parser.add_argument('-p', '--port', metavar='port', default=20001, type=int, help='port to publish T & P')
@@ -88,7 +89,7 @@ class Sensor:
 class SensorSimulator:
 
     def __init__(self):
-        pass
+        self.sensor_type = SensorType.BAR30.num
 
     def setup(self):
         pass
@@ -120,8 +121,21 @@ while True:
         log.warning(e)
         continue
 
-    now = datetime.utcnow()
-    line = '%s,%s,%9.2f,%7.2f\n' % (now.strftime('%Y-%m-%dT%H:%M:%SZ'), sensor.sensor_type, p_mbar, t_celsius)
+    try:
+        float(p_mbar)
+    except Exception as e:
+        log.error(f'Pressure cannot be converted to a float. {e}')
+        p_mbar = 0
+    
+    try:
+        float(t_celsius)
+    except Exception as e:
+        log.error(f'Temperature cannot be converted to a float. {e}')
+        t_celsius = 0
 
-    log.debug(f'Send: {line}')
-    sock.sendto(line.encode('utf8'), addr)
+    pressure_temperature_data = PressureTemperatureData()
+    pressure_temperature_data.pressure_raw = p_mbar
+    pressure_temperature_data.temperature = t_celsius
+    pressure_temperature_data.sensor_type = sensor.sensor_type
+
+    sock.sendto(pressure_temperature_data.SerializeToString(), addr)
