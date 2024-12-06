@@ -125,13 +125,13 @@ while True:
         float(p_mbar)
     except Exception as e:
         log.error(f'Pressure cannot be converted to a float. {e}')
-        p_mbar = 0
+        continue
     
     try:
         float(t_celsius)
     except Exception as e:
         log.error(f'Temperature cannot be converted to a float. {e}')
-        t_celsius = 0
+        continue
 
     pressure_temperature_data = PressureTemperatureData()
     pressure_temperature_data.pressure_raw = p_mbar

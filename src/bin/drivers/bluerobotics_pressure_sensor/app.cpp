@@ -103,6 +103,20 @@ jaiabot::apps::BlueRoboticsPressureSensorDriver::BlueRoboticsPressureSensorDrive
                 return;
             }
 
+            if (pressure_temperature_data.has_pressure_raw())
+            {
+                double pressure_raw = pressure_temperature_data.pressure_raw();
+                pressure_temperature_data.set_pressure_raw_with_units(pressure_raw * si::milli *
+                                                                      goby::util::seawater::bar);
+            }
+
+            if (pressure_temperature_data.has_temperature())
+            {
+                double temperature = pressure_temperature_data.temperature();
+                pressure_temperature_data.set_temperature_with_units(
+                    temperature * boost::units::absolute<boost::units::celsius::temperature>());
+            }
+
             glog.is_debug2() && glog << "Publishing PressureTemperatureData: "
                                      << pressure_temperature_data.ShortDebugString() << std::endl;
 
