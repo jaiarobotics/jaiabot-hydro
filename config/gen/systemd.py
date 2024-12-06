@@ -59,6 +59,7 @@ parser.add_argument('--imu_install_type', choices=['embedded', 'retrofit', 'none
 parser.add_argument('--arduino_type', choices=['spi', 'usb', 'none'], help='If set, configure services for arduino type')
 parser.add_argument('--bot_type', choices=['hydro', 'echo', 'none'], help='If set, configure services for bot type')
 parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for arduino type')
+parser.add_argument('--motor_harness_type', choices=['rpm_and_thermistor', 'none'], help='If set, configure services for motor harness type')
 parser.add_argument('--temperature_sensor_type', choices=['bar02', 'bar30', 'tsys01', 'none'], help='If set, configure services for temperature sensor')
 parser.add_argument('--pressure_sensor_type', choices=['bar02', 'bar30', 'none'], help='If set, configure services for pressure sensor')
 
@@ -102,6 +103,10 @@ class BOT_TYPE(Enum):
 class DATA_OFFLOAD_IGNORE_TYPE(Enum):
     GOBY = 'GOBY'
     TASKPACKET = 'TASKPACKET'
+    NONE = 'NONE'
+
+class MOTOR_HARNESS_TYPE(Enum):
+    RPM_AND_THERMISTOR = 'RPM_AND_THERMISTOR'
     NONE = 'NONE'
 
 class TEMPERATURE_SENSOR_TYPE(Enum):
@@ -173,6 +178,11 @@ if args.data_offload_ignore_type == 'goby':
 elif args.data_offload_ignore_type == 'taskpacket':
     jaia_data_offload_ignore_type = DATA_OFFLOAD_IGNORE_TYPE.TASKPACKET
 
+jaia_motor_harness_type = MOTOR_HARNESS_TYPE.NONE
+
+if args.motor_harness_type == 'rpm_and_thermistor':
+    jaia_motor_harness_type = MOTOR_HARNESS_TYPE.RPM_AND_THERMISTOR
+
 if args.temperature_sensor_type == 'bar02':
     jaia_temperature_sensor_type = TEMPERATURE_SENSOR_TYPE.BAR02
 elif args.temperature_sensor_type == 'bar30':
@@ -235,6 +245,7 @@ subprocess.run('bash -ic "' +
                'export jaia_arduino_type=' + str(jaia_arduino_type.value) + '; ' +
                'export jaia_bot_type=' + str(jaia_bot_type.value) + '; ' +
                'export jaia_data_offload_ignore_type=' + str(jaia_data_offload_ignore_type.value) + '; ' +
+               'export jaia_motor_harness_type=' + str(jaia_motor_harness_type.value) + '; ' +
                'export jaia_temperature_sensor_type=' + str(jaia_temperature_sensor_type.value) + '; ' +
                'export jaia_pressure_sensor_type=' + str(jaia_pressure_sensor_type.value) + '; ' +
                'source ' + args.gen_dir + '/../preseed.goby; env | egrep \'^jaia|^LD_LIBRARY_PATH\' > /tmp/runtime.env; cp --backup=numbered /tmp/runtime.env ' + args.env_file + '; rm /tmp/runtime.env"',
@@ -548,6 +559,23 @@ if jaia_bot_type.value == 'echo':
         'restart': 'on-failure'},
     ] 
     jaiabot_apps.extend(jaiabot_apps_echo)
+
+if jaia_motor_harness_type.value == 'RPM_AND_THERMISTOR':
+    jaiabot_apps_motor_harness_type = [
+        {'exe': 'rpm.py',
+        'description': 'JaiaBot Motor Python Driver',
+        'template': 'py-app.service.in',
+        'user': 'root', # must run as root to allow interaction with GPIO pin
+        'group': 'root',
+        'subdir': 'motor',
+        'args': '',
+        'error_on_fail': 'ERROR__FAILED__PYTHON_JAIABOT_MOTOR_LISTENER',
+        'runs_on': Type.BOT,
+        'runs_when': Mode.RUNTIME,
+        'wanted_by': 'jaiabot_health.service',
+        'restart': 'on-failure'}
+    ] 
+    jaiabot_apps.extend(jaiabot_apps_motor_harness_type)
 
 if jaia_temperature_sensor_type.value == 'tsys01':
     jaiabot_apps_tsys01 = [

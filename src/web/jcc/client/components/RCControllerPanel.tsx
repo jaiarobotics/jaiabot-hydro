@@ -16,7 +16,7 @@ import { Joystick, JoystickShape } from "react-joystick-component";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { CustomAlert } from "./shared/CustomAlert";
 import { Typography } from "@mui/material";
-import JaiaToggle from "./JaiaToggle";
+import JaiaToggle from "./JaiaToggle/JaiaToggle";
 
 interface Props {
     api: JaiaAPI;
@@ -67,7 +67,7 @@ export default class RCControllerPanel extends React.Component {
     /**
      * Constructor for the RCControllerPanel.
      * Defines props and state used by the panel and provides initial settings.
-     * 
+     *
      * @param {Props} props Properties passed down from parent
      */
     constructor(props: Props) {
@@ -110,11 +110,14 @@ export default class RCControllerPanel extends React.Component {
             this.props.remoteControlValues.pid_control.throttle = throttleBin.binValue;
         }
         this.setState(
-            { throttleDirection: event.direction.toString(), throttleBinNumber: throttleBin.binNumber },
+            {
+                throttleDirection: event.direction.toString(),
+                throttleBinNumber: throttleBin.binNumber,
+            },
             () => {},
         );
     }
-    
+
     /**
      * Checks to see if Overdrive has been enabled
      *
@@ -131,19 +134,18 @@ export default class RCControllerPanel extends React.Component {
      * @returns {void}
      */
     async handleOverdriveCheck() {
-
-        if (!this.state.overdriveEnabled){
+        if (!this.state.overdriveEnabled) {
             if (
                 !(await CustomAlert.confirmAsync(
                     "You are about to enable Overdrive.  \nUse Overdrive with caution as it can make the bots difficult to control",
-                    "Enable Overdrive"
+                    "Enable Overdrive",
                 ))
             ) {
                 return;
-            }  
+            }
         }
 
-        this.setState({overdriveEnabled: !this.state.overdriveEnabled});
+        this.setState({ overdriveEnabled: !this.state.overdriveEnabled });
         return;
     }
 
@@ -153,17 +155,13 @@ export default class RCControllerPanel extends React.Component {
      * @param {number} speed Is the position of the input that is used to determine bin number
      * @param {string} throttleDirection Determines the direction of the throttle (FORWARD, BACKWARD)
      * @param {Bin} throttleBin Used to pass the bin number and value
-     * 
+     *
      * @returns {number}
      *
      * @notes
      * Need template for object parameters
      */
-    calcThrottleBinNum(
-        speed: number,
-        throttleDirection: string,
-        throttleBin: Bin,
-    ) {
+    calcThrottleBinNum(speed: number, throttleDirection: string, throttleBin: Bin) {
         // Basic error handling to protect against unexpected speed value
         if (!speed || speed === 0) {
             return 0;
@@ -171,20 +169,20 @@ export default class RCControllerPanel extends React.Component {
 
         //boost throttle settings if overdrive is enabled
         let boost: Bin = { binNumber: 0, binValue: 0 };
-        if (this.state.overdriveEnabled) boost = {binNumber: 1, binValue: 20 }
+        if (this.state.overdriveEnabled) boost = { binNumber: 1, binValue: 20 };
 
         if (throttleDirection === "FORWARD") {
             // This means our max forward throttle would be 40 or speed 2 unless overdrive enabled
-            if (speed <= 50){ // under 50 never use boost
+            if (speed <= 50) {
+                // under 50 never use boost
                 throttleBin.binNumber = 1;
                 throttleBin.binValue = 20;
-            }
-            else if (speed <= 95) {
+            } else if (speed <= 95) {
                 throttleBin.binNumber = 1 + boost.binNumber;
                 throttleBin.binValue = 20 + boost.binValue;
             } else if (speed > 95) {
                 throttleBin.binNumber = 2 + boost.binNumber;
-                throttleBin.binValue = 40+ boost.binValue;
+                throttleBin.binValue = 40 + boost.binValue;
             }
         } else if (throttleDirection === "BACKWARD") {
             // This means our max backward throttle would be 10 or speed 0.5.
@@ -194,7 +192,7 @@ export default class RCControllerPanel extends React.Component {
     }
     /**
      * Sets the Throttle Value and Direction to 0 when stopped
-     * 
+     *
      * @returns {void}
      */
     updateThrottleDirectionStop() {
@@ -203,9 +201,9 @@ export default class RCControllerPanel extends React.Component {
     }
     /**
      * Updates the ruder direction when rudder "joystic" is moved on a tablet
-     * 
+     *
      * @param {IJoystickUpdateEvent} event Event data from Joystick widget
-     * 
+     *
      * @returns {void}
      */
     updateRudderDirectionMove(event: IJoystickUpdateEvent) {
@@ -223,18 +221,14 @@ export default class RCControllerPanel extends React.Component {
 
     /**
      * Sets Rudder values
-     * 
-     * @param {number} position Value from Joystick 
+     *
+     * @param {number} position Value from Joystick
      * @param {Bin} rudderBin Current Bin values for the rudder
      * @param {number} deadzonePercent Deadzone in percentage of joystick movement to ignore
-     * 
+     *
      * @returns {void}
      */
-    calcRudderBinNum(
-        position: number,
-        rudderBin: Bin,
-        deadzonePercent: number,
-    ) {
+    calcRudderBinNum(position: number, rudderBin: Bin, deadzonePercent: number) {
         // Basic error handling to protect against unexpected position value
         if (!position) {
             return;
@@ -264,7 +258,7 @@ export default class RCControllerPanel extends React.Component {
 
     /**
      * Sets rudder values to 0 when stopped
-     * 
+     *
      * @returns {void}
      */
     updateRudderDirectionStop() {
@@ -274,9 +268,9 @@ export default class RCControllerPanel extends React.Component {
 
     /**
      * Sets Throttle and Rudder values for Solo Controller
-     * 
+     *
      * @param {IJoystickUpdateEvent} event Event data from the Joystick widget
-     * 
+     *
      * @returns {void}
      */
     moveSoloController(event: IJoystickUpdateEvent) {
@@ -324,10 +318,10 @@ export default class RCControllerPanel extends React.Component {
     /**
      * This handles the input from the xbox controller by mapping the value
      * of the inputs to a bin number and direction to give the user feedback
-     * 
+     *
      * @param {string} axisName Indicates the analog stick that is being controlled
      * @param {number} value Indicates the position of the analog stick
-     * 
+     *
      * @returns {void}
      */
     handleGamepadAxisChange(axisName: string, value: number) {
@@ -632,7 +626,6 @@ export default class RCControllerPanel extends React.Component {
 
         driveControlPad = (
             <div className="rc-labels-container">
-                
                 <div className="rc-labels-left">
                     {selectControlType}
                     <div className="rc-info-container">
@@ -657,7 +650,6 @@ export default class RCControllerPanel extends React.Component {
                             disabled={() => false}
                         />
                     </div>
-
                 </div>
             </div>
         );
@@ -776,19 +768,19 @@ export default class RCControllerPanel extends React.Component {
         );
 
         /**
-        * Toggle minimize/maximize state of the RC panel.
-        * Tapping anywhere on the heading will toggle this.
-        * 
-        * @returns {void}
-        */
+         * Toggle minimize/maximize state of the RC panel.
+         * Tapping anywhere on the heading will toggle this.
+         *
+         * @returns {void}
+         */
         const toggleMinimize = () => {
             this.setState({ isMaximized: !this.state.isMaximized });
         };
 
         /**
-        * Buttons to indicate the ability to toggle the minimize/maximize state.
-        * They don't need an onClick handler, because the whole heading is sensitive to clicks.
-        */
+         * Buttons to indicate the ability to toggle the minimize/maximize state.
+         * They don't need an onClick handler, because the whole heading is sensitive to clicks.
+         */
         const toggleMinimizeIndicator = (
             <Button>
                 <Typography>{this.state.isMaximized ? "^" : "˅"}</Typography>
