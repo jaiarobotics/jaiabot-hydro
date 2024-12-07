@@ -3,6 +3,8 @@ from google.protobuf.message import *
 import serial
 import logging
 import time
+from binascii import crc32
+
 
 log = logging.getLogger('jaia_serial')
 
@@ -43,8 +45,15 @@ class JaiaProtobufOverSerial:
             # Read length
             data_length = int.from_bytes(self.port.read(2), 'big')
 
+            # Read crc32
+            crc = int.from_bytes(self.port.read(4), 'big')
+
             # Read data
             data = self.port.read(data_length)
+
+            if crc != crc32(data):
+                log.warning(f'crc32 mismatch: {crc} != {crc32(data)}')
+                return None
 
             try:
                 # Deserialize the message
@@ -61,5 +70,6 @@ class JaiaProtobufOverSerial:
 
         self.port.write(b'JAIA')
         self.port.write(len(data).to_bytes(2, 'big'))
+        self.port.write(crc32(data).to_bytes(4, 'big'))
         self.port.write(data)
 
