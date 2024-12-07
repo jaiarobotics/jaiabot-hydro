@@ -22,12 +22,22 @@ def parse_args():
     args = parser.parse_args()
 
     global log
-        logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
     log = logging.getLogger('camera_driver')
 
 
 def now_string():
     return datetime.datetime.now().isoformat()
+
+
+class MockCamera:
+
+    def do_command(self, command: CameraCommand):
+        log.info(command)
+
+
+    def loop(self):
+        pass
 
 
 class Camera:
@@ -46,9 +56,7 @@ class Camera:
         os.makedirs(self.output_dir, exist_ok=True)
 
     def do_command(self, command: CameraCommand):
-        if args.debug:
-            log.info(command)
-            return
+        log.info(command)
 
         if command.type == CameraCommand.CameraCommandType.START_IMAGES:
             self.image_capture_interval = command.image_capture_interval
@@ -80,8 +88,8 @@ class Camera:
 
 
 def main():
-    if args.debug:
-        cam = None
+    if args.simulate:
+        cam = MockCamera()
     else:
         cam = Camera()
 
@@ -91,8 +99,7 @@ def main():
         msg = port.read(CameraCommand, timeout=0.1)
 
         if msg is not None:
-            if not args.debug:
-                cam.do_command(msg)
+            cam.do_command(msg)
 
         cam.loop()
 
