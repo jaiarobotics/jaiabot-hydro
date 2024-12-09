@@ -30,6 +30,9 @@ def main():
         try:
             command = text_format.Parse(command_string, CameraCommand())
             port.write(command)
+
+            response = port.read(CameraResponse)
+            log.info(f'response = {response}')
         except Exception as e:
             print(e)
 

@@ -13,6 +13,9 @@ from typing import *
 from jaia_serial import *
 
 
+CAMERA_DRIVER_VERSION = 1
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='JaiaBot Camera Driver')
     parser.add_argument('--device', required=True, help='Serial device to listen for camera commands')
@@ -96,10 +99,19 @@ def main():
     port = JaiaProtobufOverSerial(args.device)
 
     while True:
-        msg = port.read(CameraCommand, timeout=0.1)
+        command = port.read(CameraCommand, timeout=0.1)
 
-        if msg is not None:
-            cam.do_command(msg)
+        if command is not None:
+
+            response = CameraResponse()
+            response.id = command.id
+
+            if command.type == CameraCommand.CameraCommandType.GET_METADATA:
+                response.metadata.driver_version = CAMERA_DRIVER_VERSION
+
+            cam.do_command(command)
+
+            port.write(response)
 
         cam.loop()
 

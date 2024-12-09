@@ -4,18 +4,28 @@ package jaiabot.protobuf;
 
 message CameraCommand
 {
+    required int32 id = 1;
+
     enum CameraCommandType
     {
         START_IMAGES = 0;
         STOP_IMAGES = 1;
         START_VIDEO = 2;
         STOP_VIDEO = 3;
+        GET_METADATA = 4;
     }
 
-    required CameraCommandType type = 1;
-    optional double image_capture_interval = 2;
+    required CameraCommandType type = 2;
+    optional double image_capture_interval = 3;
 }
 
 message CameraResponse
 {
+    required int32 id = 1;
+
+    message Metadata {
+        optional int32 driver_version = 1;
+    }
+
+    optional Metadata metadata = 2;
 }
