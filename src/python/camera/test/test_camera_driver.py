@@ -3,8 +3,9 @@
 # JaiaBot Camera Driver version 0.0.1 alpha
 
 
-from camera_driver_pb2 import *
-import logging, argparse, jaia_serial
+from jaiabot.messages.camera_driver_pb2 import *
+import logging, argparse
+from jaia_serial import JaiaProtobufOverSerial
 from google.protobuf import text_format
 
 
@@ -23,7 +24,7 @@ def parse_args():
 def main():
 
     print(f'Using device {args.device}')
-    port = jaia_serial.JaiaProtobufOverSerial(args.device)
+    port = JaiaProtobufOverSerial(args.device)
 
     while True:
         command_string = input('Input command in protobuf string format >> ')

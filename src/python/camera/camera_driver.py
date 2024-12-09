@@ -6,11 +6,12 @@
 import time
 import os
 import argparse
-from camera_driver_pb2 import *
+from jaiabot.messages.camera_driver_pb2 import *
 import logging
 import datetime
 from typing import *
 from jaia_serial import *
+import subprocess
 
 
 CAMERA_DRIVER_VERSION = 1
@@ -46,14 +47,9 @@ class MockCamera:
 class Camera:
 
     def __init__(self):
-        from picamera2 import Picamera2
-        from picamera2.encoders import H264Encoder
-
-        self.cam = Picamera2()
-        self.encoder = H264Encoder(10000000)
-
         self.image_capture_interval = None
         self.last_image_capture = 0.0
+        self.videoprocess = None
 
         self.output_dir = datetime.datetime.now().strftime('%Y-%b-%d')
         os.makedirs(self.output_dir, exist_ok=True)
@@ -70,13 +66,13 @@ class Camera:
             
 
         if command.type == CameraCommand.CameraCommandType.START_VIDEO:
-            video_config = self.cam.create_video_configuration()
-            self.cam.configure(video_config)
-            self.cam.start_recording(self.encoder, f'{self.output_dir}/video-{now_string()}.h264')
+            cmd = f'libcamera-vid --codec libav -o {self.output_dir}/video-{now_string()}.mp4'
+            self.videoprocess = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
         
         if command.type == CameraCommand.CameraCommandType.STOP_VIDEO:
-            self.cam.stop_recording()
+            self.videoprocess.terminate()
+            self.videoprocess.wait()
 
 
     def loop(self):
@@ -84,10 +80,7 @@ class Camera:
             t = time.time()
             if t - self.last_image_capture > self.image_capture_interval:
                 self.last_image_capture = t
-
-                capture_config = self.cam.create_still_configuration()
-                self.cam.start(show_preview=False)
-                self.cam.switch_mode_and_capture_file(capture_config, f'{self.output_dir}/image-{now_string()}.jpg')
+                os.system(f'libcamera-still -t 1 -o {self.output_dir}/image-{now_string()}.jpg')
 
 
 def main():
