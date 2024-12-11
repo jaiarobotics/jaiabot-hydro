@@ -397,9 +397,12 @@ void jaiabot::apps::SimulatorTranslation::process_nav(const CMOOSMsg& msg)
         // randomize temperature
         temperature += temperature_distribution_(generator_);
 
+        using goby::util::seawater::bar;
+
         // construct PressureTemperatureData protobuf message
         jaiabot::protobuf::PressureTemperatureData pressure_temperature_data;
-        pressure_temperature_data.set_pressure_raw(pressure.value());
+        pressure_temperature_data.set_pressure_raw(
+            quantity<decltype(si::milli * bar)>(pressure).value());
         pressure_temperature_data.set_temperature(temperature);
         pressure_temperature_data.set_sensor_type(jaiabot::protobuf::PressureSensorType::BAR30);
 
