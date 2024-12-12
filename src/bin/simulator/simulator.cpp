@@ -399,8 +399,8 @@ void jaiabot::apps::SimulatorTranslation::process_nav(const CMOOSMsg& msg)
 
         using goby::util::seawater::bar;
 
-        // construct PressureTemperatureData protobuf message
         jaiabot::protobuf::PressureTemperatureData pressure_temperature_data;
+        // convert pressure from decibars to millibars to mimic output of BARXX sensor
         pressure_temperature_data.set_pressure_raw(
             quantity<decltype(si::milli * bar)>(pressure).value());
         pressure_temperature_data.set_temperature(temperature);
