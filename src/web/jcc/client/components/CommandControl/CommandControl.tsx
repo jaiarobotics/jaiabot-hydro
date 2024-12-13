@@ -2540,8 +2540,9 @@ export default class CommandControl extends React.Component {
     }
 
     /**
-     * Handler for when the user clicks on jcc
+     * Handler for when a user clicks in the JCC
      *
+     * @return {void}
      */
     handleJccContainerClick() {
         if (!document.fullscreenElement && this.isMobile) {
