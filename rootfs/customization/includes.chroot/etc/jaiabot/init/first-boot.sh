@@ -13,7 +13,7 @@ CONFIG_FILE="$SSH_DIR/config"
 USING_PRESEED=false
 if [ -e "$PRESEED_DIR/first-boot.preseed" ]; then
    USING_PRESEED=true
-   source /boot/firmware/jaiabot/init/first-boot.preseed
+   source "$PRESEED_DIR/first-boot.preseed"
 fi
 
 INCLUDES_HUB_KEYS=false
@@ -271,7 +271,7 @@ echo "JAIABOT_FIRST_BOOT_DATE=\"`date -u`\"" >> /etc/jaiabot/version
 if [[ "$USING_PRESEED" = "true" ]]; then
     # avoid re-running with same preseed
     mount -o remount,rw /boot/firmware
-    mv /boot/firmware/jaiabot/init/first-boot.preseed /boot/firmware/jaiabot/init/first-boot.preseed.complete
+    mv "$PRESEED_DIR/first-boot.preseed" "$PRESEED_DIR/first-boot.preseed.complete"
     mount -o remount,ro /boot/firmware
 fi
 
