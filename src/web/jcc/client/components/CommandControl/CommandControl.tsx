@@ -547,7 +547,6 @@ export default class CommandControl extends React.Component {
 
         // Hotkeys
         document.onkeydown = this.keyPressed.bind(this);
-        document.onclick = this.jccClicked.bind(this);
 
         info("Welcome to Jaia Command & Control!");
 
@@ -719,16 +718,6 @@ export default class CommandControl extends React.Component {
                     this.toggleBot(botId);
                     return;
                 }
-        }
-    }
-
-    /**
-     * Handler for when the user clicks on jcc
-     *
-     */
-    jccClicked() {
-        if (!document.fullscreenElement && this.isMobile) {
-            document.documentElement.requestFullscreen();
         }
     }
 
@@ -2550,7 +2539,15 @@ export default class CommandControl extends React.Component {
         }
     }
 
+    /**
+     * Handler for when the user clicks on jcc
+     *
+     */
     handleJccContainerClick() {
+        if (!document.fullscreenElement && this.isMobile) {
+            document.documentElement.requestFullscreen();
+        }
+
         if (this.state.mode === "newRallyPoint") {
             this.setState({ mode: "" });
             map.getTargetElement().style.cursor = "default";

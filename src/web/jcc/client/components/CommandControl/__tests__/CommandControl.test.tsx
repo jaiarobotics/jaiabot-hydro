@@ -26,7 +26,6 @@ const mockGlobalContext1: GlobalContextType = {
     showHubDetails: false,
     hubAccordionStates: mockHubAccordionStates1,
     isRCMode: false,
-    isFullscreen: false,
 };
 
 const mockGlobalDispatch = () => {};
