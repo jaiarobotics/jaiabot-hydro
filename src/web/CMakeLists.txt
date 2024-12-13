@@ -27,6 +27,7 @@ add_custom_target(npm_dependencies
 
 file(GLOB_RECURSE jcc_src_files FOLLOW_SYMLINKS LIST_DIRECTORIES false ${CMAKE_CURRENT_SOURCE_DIR}/jcc/*)
 file(GLOB jed_src_files ${CMAKE_CURRENT_SOURCE_DIR}/jed/*)
+file(GLOB RECURSE web_lib_files ${CMAKE_CURRENT_SOURCE_DIR}/libs/*)
 file(GLOB_RECURSE shared_src_files FOLLOW_SYMLINKS LIST_DIRECTORIES false ${CMAKE_CURRENT_SOURCE_DIR}/shared/*)
 
 ###############################################################################
@@ -50,7 +51,7 @@ add_custom_command(OUTPUT ${web_out_dir}/jcc/client.js ${web_out_dir}/jed/script
   ARGS --mode production --env OUTPUT_DIR=${web_out_dir} --stats errors-only
   WORKING_DIRECTORY ${intermediate_web_dir}/
   COMMENT "Building jcc and jed"
-  DEPENDS npm_dependencies ${jcc_src_files} ${jed_src_files} ${shared_src_files}
+  DEPENDS npm_dependencies ${jcc_src_files} ${jed_src_files} ${shared_src_files} ${web_lib_files}
   )
 add_custom_target(jcc_jed
   ALL
