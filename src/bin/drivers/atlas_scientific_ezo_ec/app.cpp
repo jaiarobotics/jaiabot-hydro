@@ -26,14 +26,16 @@
 #include <goby/middleware/marshalling/protobuf.h>
 // this space intentionally left blank
 #include <dccl/codec.h>
-#include <goby/util/constants.h>
-#include <goby/zeromq/application/multi_thread.h>
 #include <goby/middleware/io/udp_point_to_point.h>
+#include <goby/util/constants.h>
+#include <goby/util/seawater/units.h>
+#include <goby/zeromq/application/multi_thread.h>
 
 #include "config.pb.h"
 #include "jaiabot/groups.h"
 #include "jaiabot/messages/health.pb.h"
 #include "jaiabot/messages/moos.pb.h"
+#include "jaiabot/messages/pressure_temperature.pb.h"
 #include "jaiabot/messages/salinity.pb.h"
 
 using goby::glog;
@@ -49,6 +51,9 @@ namespace apps
 {
 constexpr goby::middleware::Group atlas_salinity_udp_in{"atlas_salinity_udp_in"};
 constexpr goby::middleware::Group atlas_salinity_udp_out{"atlas_salinity_udp_out"};
+
+constexpr goby::middleware::Group bar30_udp_in{"bar30_udp_in"};
+constexpr goby::middleware::Group bar30_udp_out{"bar30_udp_out"};
 
 class AtlasSalinityPublisher : public zeromq::MultiThreadApplication<config::AtlasSalinityPublisher>
 {
@@ -134,34 +139,46 @@ jaiabot::apps::AtlasSalinityPublisher::AtlasSalinityPublisher()
             last_atlas_salinity_report_time_ = goby::time::SteadyClock::now();
         });
 
-    interprocess().subscribe<jaiabot::groups::moos>([this](const protobuf::MOOSMessage& moos_msg) {
-        if (moos_msg.key() == "JAIABOT_MISSION_STATE")
-        {
-            if (moos_msg.svalue() == "IN_MISSION__UNDERWAY__MOVEMENT__TRANSIT")
-            {
-                helm_ivp_in_mission_ = true;
-            }
-            else
-            {
-                helm_ivp_in_mission_ = false;
-            }
-        }
-    });
+    std::cout << index << std::endl;
 
-    interprocess().subscribe<jaiabot::groups::pressure_temperature>(
-        [this](const goby::middleware::protobuf::IOData& data)
+    interprocess().subscribe<bar30_udp_in>(
+        [this](const goby::middleware::protobuf::IOData& bar_data)
         {
-            auto s = std::string(data.data());
+            auto s = std::string(bar_data.data());
             auto fields = split(s, ",");
 
-            int index = 0;
-            auto date_string = fields[index++];
+            using goby::util::seawater::bar;
+            namespace celsius = boost::units::celsius;
+            using boost::units::absolute;
 
-            jaiabot::protobuf::SalinityData output;
+            auto date_string = fields[0];
+            auto version_string = fields[1];
+            auto p_mbar = std::stod(fields[2]) * si::milli * bar;
+            auto t_celsius = std::stod(fields[3]) * absolute<celsius::temperature>();
 
-            output.set_pressure(std::stod(fields[2]));
-            output.set_temperature(std::stod(fields[3]));
-        })
+            protobuf::PressureTemperatureData data;
+
+            data.set_pressure_raw_with_units(p_mbar);
+            data.set_temperature_with_units(t_celsius);
+
+            interthread().publish<atlas_salinity_udp_out>(data);
+        });
+
+    interprocess().subscribe<jaiabot::groups::moos>(
+        [this](const protobuf::MOOSMessage& moos_msg)
+        {
+            if (moos_msg.key() == "JAIABOT_MISSION_STATE")
+            {
+                if (moos_msg.svalue() == "IN_MISSION__UNDERWAY__MOVEMENT__TRANSIT")
+                {
+                    helm_ivp_in_mission_ = true;
+                }
+                else
+                {
+                    helm_ivp_in_mission_ = false;
+                }
+            }
+        });
 }
 
 void jaiabot::apps::AtlasSalinityPublisher::loop()

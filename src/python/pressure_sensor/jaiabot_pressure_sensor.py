@@ -95,7 +95,7 @@ class Sensor:
 class SensorSimulator:
 
     def __init__(self):
-        pass
+        pass 
 
     def setup(self):
         pass
