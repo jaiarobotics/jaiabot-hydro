@@ -30,6 +30,12 @@ ssh-rsa AAAA_B64_KEY username
 EOM
 )
 
+# hub keys (/etc/jaiabot/ssh/hub_authorized_keys)
+jaia_hub_authorized_keys=$(cat << EOM
+ssh-rsa AAAA_B64_KEY username
+EOM
+)
+
 #########################################################
 # Preseed jaiabot-embedded package debconf queries
 # See jaiabot-embedded.templates from jaiabot-debian 

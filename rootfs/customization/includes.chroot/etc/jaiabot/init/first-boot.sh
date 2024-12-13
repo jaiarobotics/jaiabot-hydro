@@ -6,11 +6,30 @@ set -e -u
 # on first boot
 # 
 
+PRESEED_DIR="/boot/firmware/jaiabot/init"
+SSH_DIR="/home/jaia/.ssh"
+CONFIG_FILE="$SSH_DIR/config"
+
 USING_PRESEED=false
-if [ -e /boot/firmware/jaiabot/init/first-boot.preseed ]; then
+if [ -e "$PRESEED_DIR/first-boot.preseed" ]; then
    USING_PRESEED=true
    source /boot/firmware/jaiabot/init/first-boot.preseed
 fi
+
+INCLUDES_HUB_KEYS=false
+HUB_PRIVATE_KEY=""
+HUB_PUBLIC_KEY=""
+
+# Search for hub ssh key pair
+for PRIVATE in "$PRESEED_DIR/"hub*_fleet*; do
+    PUBLIC="${PRIVATE}.pub"
+    if [ -e "$PRIVATE" ] && [ -e "$PUBLIC" ]; then
+        HUB_PRIVATE_KEY="$PRIVATE"
+        HUB_PUBLIC_KEY="$PUBLIC"
+        INCLUDES_HUB_KEYS=true
+        break
+    fi
+done
 
 source /etc/jaiabot/init/include/wt_tools.sh
 
@@ -182,15 +201,59 @@ run_wt_inputbox jaia_perm_authorized_keys "SSH permanent authorized keys" \
             "Enter permanent authorized public SSH keys as formatted for .ssh/authorized_keys"
 perm_authorized_keys=${WT_TEXT}
 
-mkdir -p /home/jaia/.ssh
-cat << EOF >> /home/jaia/.ssh/authorized_keys
+mkdir -p "$SSH_DIR"
+cat << EOF >> "$SSH_DIR/authorized_keys"
 ${perm_authorized_keys}
 EOF
 
-chown -R jaia:jaia /home/jaia/.ssh
+chown -R jaia:jaia "$SSH_DIR/"
 chown -R jaia:jaia /etc/jaiabot/ssh
+
+run_wt_inputbox jaia_hub_authorized_keys "SSH hub authorized keys" \
+            "Enter hub authorized public SSH keys as formatted for .ssh/authorized_keys"
+hub_authorized_keys=${WT_TEXT}
+
+cat << EOF >> /etc/jaiabot/ssh/hub_authorized_keys
+${hub_authorized_keys}
+EOF
 )
 
+echo "###############################################"
+echo "## Setting up hub ssh key                    ##"
+echo "###############################################"
+
+# If matching files are found, proceed
+if [ "$INCLUDES_HUB_KEYS" = true ]; then
+    echo "Found private key: $HUB_PRIVATE_KEY and public key: $HUB_PUBLIC_KEY. Proceeding with setup..."
+
+    # Create .ssh directory if it doesn't exist
+    mkdir -p "$SSH_DIR/"
+    chmod 700 "$SSH_DIR/"
+
+    # Move the files to the .ssh directory
+    mv "$HUB_PRIVATE_KEY" "$SSH_DIR/"
+    mv "$HUB_PUBLIC_KEY" "$SSH_DIR/"
+
+    # Extract just the base filename for use in config
+    PRIVATE_BASENAME=$(basename "$HUB_PRIVATE_KEY")
+
+    # Set permissions for the keys
+    chmod 600 "$SSH_DIR/$PRIVATE_BASENAME"
+    chmod 644 "$SSH_DIR/$PRIVATE_BASENAME.pub"
+
+    # Create the SSH config file and Clear the file if it exists
+    > "$CONFIG_FILE" 
+    cat >> "$CONFIG_FILE" <<EOL
+Host 10.23.*.*
+    StrictHostKeyChecking accept-new
+    IdentityFile $SSH_DIR/$PRIVATE_BASENAME 
+EOL
+
+    # Set permissions for the config file
+    chmod 600 "$CONFIG_FILE"
+
+    echo "Setup completed. SSH keys and config file are in $SSH_DIR."
+fi
 
 echo "###############################################################"
 echo "## Removing first-boot hooks so that this does not run again ##"
