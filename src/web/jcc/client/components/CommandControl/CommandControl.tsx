@@ -296,6 +296,8 @@ export default class CommandControl extends React.Component {
     missionHistory: MissionInterface[];
     lastBotPathPointUtime: number = 0;
     botPathFeatures: { [key: number]: OlFeature<OlLineString> } = {};
+    // Source: Facebook's Slingshot
+    isMobile: boolean = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     constructor(props: Props) {
         super(props);
@@ -545,6 +547,7 @@ export default class CommandControl extends React.Component {
 
         // Hotkeys
         document.onkeydown = this.keyPressed.bind(this);
+        document.onclick = this.jccClicked.bind(this);
 
         info("Welcome to Jaia Command & Control!");
 
@@ -716,6 +719,16 @@ export default class CommandControl extends React.Component {
                     this.toggleBot(botId);
                     return;
                 }
+        }
+    }
+
+    /**
+     * Handler for when the user clicks on jcc
+     *
+     */
+    jccClicked() {
+        if (!document.fullscreenElement && this.isMobile) {
+            document.documentElement.requestFullscreen();
         }
     }
 
