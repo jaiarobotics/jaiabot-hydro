@@ -66,7 +66,10 @@ class Camera:
             
 
         if command.type == CameraCommand.CameraCommandType.START_VIDEO:
-            cmd = f'libcamera-vid --codec libav -o {self.output_dir}/video-{now_string()}.mp4'
+            cmd = [
+                'libcamera-vid', '--codec', 'libav', '-o',
+                f'{self.output_dir}/video-{now_string()}.mp4'
+            ]
             self.videoprocess = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
         
