@@ -300,6 +300,8 @@ export default class CommandControl extends React.Component {
     missionHistory: MissionInterface[];
     lastBotPathPointUtime: number = 0;
     botPathFeatures: { [key: number]: OlFeature<OlLineString> } = {};
+    // Source: Facebook's Slingshot
+    isMobile: boolean = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     constructor(props: Props) {
         super(props);
@@ -2541,7 +2543,16 @@ export default class CommandControl extends React.Component {
         }
     }
 
+    /**
+     * Handler for when a user clicks in the JCC
+     *
+     * @return {void}
+     */
     handleJccContainerClick() {
+        if (!document.fullscreenElement && this.isMobile) {
+            document.documentElement.requestFullscreen();
+        }
+
         if (this.state.mode === "newRallyPoint") {
             this.setState({ mode: "" });
             map.getTargetElement().style.cursor = "default";
