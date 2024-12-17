@@ -5,7 +5,7 @@ import { MultiPoint as OlMultiPoint } from "ol/geom";
 import { Style as OlStyle } from "ol/style";
 import * as Styles from "../../shared/Styles";
 import { GeographicCoordinate } from "../../shared/JAIAProtobuf";
-import { MissionParams } from "../../containers/MissionSettings/MissionSettings";
+import { MissionParams } from "../../containers/MissionSettingsPanel/MissionSettingsPanel";
 import { MissionTask } from "../../shared/JAIAProtobuf";
 import { CommandList } from "../missions";
 import { deepcopy } from "../../shared/Utilities";

@@ -18,7 +18,7 @@ import { Geometry } from "ol/geom";
 import { Feature as OlFeature } from "ol";
 import { CustomAlert } from "../../shared/CustomAlert";
 
-import "./MissionSettings.less";
+import "./MissionSettingsPanel.less";
 
 export interface MissionSettings {
     endTask: MissionTask;

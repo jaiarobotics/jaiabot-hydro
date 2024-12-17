@@ -40,7 +40,7 @@ import {
     MissionSettingsPanel,
     MissionSettings,
     MissionParams,
-} from "../MissionSettings/MissionSettings";
+} from "../MissionSettingsPanel/MissionSettingsPanel";
 import { PodStatus, PortalBotStatus, PortalHubStatus, Metadata } from "../../shared/PortalStatus";
 import { divePacketIconStyle, driftPacketIconStyle, getRallyStyle } from "../../shared/Styles";
 import { createBotCourseOverGroundFeature, createBotHeadingFeature } from "../../shared/BotFeature";
