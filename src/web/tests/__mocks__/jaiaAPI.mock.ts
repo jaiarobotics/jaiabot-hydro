@@ -1,6 +1,6 @@
 // Mock JaiaAPI, replace the hit method on the jaiaAPI instance
 // Import the real module to access the original jaiaAPI instance
-const originalModule = jest.requireActual("../../jcc/common/JaiaAPI");
+const originalModule = jest.requireActual("../../utils/jaia-api");
 
 originalModule.jaiaAPI.hit = jest
     .fn()
