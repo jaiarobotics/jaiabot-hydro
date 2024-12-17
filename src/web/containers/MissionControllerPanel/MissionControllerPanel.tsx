@@ -3,7 +3,7 @@ import RunPanel from "./RunPanel/RunPanel";
 import { JaiaAPI } from "../../utils/jaia-api";
 import { Missions } from "../../missions/missions";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
-import MissionSpeedSettings from "../MissionSpeedSettings/MissionSpeedSettings";
+import MissionSpeedSettings from "./MissionSpeedSettings/MissionSpeedSettings";
 
 import Icon from "@mdi/react";
 import Button from "@mui/material/Button";
