@@ -9,7 +9,7 @@ import { GlobalActions } from "../../context/Global/GlobalActions";
 import { Map } from "ol";
 
 import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
-import SetHubLocation from "../SetHubLocation/SetHubLocation";
+import SetHubLocation from "./SetHubLocation/SetHubLocation";
 import ScanForBotPanel from "../__engineering__/ScanForBotPanel/ScanForBotPanel";
 import QueryBotStatusPanel from "../__engineering__/QueryBotStatusPanel/QueryBotStatusPanel";
 import { JaiaAPI } from "../../utils/jaia-api";
