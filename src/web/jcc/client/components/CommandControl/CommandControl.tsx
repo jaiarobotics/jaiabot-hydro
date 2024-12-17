@@ -2162,6 +2162,7 @@ export default class CommandControl extends React.Component {
                     goalIndex: feature.get("goalIndex"),
                     botId: feature.get("botId"),
                     runNumber: feature.get("runNumber"),
+                    moveWptMode: false,
                 };
                 this.setState({ goalBeingEdited }, () =>
                     this.setVisiblePanel(PanelType.GOAL_SETTINGS),
@@ -2390,7 +2391,13 @@ export default class CommandControl extends React.Component {
         }
         this.setState({ goalBeingEdited });
     }
-
+    toggleMoveWpt(evt: React.ChangeEvent<HTMLInputElement>) {
+        const goalBeingEdited = this.state.goalBeingEdited;
+        if (goalBeingEdited) {
+            goalBeingEdited.moveWptMode = !goalBeingEdited?.moveWptMode;
+        }
+        this.setState({ goalBeingEdited });
+    }
     /**
      * Moves a waypoint from its existing location to a new location selected by the operator
      *
@@ -4197,6 +4204,7 @@ export default class CommandControl extends React.Component {
                         runList={this.getRunList()}
                         runNumber={goalBeingEdited?.runNumber}
                         enableEcho={this.state.enableEcho}
+                        moveWptMode={this.state.goalBeingEdited.moveWptMode}
                         setRunList={this.setRunList.bind(this)}
                         onChange={() => {
                             this.setRunList(this.getRunList());
@@ -4208,6 +4216,7 @@ export default class CommandControl extends React.Component {
                         setVisiblePanel={this.setVisiblePanel.bind(this)}
                         setMoveWptMode={this.setMoveWptMode.bind(this)}
                         toggleEditMode={this.toggleEditMode.bind(this)}
+                        toggleMoveWpt={this.toggleMoveWpt.bind(this)}
                         updateMissionHistory={this.updateMissionHistory.bind(this)}
                     />
                 );
