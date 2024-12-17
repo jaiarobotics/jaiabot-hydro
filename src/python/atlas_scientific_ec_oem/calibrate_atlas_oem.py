@@ -232,6 +232,9 @@ def pollEC():
                 new_file.write(f'time: {datetime.datetime.now()}  EC: {ec: 6.0f}  delta: {delta_percent: 3.2f}%\n')
                 ec_old = ec
                 time.sleep(1)
+            except IOError:
+                print("IO Error: Continuing anyway...")
+                continue
             except KeyboardInterrupt:
                 print("User Interrupt")
                 break
