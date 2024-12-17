@@ -99,6 +99,7 @@ job-template-amd64: &job-template-amd64
         name: Run tests
         command: |
           cd build && ctest --output-on-failure
+          cd intermediate/web && npm test
 
 job-template-deb-amd64: &job-template-deb-amd64
   <<: *job-template-amd64
