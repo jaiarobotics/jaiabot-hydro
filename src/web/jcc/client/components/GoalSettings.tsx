@@ -2,10 +2,10 @@ import React, { ChangeEvent } from "react";
 
 import { Map } from "ol";
 
-import JaiaToggle from "./JaiaToggle";
+import JaiaToggle from "./JaiaToggle/JaiaToggle";
 import { Goal } from "./shared/JAIAProtobuf";
 import { CustomAlert } from "./shared/CustomAlert";
-import { TaskSettingsPanel } from "./TaskSettingsPanel";
+import { TaskSettingsPanel } from "./TaskSettingsPanel/TaskSettingsPanel";
 import { MissionInterface, PanelType } from "./CommandControl/CommandControl";
 import { adjustAccordionScrollPosition } from "./shared/Utilities";
 import EditModeToggle from "./EditModeToggle";

@@ -24,7 +24,7 @@ import { BotListPanel } from "../BotListPanel";
 import { Interactions } from "../Interactions";
 import { GlobalActions } from "../../../../context/actions/GlobalActions";
 import { SettingsPanel } from "../SettingsPanel";
-import { RallyPointPanel } from "../RallyPointPanel";
+import { RallyPointPanel } from "../RallyPointPanel/RallyPointPanel";
 import { TaskPacketPanel } from "../TaskPacketPanel";
 import { SurveyExclusions } from "../SurveyExclusions";
 import { LoadMissionPanel } from "../LoadMissionPanel";
@@ -296,6 +296,8 @@ export default class CommandControl extends React.Component {
     missionHistory: MissionInterface[];
     lastBotPathPointUtime: number = 0;
     botPathFeatures: { [key: number]: OlFeature<OlLineString> } = {};
+    // Source: Facebook's Slingshot
+    isMobile: boolean = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     constructor(props: Props) {
         super(props);
@@ -2537,7 +2539,16 @@ export default class CommandControl extends React.Component {
         }
     }
 
+    /**
+     * Handler for when a user clicks in the JCC
+     *
+     * @return {void}
+     */
     handleJccContainerClick() {
+        if (!document.fullscreenElement && this.isMobile) {
+            document.documentElement.requestFullscreen();
+        }
+
         if (this.state.mode === "newRallyPoint") {
             this.setState({ mode: "" });
             map.getTargetElement().style.cursor = "default";

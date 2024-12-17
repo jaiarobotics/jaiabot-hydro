@@ -1,7 +1,7 @@
 import React from "react";
 import Map from "ol/Map";
 import { Feature as GjFeature, LineString as GjLineString } from "geojson";
-import JaiaToggle from "./JaiaToggle";
+import JaiaToggle from "./JaiaToggle/JaiaToggle";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import {
     BotStatus,
@@ -12,7 +12,7 @@ import {
 } from "./shared/JAIAProtobuf";
 import { getGeographicCoordinate } from "./shared/Utilities";
 import { FormControl, MenuItem } from "@mui/material";
-import { TaskSettingsPanel } from "./TaskSettingsPanel";
+import { TaskSettingsPanel } from "./TaskSettingsPanel/TaskSettingsPanel";
 import { MissionInterface } from "./CommandControl/CommandControl";
 import { Geometry } from "ol/geom";
 import { Feature as OlFeature } from "ol";
