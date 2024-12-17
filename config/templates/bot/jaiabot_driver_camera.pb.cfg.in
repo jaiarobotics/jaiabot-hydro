@@ -1,0 +1,7 @@
+$app_block
+$interprocess_block
+
+serial_camera {
+    port: "/tmp/camera_mock_0"
+    baud: 9600
+}

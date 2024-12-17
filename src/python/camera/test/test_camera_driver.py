@@ -12,6 +12,7 @@ from google.protobuf import text_format
 def parse_args():
     parser = argparse.ArgumentParser(description='JaiaBot Camera Driver Tester')
     parser.add_argument('--device', required=True, help='Serial device to send camera commands')
+    parser.add_argument('--slave', action="store_true", help='Simulate the camera driver slave, instead of the master')
 
     global args
     args = parser.parse_args()
@@ -23,16 +24,23 @@ def parse_args():
 
 def main():
 
+    if args.slave:
+        CommandType = CameraResponse
+        ResponseType = CameraCommand
+    else:
+        CommandType = CameraCommand
+        ResponseType = CameraResponse
+
     print(f'Using device {args.device}')
     port = JaiaProtobufOverSerial(args.device)
 
     while True:
         command_string = input('Input command in protobuf string format >> ')
         try:
-            command = text_format.Parse(command_string, CameraCommand())
+            command = text_format.Parse(command_string, CommandType())
             port.write(command)
 
-            response = port.read(CameraResponse)
+            response = port.read(ResponseType)
             log.info(f'response = {response}')
         except Exception as e:
             print(e)

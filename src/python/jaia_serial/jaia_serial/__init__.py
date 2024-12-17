@@ -69,7 +69,14 @@ class JaiaProtobufOverSerial:
         data: bytes = message.SerializeToString()
 
         self.port.write(b'JAIA')
+        log.debug('Write JAIA')
+
         self.port.write(len(data).to_bytes(2, 'big'))
+        log.debug(f'Size: {len(data)}')
+
         self.port.write(crc32(data).to_bytes(4, 'big'))
+        log.debug(f'CRC32: {crc32(data)}')
+
         self.port.write(data)
+        log.debug(f'Data: {data}')
 
