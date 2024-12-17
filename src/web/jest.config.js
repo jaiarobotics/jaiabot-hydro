@@ -197,6 +197,8 @@ const config = {
 
     // Whether to use watchman for file crawling
     // watchman: true,
+    testTimeout: 20000,
+    maxWorkers: 2,
 };
 
 module.exports = config;
