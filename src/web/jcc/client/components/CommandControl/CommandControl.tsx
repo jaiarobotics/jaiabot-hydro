@@ -2149,6 +2149,13 @@ export default class CommandControl extends React.Component {
             // Clicked on goal / waypoint
             const goal = feature.get("goal");
             if (goal) {
+                // Ignore event if this waypoint is already being edited
+                if (
+                    feature.get("runNumber") == this.state.goalBeingEdited?.runNumber &&
+                    feature.get("goalIndex") == this.state.goalBeingEdited?.goalIndex
+                ) {
+                    return false;
+                }
                 const goalBeingEdited = {
                     goal: goal,
                     originalGoal: deepcopy(goal),
