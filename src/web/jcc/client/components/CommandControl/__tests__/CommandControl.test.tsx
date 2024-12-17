@@ -1,5 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-
+import { act, render, screen, fireEvent } from "@testing-library/react";
 import CommandControl, { Props } from "../CommandControl";
 import {
     GlobalContextType,
@@ -26,7 +25,6 @@ const mockGlobalContext1: GlobalContextType = {
     showHubDetails: false,
     hubAccordionStates: mockHubAccordionStates1,
     isRCMode: false,
-    isFullscreen: false,
 };
 
 const mockGlobalDispatch = () => {};
@@ -36,9 +34,21 @@ const mockProps1: Props = {
     globalDispatch: mockGlobalDispatch,
 };
 
+// Mock JaiaAPI, replace the hit method on the jaiaAPI instance
+jest.mock("../../../../common/JaiaAPI", () =>
+    require("../../../../../tests/__mocks__/jaiaAPI.mock.ts"),
+);
+
+// Mock the CustomLayers, replace  createCustomLayerGroup
+jest.mock("../../CustomLayers", () =>
+    require("../../../../../tests/__mocks__/customLayers.mock.ts"),
+);
+
 describe("JaiaAbout integration tests", () => {
-    test("JaiaAbout panel opens when Jaia info button is clicked", () => {
-        render(<CommandControl {...mockProps1} />);
+    test("JaiaAbout panel opens when Jaia info button is clicked", async () => {
+        await act(async () => {
+            render(<CommandControl {...mockProps1} />);
+        });
         const jaiaInfoButton = screen.getByRole("img", { name: "Jaia info button" });
         fireEvent.click(jaiaInfoButton);
         const panelElement = screen.getByTestId("jaia-about-panel");
