@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { TaskSettingsPanel, Props } from "../TaskSettingsPanel";
 import { MissionTask, TaskType } from "../../../shared/JAIAProtobuf";
-import { validateTask } from "../../../tests/helpers/validate-task/validate-task";
+import { validateTask } from "./utils/validate-task";
 
 let mockProps: Props = {
     isEditMode: true,

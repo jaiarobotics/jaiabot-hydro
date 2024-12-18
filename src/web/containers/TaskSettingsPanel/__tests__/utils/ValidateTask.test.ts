@@ -1,6 +1,6 @@
-import { validateTask } from "../validate-task";
+import { validateTask } from "./validate-task";
 import { MissionTask, TaskType } from "../../../../shared/JAIAProtobuf";
-import testCases from "./missionTaskTestCases.json";
+import testCases from "../cases/missionTaskTestCases.json";
 
 type TaskParams = {
     description: string;

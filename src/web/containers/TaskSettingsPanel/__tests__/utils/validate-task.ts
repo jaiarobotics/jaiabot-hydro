@@ -1,4 +1,4 @@
-import { MissionTask, TaskType } from "../../../shared/JAIAProtobuf";
+import { MissionTask, TaskType } from "../../../../shared/JAIAProtobuf";
 //Helper function to verify the task created by the Panel is valid
 export function validateTask(task?: MissionTask): void {
     if (!task) {
@@ -62,3 +62,7 @@ export function validateTask(task?: MissionTask): void {
             throw new Error(`Unhandled TaskType: ${task.type}`);
     }
 }
+
+describe("Placeholder to prevent jest from failing due to no explicit test for a file inside __test__ dir", () => {
+    test("Placeholder test", () => {});
+});
