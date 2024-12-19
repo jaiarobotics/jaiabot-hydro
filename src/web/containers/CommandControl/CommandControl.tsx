@@ -2395,13 +2395,20 @@ export default class CommandControl extends React.Component {
         }
         this.setState({ goalBeingEdited });
     }
-    toggleMoveWpt(evt: React.ChangeEvent<HTMLInputElement>) {
+
+    /**
+     * Switches between true/false for the state moveWptMode
+     *
+     * @returns {void}
+     */
+    toggleMoveWpt() {
         const goalBeingEdited = this.state.goalBeingEdited;
         if (goalBeingEdited) {
             goalBeingEdited.moveWptMode = !goalBeingEdited?.moveWptMode;
         }
         this.setState({ goalBeingEdited });
     }
+
     /**
      * Moves a waypoint from its existing location to a new location selected by the operator
      *
