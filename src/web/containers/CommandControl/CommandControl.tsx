@@ -2153,12 +2153,20 @@ export default class CommandControl extends React.Component {
             // Clicked on goal / waypoint
             const goal = feature.get("goal");
             if (goal) {
+                // Ignore event if this waypoint is already being edited
+                if (
+                    feature.get("runNumber") == this.state.goalBeingEdited?.runNumber &&
+                    feature.get("goalIndex") == this.state.goalBeingEdited?.goalIndex
+                ) {
+                    return false;
+                }
                 const goalBeingEdited = {
                     goal: goal,
                     originalGoal: deepcopy(goal),
                     goalIndex: feature.get("goalIndex"),
                     botId: feature.get("botId"),
                     runNumber: feature.get("runNumber"),
+                    moveWptMode: false,
                 };
                 this.setState({ goalBeingEdited }, () =>
                     this.setVisiblePanel(PanelType.GOAL_SETTINGS),
@@ -2384,6 +2392,19 @@ export default class CommandControl extends React.Component {
         const goalBeingEdited = this.state.goalBeingEdited;
         if (goalBeingEdited) {
             goalBeingEdited.moveWptMode = canMoveWpt;
+        }
+        this.setState({ goalBeingEdited });
+    }
+
+    /**
+     * Switches between true/false for the state moveWptMode
+     *
+     * @returns {void}
+     */
+    toggleMoveWpt() {
+        const goalBeingEdited = this.state.goalBeingEdited;
+        if (goalBeingEdited) {
+            goalBeingEdited.moveWptMode = !goalBeingEdited?.moveWptMode;
         }
         this.setState({ goalBeingEdited });
     }
@@ -4194,6 +4215,7 @@ export default class CommandControl extends React.Component {
                         runList={this.getRunList()}
                         runNumber={goalBeingEdited?.runNumber}
                         enableEcho={this.state.enableEcho}
+                        moveWptMode={this.state.goalBeingEdited.moveWptMode}
                         setRunList={this.setRunList.bind(this)}
                         onChange={() => {
                             this.setRunList(this.getRunList());
@@ -4205,6 +4227,7 @@ export default class CommandControl extends React.Component {
                         setVisiblePanel={this.setVisiblePanel.bind(this)}
                         setMoveWptMode={this.setMoveWptMode.bind(this)}
                         toggleEditMode={this.toggleEditMode.bind(this)}
+                        toggleMoveWpt={this.toggleMoveWpt.bind(this)}
                         updateMissionHistory={this.updateMissionHistory.bind(this)}
                     />
                 );

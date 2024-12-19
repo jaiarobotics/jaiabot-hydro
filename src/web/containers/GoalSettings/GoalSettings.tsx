@@ -28,17 +28,18 @@ interface Props {
     runList: MissionInterface;
     runNumber: number;
     enableEcho: boolean;
+    moveWptMode: boolean;
     onChange: () => void;
     onDoneClick: () => void;
     setVisiblePanel: (panelType: PanelType) => void;
     setMoveWptMode: (canMoveWptMode: boolean, runId: string, goalNum: number) => void;
     setRunList: (runList: MissionInterface) => void;
     toggleEditMode: (evt: React.ChangeEvent, run: RunInterface) => string;
+    toggleMoveWpt: () => void;
     updateMissionHistory: (mission: MissionInterface) => void;
 }
 
 interface State {
-    isChecked: boolean;
     goalIndex: number;
     pauseNumModif: boolean;
     enterNegative: { [direction: string]: boolean };
@@ -52,7 +53,6 @@ export class GoalSettingsPanel extends React.Component {
     constructor(props: Props) {
         super(props);
         this.state = {
-            isChecked: false,
             goalIndex: this.props.goalIndex,
             pauseNumModif: false,
             enterNegative: {
@@ -65,27 +65,6 @@ export class GoalSettingsPanel extends React.Component {
 
     componentWillUnmount() {
         this.props.setMoveWptMode(false, `run-${this.props.runNumber}`, this.props.goalIndex);
-    }
-
-    handleToggleClick() {
-        const updatedIsChecked = !this.state.isChecked;
-        this.setState({ isChecked: updatedIsChecked });
-        this.props.setMoveWptMode(
-            updatedIsChecked,
-            `run-${this.props.runNumber}`,
-            this.props.goalIndex,
-        );
-    }
-
-    isChecked() {
-        if (this.state.goalIndex !== this.props.goalIndex) {
-            this.setState({
-                isChecked: false,
-                goalIndex: this.props.goalIndex,
-            });
-        }
-
-        return this.state.isChecked;
     }
 
     doneClicked() {
@@ -272,7 +251,7 @@ export class GoalSettingsPanel extends React.Component {
                         runIdInEditMode={this.props.runList.runIdInEditMode}
                         run={this.getRun()}
                         label=""
-                        title="ToggleEditMode"
+                        title="Toggle Edit Mode"
                     />
                     <div className="goal-settings-line-break"></div>
                     <div
@@ -280,10 +259,10 @@ export class GoalSettingsPanel extends React.Component {
                     >
                         <div className="goal-settings-label move-label">Tap To Move</div>
                         <JaiaToggle
-                            checked={() => this.isChecked()}
-                            onClick={() => this.handleToggleClick()}
+                            checked={() => this.props.moveWptMode}
+                            onClick={() => this.props.toggleMoveWpt()}
                             label=""
-                            title="Click on map to move goal"
+                            title="Move Waypoint Toggle"
                         />
                     </div>
                     <div
