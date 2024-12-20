@@ -606,7 +606,7 @@ export interface BotDetailsProps {
     setDetailsExpanded: (section: keyof DetailsExpandedState, expanded: boolean) => void;
     isRCModeActive: (botId: number) => boolean;
     setRcMode: (botId: number, rcMode: boolean) => void;
-    toggleEditMode: (run: RunInterface) => boolean;
+    toggleEditMode: (run: RunInterface) => void;
     downloadIndividualBot: (bot: PortalBotStatus, disableMessage: string) => void;
 }
 

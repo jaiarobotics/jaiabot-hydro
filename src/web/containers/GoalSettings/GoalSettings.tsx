@@ -33,7 +33,7 @@ interface Props {
     setVisiblePanel: (panelType: PanelType) => void;
     setMoveWptMode: (canMoveWptMode: boolean, runId: string, goalNum: number) => void;
     setRunList: (runList: MissionInterface) => void;
-    toggleEditMode: (run: RunInterface) => string;
+    toggleEditMode: (run: RunInterface) => void;
     toggleMoveWpt: () => void;
     updateMissionHistory: (mission: MissionInterface) => void;
 }

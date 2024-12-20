@@ -29,7 +29,7 @@ type RunItemProps = {
     unSelectHubOrBot: () => void;
     addDuplicateRun: (run: RunInterface) => void;
     deleteSingleRun: (runId: string) => void;
-    toggleEditMode: (run: RunInterface) => boolean;
+    toggleEditMode: (run: RunInterface) => void;
     toggleShowTableOfWaypoints: (runId: string) => void;
 };
 
