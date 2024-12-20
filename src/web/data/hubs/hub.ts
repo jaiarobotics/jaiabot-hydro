@@ -11,8 +11,8 @@ export class Hub {
     private hubID: number;
     private fleetID: number;
     private healthState: HealthState;
-    private error: Error;
-    private warning: Warning;
+    private errors: Error[];
+    private warnings: Warning[];
     private location: GeographicCoordinate;
     private linuxHardwareStatus: LinuxHardwareStatus;
     private botOffload: BotOffloadData;
@@ -44,20 +44,20 @@ export class Hub {
         this.healthState = healthState;
     }
 
-    getError() {
-        return this.error;
+    getErrors() {
+        return this.errors;
     }
 
-    setError(error: Error) {
-        this.error = error;
+    setErrors(errors: Error[]) {
+        this.errors = errors;
     }
 
-    getWarning() {
-        return this.warning;
+    getWarnings() {
+        return this.warnings;
     }
 
-    setWarning(warning: Warning) {
-        this.warning = warning;
+    setWarnings(warnings: Warning[]) {
+        this.warnings = warnings;
     }
 
     getLocation() {
