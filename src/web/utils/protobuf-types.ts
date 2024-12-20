@@ -1180,3 +1180,8 @@ export interface BotOffloadData {
     data_offload_percentage?: number;
     offload_succeeded?: boolean;
 }
+
+export enum BotType {
+    HYDRO = "HYDRO",
+    ECHO = "ECHO",
+}
