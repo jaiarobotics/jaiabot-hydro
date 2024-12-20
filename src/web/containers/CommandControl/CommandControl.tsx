@@ -2353,14 +2353,13 @@ export default class CommandControl extends React.Component {
     /**
      * Called when an EditModeToggle is turned on/off and updates runList.runIdInEditMode to the input run
      *
-     * @param {React.ChangeEvent<HTMLInputElement>} evt Event activating the edit mode toggle
      * @param {RunInterface} run The run being put into Edit Mode
      * @returns {void}
      */
     toggleEditMode(run: RunInterface) {
         const runList = this.getRunList();
 
-        if (runList.runIdInEditMode === "") {
+        if (runList.runIdInEditMode === "" || runList.runIdInEditMode != run?.id) {
             runList.runIdInEditMode = run?.id;
         } else {
             if (this.state.visiblePanel === "GOAL_SETTINGS") {
