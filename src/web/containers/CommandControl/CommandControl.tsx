@@ -2360,7 +2360,7 @@ export default class CommandControl extends React.Component {
     toggleEditMode(evt: React.ChangeEvent<HTMLInputElement>, run: RunInterface) {
         const runList = this.getRunList();
 
-        if (evt.target.checked) {
+        if (runList.runIdInEditMode === "") {
             runList.runIdInEditMode = run?.id;
         } else {
             if (this.state.visiblePanel === "GOAL_SETTINGS") {

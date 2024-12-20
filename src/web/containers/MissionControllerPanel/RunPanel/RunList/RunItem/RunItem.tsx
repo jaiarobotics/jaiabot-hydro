@@ -7,17 +7,14 @@ import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Button from "@mui/material/Button";
 import { SelectChangeEvent } from "@mui/material/Select";
-import { Slider, ThemeProvider, createTheme } from "@mui/material";
+import { ThemeProvider, createTheme } from "@mui/material";
 
 import Icon from "@mdi/react";
 import { mdiDelete, mdiContentDuplicate } from "@mdi/js";
 
 import RunAssignMenu from "../../../../../components/RunAssignMenu/RunAssignMenu";
-import EditModeToggle from "../../../../../components/EditModeToggle/EditModeToggle";
-import { Goal } from "../../../../../shared/JAIAProtobuf";
 import { RunInterface } from "../../../../CommandControl/CommandControl";
-import { deepcopy, addDropdownListener } from "../../../../../shared/Utilities";
-import { jaiaAPI } from "../../../../../utils/jaia-api";
+import { addDropdownListener } from "../../../../../shared/Utilities";
 import "./RunItem.less";
 import JaiaToggle from "../../../../../components/JaiaToggle/JaiaToggle";
 
@@ -171,10 +168,9 @@ export default class RunItem extends React.Component<RunItemProps, RunItemState>
                             >
                                 <Icon path={mdiDelete} title="Delete Run" />
                             </Button>
-                            <EditModeToggle
-                                onClick={this.props.toggleEditMode}
-                                runIdInEditMode={this.props.runIdInEditMode}
-                                run={this.props.run}
+                            <JaiaToggle
+                                checked={() => this.props.runIdInEditMode === this.props.run?.id}
+                                onClick={() => this.props.toggleEditMode(undefined, this.props.run)}
                                 label="Edit"
                                 title="ToggleEditMode"
                             />

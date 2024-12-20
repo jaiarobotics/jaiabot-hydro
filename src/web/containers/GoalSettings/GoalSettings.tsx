@@ -8,7 +8,6 @@ import { CustomAlert } from "../../shared/CustomAlert";
 import { TaskSettingsPanel } from "../TaskSettingsPanel/TaskSettingsPanel";
 import { MissionInterface, PanelType } from "../CommandControl/CommandControl";
 import { adjustAccordionScrollPosition } from "../../shared/Utilities";
-import EditModeToggle from "../../components/EditModeToggle/EditModeToggle";
 import { RunInterface } from "../CommandControl/CommandControl";
 import { Icon } from "@mdi/react";
 import { mdiDelete } from "@mdi/js";
@@ -246,10 +245,9 @@ export class GoalSettingsPanel extends React.Component {
                     <div className="goal-settings-input">{botId}</div>
                     <div className="goal-settings-line-break"></div>
                     <div className="goal-settings-label move-label">Edit Run</div>
-                    <EditModeToggle
-                        onClick={this.props.toggleEditMode}
-                        runIdInEditMode={this.props.runList.runIdInEditMode}
-                        run={this.getRun()}
+                    <JaiaToggle
+                        checked={() => this.props.runList.runIdInEditMode === this.getRun()?.id}
+                        onClick={() => this.props.toggleEditMode(undefined, this.getRun())}
                         label=""
                         title="Toggle Edit Mode"
                     />
