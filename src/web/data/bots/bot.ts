@@ -1,5 +1,6 @@
 import { MissionStatus } from "../../types/jaia-system-types";
 import { BotType, Error, HealthState, Warning } from "../../utils/protobuf-types";
+import Mission from "../missions/mission";
 import BotSensors from "./bot-sensors";
 
 export default class Bot {
@@ -8,6 +9,7 @@ export default class Bot {
     private healthState: HealthState;
     private errors: Error[];
     private warnings: Warning[];
+    private mission: Mission;
     private missionStatus: MissionStatus;
     private botSensors: BotSensors;
     private batteryPercent: number;
@@ -58,6 +60,14 @@ export default class Bot {
 
     setWarnings(warnings: Warning[]) {
         this.warnings = warnings;
+    }
+
+    getMission() {
+        return this.mission;
+    }
+
+    setMission(mission: Mission) {
+        this.mission = mission;
     }
 
     getMissionStatus() {
