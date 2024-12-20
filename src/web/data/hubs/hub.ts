@@ -6,6 +6,7 @@ import {
     LinuxHardwareStatus,
     Warning,
 } from "../../utils/protobuf-types";
+import HubSensors from "./hub-sensors";
 
 export class Hub {
     private hubID: number;
@@ -13,12 +14,15 @@ export class Hub {
     private healthState: HealthState;
     private errors: Error[];
     private warnings: Warning[];
-    private location: GeographicCoordinate;
+    private hubSensors: HubSensors;
     private linuxHardwareStatus: LinuxHardwareStatus;
     private botOffload: BotOffloadData;
     private statusAge: number;
 
-    constructor() {}
+    constructor() {
+        // Init base sensors
+        this.hubSensors = new HubSensors();
+    }
 
     getHubID() {
         return this.hubID;
@@ -60,12 +64,8 @@ export class Hub {
         this.warnings = warnings;
     }
 
-    getLocation() {
-        return this.location;
-    }
-
-    setLocation(location: GeographicCoordinate) {
-        this.location = location;
+    getHubSensors() {
+        return this.hubSensors;
     }
 
     getLinuxHardwareStatus() {
