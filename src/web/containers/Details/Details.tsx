@@ -606,7 +606,7 @@ export interface BotDetailsProps {
     setDetailsExpanded: (section: keyof DetailsExpandedState, expanded: boolean) => void;
     isRCModeActive: (botId: number) => boolean;
     setRcMode: (botId: number, rcMode: boolean) => void;
-    toggleEditMode: (evt: React.ChangeEvent, run: RunInterface) => boolean;
+    toggleEditMode: (run: RunInterface) => boolean;
     downloadIndividualBot: (bot: PortalBotStatus, disableMessage: string) => void;
 }
 
@@ -889,7 +889,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                         <JaiaToggle
                             checked={() => props.mission.runIdInEditMode === props.run?.id}
-                            onClick={() => props.toggleEditMode(undefined, props.run)}
+                            onClick={() => props.toggleEditMode(props.run)}
                             label="Edit"
                             title="ToggleEditMode"
                             disabled={() => (getBotRun(bot.bot_id, mission.runs) ? false : true)}

@@ -29,7 +29,7 @@ type RunItemProps = {
     unSelectHubOrBot: () => void;
     addDuplicateRun: (run: RunInterface) => void;
     deleteSingleRun: (runId: string) => void;
-    toggleEditMode: (evt: React.ChangeEvent, run: RunInterface) => boolean;
+    toggleEditMode: (run: RunInterface) => boolean;
     toggleShowTableOfWaypoints: (runId: string) => void;
 };
 
@@ -170,7 +170,7 @@ export default class RunItem extends React.Component<RunItemProps, RunItemState>
                             </Button>
                             <JaiaToggle
                                 checked={() => this.props.runIdInEditMode === this.props.run?.id}
-                                onClick={() => this.props.toggleEditMode(undefined, this.props.run)}
+                                onClick={() => this.props.toggleEditMode(this.props.run)}
                                 label="Edit"
                                 title="ToggleEditMode"
                             />

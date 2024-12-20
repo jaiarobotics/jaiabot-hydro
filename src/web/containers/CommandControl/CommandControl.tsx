@@ -2357,7 +2357,7 @@ export default class CommandControl extends React.Component {
      * @param {RunInterface} run The run being put into Edit Mode
      * @returns {void}
      */
-    toggleEditMode(evt: React.ChangeEvent<HTMLInputElement>, run: RunInterface) {
+    toggleEditMode(run: RunInterface) {
         const runList = this.getRunList();
 
         if (runList.runIdInEditMode === "") {

@@ -33,7 +33,7 @@ interface Props {
     setVisiblePanel: (panelType: PanelType) => void;
     setMoveWptMode: (canMoveWptMode: boolean, runId: string, goalNum: number) => void;
     setRunList: (runList: MissionInterface) => void;
-    toggleEditMode: (evt: React.ChangeEvent, run: RunInterface) => string;
+    toggleEditMode: (run: RunInterface) => string;
     toggleMoveWpt: () => void;
     updateMissionHistory: (mission: MissionInterface) => void;
 }
@@ -247,7 +247,7 @@ export class GoalSettingsPanel extends React.Component {
                     <div className="goal-settings-label move-label">Edit Run</div>
                     <JaiaToggle
                         checked={() => this.props.runList.runIdInEditMode === this.getRun()?.id}
-                        onClick={() => this.props.toggleEditMode(undefined, this.getRun())}
+                        onClick={() => this.props.toggleEditMode(this.getRun())}
                         label=""
                         title="Toggle Edit Mode"
                     />
