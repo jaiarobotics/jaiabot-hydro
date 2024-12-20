@@ -1174,3 +1174,9 @@ export interface HubStatus {
     bot_ids_in_radio_file?: number[];
     linux_hardware_status?: LinuxHardwareStatus;
 }
+
+export interface BotOffloadData {
+    bot_id: number;
+    data_offload_percentage?: number;
+    offload_succeeded?: boolean;
+}
