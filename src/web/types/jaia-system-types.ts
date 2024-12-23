@@ -1,7 +1,7 @@
 import { MissionState } from "../utils/protobuf-types";
 
 export interface MissionStatus {
-    missionState: MissionState;
-    activeGoal: number;
-    distanceToActiveGoal: number;
+    missionState?: MissionState;
+    activeGoal?: number;
+    distanceToActiveGoal?: number;
 }

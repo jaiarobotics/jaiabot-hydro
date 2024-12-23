@@ -1,5 +1,4 @@
-const Bot = require("../bots/bot");
-const Bots = require("../bots/bots");
+const bots = require("../bots/bots");
 
 const statusIntervalTimeout = 1000;
 const statusURL = "http://localhost:40001/jaia/v0/status";
@@ -18,4 +17,13 @@ const statusInterval = setInterval(async () => {
     }
 }, statusIntervalTimeout);
 
-function updateBots(botStatuses: string) {}
+function updateBots(botStatuses: { [botID: string]: any }) {
+    const botIDs = Object.keys(botStatuses);
+    for (let botID of botIDs) {
+        if (bots.isNewBot(Number(botID))) {
+            bots.addBot(botStatuses[botID]);
+        } else {
+            bots.updateBot(botStatuses[botID]);
+        }
+    }
+}
