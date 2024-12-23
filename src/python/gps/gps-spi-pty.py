@@ -9,6 +9,7 @@ import stat
 import pty
 import systemd.daemon
 import termios
+import re
 
 """Create a PTY and send all the SPI GPS data to it"""
 
@@ -68,8 +69,16 @@ signal.signal(signal.SIGINT, handle_ctrl_c)
 # Connect to SPI
 connect_spi()
 
-# Store last unique messages
-last_message = None
+def validate_checksum(sentence):
+    """Validate NMEA sentence checksum."""
+    match = re.match(r'^\$(.*)\*(\w\w)$', sentence)
+    if not match:
+        return False
+    data, checksum = match.groups()
+    calculated_checksum = 0
+    for char in data:
+        calculated_checksum ^= ord(char)
+    return f"{calculated_checksum:02X}" == checksum.upper()
 
 # Main loop to read and forward NMEA messages
 while True:
@@ -77,19 +86,21 @@ while True:
         # Flush PTY input buffer
         termios.tcflush(internal_pty, termios.TCIFLUSH)
 
-        # Read NMEA messages
         nmea_data = SPI.readbytes(1024)
-        nmea_message = bytes(nmea_data).decode('utf-8', errors='ignore').strip()
+        raw_data = bytes(nmea_data).decode('utf-8', errors='ignore').strip()
 
-        # Write unique messages to the PTY
-        if nmea_message and nmea_message != last_message:
-            os.write(internal_pty, nmea_message.encode('utf-8'))
-            last_message = nmea_message
+        # Split into individual NMEA sentences
+        nmea_sentences = raw_data.split("\n")
 
-        time.sleep(0.1)
+        for sentence in nmea_sentences:
+            sentence = sentence.strip()
+            if sentence.startswith(('$GNRMC', '$GNVTG', '$GNGGA', '$GNGSA', '$GPGSV', '$GLGSV')):
+                # Validate checksum
+                if validate_checksum(sentence):
+                    os.write(internal_pty, (sentence + "\n").encode('utf-8'))
+
+        time.sleep(0.2)
 
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         time.sleep(1)
-    
-
