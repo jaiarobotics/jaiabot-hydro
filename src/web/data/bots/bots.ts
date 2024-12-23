@@ -17,3 +17,4 @@ class Bots {
 }
 
 const bots = new Bots();
+module.exports = bots;
