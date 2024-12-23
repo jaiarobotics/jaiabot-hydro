@@ -1,8 +1,8 @@
-import Waypoint from "../waypoints/waypoint";
+import Waypoints from "../waypoints/waypoints";
 
 export default class Mission {
     private missionID: number;
-    private waypoints: Waypoint[];
+    private waypoints: Waypoints;
     private repeats: number;
     private canEdit: boolean;
     private isBotAssigned: boolean;
@@ -21,7 +21,7 @@ export default class Mission {
         return this.waypoints;
     }
 
-    setWaypoints(waypoints: Waypoint[]) {
+    setWaypoints(waypoints: Waypoints) {
         this.waypoints = waypoints;
     }
 
