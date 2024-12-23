@@ -1,7 +1,6 @@
 import {
     BotOffloadData,
     Error,
-    GeographicCoordinate,
     HealthState,
     LinuxHardwareStatus,
     Warning,
