@@ -87,9 +87,10 @@ jaiabot::apps::CameraDriver::CameraDriver()
             auto response = CameraResponse();
             response.ParseFromString(data);
 
-            glog.is_warn() && glog << response.ShortDebugString() << std::endl;
+            glog.is_verbose() && glog << "CameraResponse: " << response.ShortDebugString()
+                                      << std::endl;
 
-            // interprocess().publish<camera>(response);
+            interprocess().publish<camera>(response);
         }
         catch (const std::exception& e) //all exceptions thrown by the standard*  library
         {
@@ -105,7 +106,9 @@ jaiabot::apps::CameraDriver::CameraDriver()
         } // Catch all
     });
 
-    interthread().subscribe<camera>([this](const CameraCommand& message) {
+    interprocess().subscribe<camera>([this](const CameraCommand& message) {
+        glog.is_verbose() && glog << "CameraCommand: " << message.ShortDebugString() << std::endl;
+
         interthread().publish<serial_out>(encode_frame(message.SerializeAsString()));
     });
 }

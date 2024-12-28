@@ -1,0 +1,9 @@
+load_protobuf {  #  (repeated)
+    name: "jaiabot.protobuf.CameraCommand"  #  (required)
+    publish_to {
+        group: "jaiabot::camera"
+        group_numeric: 11  # jaiabot::INTERVEHICLE_API_VERSION
+        layer: LAYER_INTERPROCESS
+    }
+} 
+

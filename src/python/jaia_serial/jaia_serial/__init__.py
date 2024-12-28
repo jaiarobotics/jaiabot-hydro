@@ -35,6 +35,7 @@ class JaiaProtobufOverSerial:
                         return None
 
                     data = self.port.read(1)
+                    log.debug(f'Read character: {data}')
                     if len(data) > 0:
                         if data[0] != magic[magic_index]:
                             magic_done = False
@@ -44,6 +45,7 @@ class JaiaProtobufOverSerial:
 
             # Read length
             data_length = int.from_bytes(self.port.read(2), 'big')
+            log.debug(f'Read character: {data_length}')
 
             # Read crc32
             crc = int.from_bytes(self.port.read(4), 'big')

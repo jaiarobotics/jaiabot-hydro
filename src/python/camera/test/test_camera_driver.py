@@ -18,7 +18,7 @@ def parse_args():
     args = parser.parse_args()
 
     global log
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     log = logging.getLogger('test_camera_driver')
 
 
