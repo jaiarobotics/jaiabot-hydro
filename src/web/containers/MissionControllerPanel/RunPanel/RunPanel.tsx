@@ -14,7 +14,7 @@ type RunPanelProps = {
     autoAssignBotsToRuns: any;
     deleteSingleRun: (runId: string) => void;
     unSelectHubOrBot: () => void;
-    toggleEditMode: (evt: React.ChangeEvent, run: RunInterface) => boolean;
+    toggleEditMode: (run: RunInterface) => void;
     setRunList: (runList: MissionInterface) => void;
     updateMissionHistory: (mission: MissionInterface) => void;
     toggleShowTableOfWaypoints: (runId: string) => void;
