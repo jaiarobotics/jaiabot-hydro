@@ -1,27 +1,20 @@
-import Waypoints from "../waypoints/waypoints";
+import Waypoint from "../waypoints/waypoint";
 
 export default class Mission {
-    private missionID: number;
-    private waypoints: Waypoints;
+    private waypoints: Waypoint[];
     private repeats: number;
     private canEdit: boolean;
     private isBotAssigned: boolean;
 
-    constructor() {}
-
-    getMissionID() {
-        return this.missionID;
-    }
-
-    setMissionID(missionID: number) {
-        this.missionID = missionID;
+    constructor() {
+        this.waypoints = [];
     }
 
     getWaypoints() {
         return this.waypoints;
     }
 
-    setWaypoints(waypoints: Waypoints) {
+    setWaypoints(waypoints: Waypoint[]) {
         this.waypoints = waypoints;
     }
 
@@ -47,5 +40,35 @@ export default class Mission {
 
     setBotAssigned(isBotAssigned: boolean) {
         this.isBotAssigned = isBotAssigned;
+    }
+
+    getWaypoint(waypointNum: number) {
+        if (waypointNum > 0 && waypointNum <= this.getWaypoints().length) {
+            return this.getWaypoints()[waypointNum - 1];
+        }
+        return null;
+    }
+
+    addWaypoint(waypoint: Waypoint) {
+        this.getWaypoints().push(waypoint);
+    }
+
+    deleteWaypoint(waypointNum: number) {
+        let waypoints = this.getWaypoints();
+
+        // Remove last waypoint in constant time
+        if (waypointNum === waypoints.length) {
+            waypoints.pop();
+        }
+        // Remove other waypoints in linear time
+        else {
+            this.setWaypoints(
+                waypoints.filter((waypoint, index) => {
+                    if (index + 1 !== waypointNum) {
+                        return waypoint;
+                    }
+                }),
+            );
+        }
     }
 }

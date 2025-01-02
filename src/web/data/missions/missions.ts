@@ -1,35 +1,56 @@
 import Mission from "./mission";
 
 class Missions {
-    private missions: Map<number, Mission>;
+    private missions: Mission[];
 
     constructor() {
-        this.missions = new Map<number, Mission>();
+        this.missions = [];
     }
 
     getMissions() {
         return this.missions;
     }
 
-    setMissions(missions: Map<number, Mission>) {
+    setMissions(missions: Mission[]) {
         this.missions = missions;
     }
 
-    addMission(mission: Mission) {
-        this.getMissions().set(mission.getMissionID(), mission);
+    getMission(missionNum: number) {
+        if (missionNum > 0 && missionNum <= this.getMissions().length) {
+            return this.getMissions()[missionNum - 1];
+        }
+        return null;
     }
 
-    addMissions(missions: Map<number, Mission>) {}
+    addMission(mission: Mission) {
+        this.getMissions().push(mission);
+    }
 
-    deleteMission(missionID: number) {
-        this.getMissions().delete(missionID);
+    addMissionSet(missionSet: Mission[]) {
+        this.getMissions().push(...missionSet);
+    }
+
+    deleteMission(missionNum: number) {
+        let missions = this.getMissions();
+
+        // Remove last mission in constant time
+        if (missionNum === missions.length) {
+            missions.pop();
+        }
+        // Remove other missions in linear time
+        else {
+            this.setMissions(
+                missions.filter((mission, index) => {
+                    if (index + 1 != missionNum) {
+                        return mission;
+                    }
+                }),
+            );
+        }
     }
 
     deleteAllMissions() {
-        const missionIDs = this.getMissions().keys();
-        for (let missionID of missionIDs) {
-            this.deleteMission(missionID);
-        }
+        this.setMissions([]);
     }
 }
 
