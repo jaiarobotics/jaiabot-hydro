@@ -1,6 +1,7 @@
 import { MissionStatus } from "../../types/jaia-system-types";
 import { BotType, Error, HealthState, Warning } from "../../utils/protobuf-types";
 import Mission from "../missions/mission";
+import TaskPacket from "../task_packets/task-packets-new";
 import BotSensors from "./bot-sensors";
 
 export default class Bot {
@@ -12,6 +13,7 @@ export default class Bot {
     private mission: Mission;
     private missionStatus: MissionStatus;
     private botSensors: BotSensors;
+    private taskPackets: TaskPacket[];
     private batteryPercent: number;
     private wifiLinkQuality: number;
     private statusAge: number;
@@ -106,6 +108,14 @@ export default class Bot {
 
     setStatusAge(statusAge: number) {
         this.statusAge = statusAge;
+    }
+
+    getTaskPackets() {
+        return this.taskPackets;
+    }
+
+    addTaskPacket(taskPacket: TaskPacket) {
+        this.taskPackets.push(taskPacket);
     }
 
     private initializeSensors() {
