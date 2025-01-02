@@ -84,8 +84,10 @@ ROOTFS_BUILD_PATH="$TOPLEVEL/rootfs"
 DEFAULT_IMAGE_NAME=jaiabot_img-"$ROOTFS_BUILD_TAG".img
 OUTPUT_IMAGE_PATH="$(pwd)"/"$DEFAULT_IMAGE_NAME"
 ROOTFS_TARBALL=
-DISTRIBUTION=$(<${TOPLEVEL}/scripts/ubuntu_release)
-JAIABOT_VERSION=$(<${TOPLEVEL}/scripts/release_branch)
+
+set -a; source ${TOPLEVEL}/scripts/common-versions.env; set +a
+DISTRIBUTION=${jaia_version_ubuntu_codename}
+JAIABOT_VERSION=${jaia_version_release_branch}
 JAIABOT_REPO=release
 
 
