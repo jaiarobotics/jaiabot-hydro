@@ -1,21 +1,12 @@
 import Task from "../tasks/task";
 
 export default class Waypoint {
-    private waypointID: number;
     private lat: number;
     private lon: number;
     private task: Task;
     private canMove: boolean;
 
     constructor() {}
-
-    getWaypointID() {
-        return this.waypointID;
-    }
-
-    setWaypointID(waypointID: number) {
-        this.waypointID = waypointID;
-    }
 
     getLat() {
         return this.lat;

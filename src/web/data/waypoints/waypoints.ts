@@ -1,31 +1,47 @@
 import Waypoint from "./waypoint";
 
 export default class Waypoints {
-    private waypoints: Map<number, Waypoint>;
+    private waypoints: Waypoint[];
 
     constructor() {
-        this.waypoints = new Map<number, Waypoint>();
+        this.waypoints = [];
     }
 
     getWaypoints() {
         return this.waypoints;
     }
 
-    setWaypoints(waypoints: Map<number, Waypoint>) {
+    setWaypoints(waypoints: Waypoint[]) {
         this.waypoints = waypoints;
     }
 
+    getWaypoint(waypointNum: number) {
+        if (waypointNum > 0 && waypointNum <= this.getWaypoints().length) {
+            return this.getWaypoints()[waypointNum - 1];
+        }
+        return null;
+    }
+
     addWaypoint(waypoint: Waypoint) {
-        this.getWaypoints().set(waypoint.getWaypointID(), waypoint);
+        this.getWaypoints().push(waypoint);
     }
 
-    deleteWaypoint(waypointID: number) {
-        this.getWaypoints().delete(waypointID);
-    }
+    deleteWaypoint(waypointNum: number) {
+        let waypoints = this.getWaypoints();
 
-    moveWaypoint(waypointID: number, lat: number, lon: number) {
-        let waypoint = this.getWaypoints().get(waypointID);
-        waypoint.setLat(lat);
-        waypoint.setLon(lon);
+        // Remove last waypoint in constant time
+        if (waypointNum === waypoints.length) {
+            waypoints.pop();
+        }
+        // Remove other waypoints in linear time
+        else {
+            this.setWaypoints(
+                waypoints.filter((waypoint, index) => {
+                    if (index + 1 != waypointNum) {
+                        return waypoint;
+                    }
+                }),
+            );
+        }
     }
 }
