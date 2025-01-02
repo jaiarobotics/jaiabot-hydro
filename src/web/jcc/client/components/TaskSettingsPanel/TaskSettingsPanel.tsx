@@ -7,10 +7,10 @@ import {
     ConstantHeadingParameters,
     GeographicCoordinate,
     StationKeepParameters,
-} from "./shared/JAIAProtobuf";
-import { GlobalSettings, Save } from "./Settings";
-import { deepcopy, getGeographicCoordinate } from "./shared/Utilities";
-import { Button, FormControl, MenuItem } from "@mui/material";
+} from "../shared/JAIAProtobuf";
+import { GlobalSettings, Save } from "../Settings";
+import { deepcopy, getGeographicCoordinate } from "../shared/Utilities";
+import { InputLabel, FormControl, MenuItem } from "@mui/material";
 import * as turf from "@turf/turf";
 import Map from "ol/Map";
 import { Draw } from "ol/interaction";
@@ -18,7 +18,7 @@ import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
 import { Point } from "ol/geom";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import JaiaToggle from "./JaiaToggle";
+import JaiaToggle from "../JaiaToggle/JaiaToggle";
 
 // For keeping heading angles in the [0, 360] range
 
@@ -39,7 +39,7 @@ function fmod(a: number, b: number) {
     return Number((a - Math.floor(a / b) * b).toPrecision(8));
 }
 
-interface Props {
+export interface Props {
     map?: Map;
     title?: string;
     task?: MissionTask;
@@ -613,12 +613,6 @@ export function TaskSettingsPanel(props: Props) {
         // No change
         if (newTaskType == oldTaskType) return;
 
-        // Change to NONE
-        if (newTaskType == TaskType.NONE) {
-            props.onChange(undefined);
-            return;
-        }
-
         // Use default parameters depending on which type of task we've switched to
         var newTask: MissionTask = {
             type: newTaskType,
@@ -652,12 +646,19 @@ export function TaskSettingsPanel(props: Props) {
 
     return (
         <FormControl sx={{ minWidth: 120 }} size="small" disabled={!props?.isEditMode}>
-            <Select onChange={(evt) => onChangeTaskType(evt)} value={props.task?.type ?? "NONE"}>
-                <MenuItem value={"NONE"}>None</MenuItem>
-                <MenuItem value={"DIVE"}>Dive</MenuItem>
-                <MenuItem value={"SURFACE_DRIFT"}>Surface Drift</MenuItem>
-                <MenuItem value={"STATION_KEEP"}>Station Keep</MenuItem>
-                <MenuItem value={"CONSTANT_HEADING"}>Constant Heading</MenuItem>
+            <Select
+                native={true}
+                labelId="task-select-label"
+                data-testid="task-select-id"
+                onChange={(evt) => onChangeTaskType(evt)}
+                value={props.task?.type ?? "NONE"}
+                inputProps={{ "data-testid": "task-select-input-id" }}
+            >
+                <option value={"NONE"}>None</option>
+                <option value={"DIVE"}>Dive</option>
+                <option value={"SURFACE_DRIFT"}>Surface Drift</option>
+                <option value={"STATION_KEEP"}>Station Keep</option>
+                <option value={"CONSTANT_HEADING"}>Constant Heading</option>
             </Select>
             {TaskOptionsPanel(props)}
         </FormControl>

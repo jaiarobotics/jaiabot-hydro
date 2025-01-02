@@ -90,7 +90,8 @@ job-template-amd64: &job-template-amd64
         command: mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug -Denable_testing=ON .. && cmake --build . -- -j4
     - run: &run-tests
         name: Run tests
-        command: cd build && ctest --output-on-failure
+        command: |
+          cd build && ctest --output-on-failure
 
 job-template-deb-amd64: &job-template-deb-amd64
   <<: *job-template-amd64

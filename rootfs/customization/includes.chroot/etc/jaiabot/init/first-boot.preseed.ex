@@ -54,6 +54,7 @@ jaiabot-embedded        jaiabot-embedded/imu_install_type       select embedded
 jaiabot-embedded        jaiabot-embedded/electronics_stack      select 2
 jaiabot-embedded        jaiabot-embedded/arduino_type   select usb
 jaiabot-embedded        jaiabot-embedded/debconf_state_common   select mode
+jaiabot-embedded        jaiabot-embedded/motor_harness_type      select none
 EOM
 )
 
