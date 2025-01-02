@@ -33,7 +33,6 @@ namespace apps
 {
 namespace tool
 {
-
 inline std::string parse_host_ip_from_code(const std::string& host_code)
 {
     if (host_code == "self")
