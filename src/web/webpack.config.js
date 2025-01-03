@@ -26,24 +26,6 @@ const baseConfig = {
                 exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
-                    options: {
-                        presets: [
-                            ["@babel/preset-env", { modules: false, targets: "defaults" }],
-                            "@babel/preset-react",
-                        ],
-                        plugins: [
-                            "@babel/plugin-proposal-class-properties",
-                            [
-                                "transform-react-remove-prop-types",
-                                {
-                                    mode: "remove",
-                                    _disabled_ignoreFilenames: ["node_modules"],
-                                },
-                            ],
-                            "@babel/plugin-proposal-nullish-coalescing-operator",
-                            "@babel/plugin-proposal-optional-chaining",
-                        ],
-                    },
                 },
             },
             { test: /\.css$/, use: ["style-loader", "css-loader"] },
@@ -94,6 +76,7 @@ module.exports = (env, argv) => {
         output: {
             path: path.resolve(env.OUTPUT_DIR, "jed/"),
             filename: "script.js",
+            clean: true,
         },
         plugins: [
             new CopyWebpackPlugin({
@@ -107,14 +90,18 @@ module.exports = (env, argv) => {
      */
     const jccConfig = {
         entry: {
-            client: path.resolve(__dirname, "jcc/client/index.js"),
+            client: path.resolve(__dirname, "jcc/index.js"),
             customLayerRasterWorker: [
-                path.resolve(__dirname, "jcc/client/components/CustomLayerRasterWorker.ts"),
+                path.resolve(
+                    __dirname,
+                    "openlayers/map/layers/geotiffs/CustomLayerRasterWorker.ts",
+                ),
             ],
         },
         output: {
             path: path.resolve(env.OUTPUT_DIR, "jcc/"),
             filename: "[name].js",
+            clean: true,
         },
         plugins: [
             new HtmlWebpackPlugin({

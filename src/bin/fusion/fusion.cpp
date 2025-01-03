@@ -450,17 +450,9 @@ jaiabot::apps::Fusion::Fusion() : ApplicationBase(5 * si::hertz)
 
     interprocess().subscribe<jaiabot::groups::arduino_to_pi>(
         [this](const jaiabot::protobuf::ArduinoResponse& arduino_response) {
-            if (arduino_response.has_thermocouple_temperature_c())
-            {
-                latest_bot_status_.set_thermocouple_temperature(
-                    arduino_response.thermocouple_temperature_c());
-            }
-
             //takes data from one message to the next (clarified by different names)
             if (arduino_response.has_vccvoltage())
             {
-                latest_bot_status_.set_vcc_voltage(arduino_response.vccvoltage());
-
                 //TODO ADD FUNCTION / CODE TO REPORT BATTERY PERCENTAGE
                 std::map<float, float> voltage_to_battery_percent_{
                     {16.5, 0.0},   {19.5, 13.5}, {20.15, 20.0},
@@ -470,16 +462,6 @@ jaiabot::apps::Fusion::Fusion() : ApplicationBase(5 * si::hertz)
                     arduino_response.vccvoltage(), voltage_to_battery_percent_);
 
                 latest_bot_status_.set_battery_percent(battery_percentage);
-            }
-
-            if (arduino_response.has_vcccurrent())
-            {
-                latest_bot_status_.set_vcc_current(arduino_response.vcccurrent());
-            }
-
-            if (arduino_response.has_vvcurrent())
-            {
-                latest_bot_status_.set_vv_current(arduino_response.vvcurrent());
             }
         });
 
