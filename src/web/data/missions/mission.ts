@@ -1,6 +1,7 @@
 import Waypoint from "../waypoints/waypoint";
 
 export default class Mission {
+    private missionID: number;
     private waypoints: Waypoint[];
     private repeats: number;
     private canEdit: boolean;
@@ -8,6 +9,14 @@ export default class Mission {
 
     constructor() {
         this.waypoints = [];
+    }
+
+    getMissionID() {
+        return this.missionID;
+    }
+
+    setMissionID(missionID: number) {
+        this.missionID = missionID;
     }
 
     getWaypoints() {
@@ -46,7 +55,7 @@ export default class Mission {
         if (waypointNum > 0 && waypointNum <= this.getWaypoints().length) {
             return this.getWaypoints()[waypointNum - 1];
         }
-        return null;
+        return undefined;
     }
 
     addWaypoint(waypoint: Waypoint) {

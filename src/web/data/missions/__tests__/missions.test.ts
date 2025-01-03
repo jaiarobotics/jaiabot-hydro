@@ -1,50 +1,57 @@
 import { missions } from "../../missions/missions";
-import { missionA, missionB, missionC, missionD } from "../../tests/__mocks__/mission-mock";
+import {
+    missionA,
+    missionB,
+    missionC,
+    missionD,
+    missionE,
+    missionF,
+} from "../../tests/__mocks__/mission-mock";
 
 describe("operator adding and deleting single missions", () => {
     test("adds first mission", () => {
         missions.addMission(missionA);
-        expect(missions.getMissions().length).toBe(1);
-        expect(missions.getMission(1)).toBe(missionA);
+        expect(missions.getMissions().size).toBe(1);
+        expect(missions.getMission(1).getMissionID()).toBe(missionA.getMissionID());
     });
 
     test("adds second mission", () => {
         missions.addMission(missionB);
-        expect(missions.getMissions().length).toBe(2);
-        expect(missions.getMission(2)).toBe(missionB);
+        expect(missions.getMissions().size).toBe(2);
+        expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
     });
 
     test("adds third mission", () => {
         missions.addMission(missionC);
-        expect(missions.getMissions().length).toBe(3);
-        expect(missions.getMission(3)).toBe(missionC);
+        expect(missions.getMissions().size).toBe(3);
+        expect(missions.getMission(3).getMissionID()).toBe(missionC.getMissionID());
     });
 
     test("adds fourth mission", () => {
         missions.addMission(missionD);
-        expect(missions.getMissions().length).toBe(4);
-        expect(missions.getMission(4)).toBe(missionD);
+        expect(missions.getMissions().size).toBe(4);
+        expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
     });
 
     test("deletes first mission", () => {
         missions.deleteMission(1);
-        expect(missions.getMissions().length).toBe(3);
-        expect(missions.getMission(1)).toBe(missionB);
-        expect(missions.getMission(2)).toBe(missionC);
-        expect(missions.getMission(3)).toBe(missionD);
+        expect(missions.getMissions().size).toBe(3);
+        expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
+        expect(missions.getMission(3).getMissionID()).toBe(missionC.getMissionID());
+        expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
     });
 
     test("deletes middle mission", () => {
-        missions.deleteMission(2);
-        expect(missions.getMissions().length).toBe(2);
-        expect(missions.getMission(1)).toBe(missionB);
-        expect(missions.getMission(2)).toBe(missionD);
+        missions.deleteMission(3);
+        expect(missions.getMissions().size).toBe(2);
+        expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
+        expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
     });
 
     test("deletes last mission", () => {
-        missions.deleteMission(2);
-        expect(missions.getMissions().length).toBe(1);
-        expect(missions.getMission(1)).toBe(missionB);
+        missions.deleteMission(4);
+        expect(missions.getMissions().size).toBe(1);
+        expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
     });
 
     test("reset missions singleton", () => {
@@ -55,35 +62,35 @@ describe("operator adding and deleting single missions", () => {
 
 describe("operator adding and deleting multiple missions at once", () => {
     const missionSet1 = [missionA, missionB, missionC, missionD];
-    const missionSet2 = [missionB, missionC];
+    const missionSet2 = [missionE, missionF];
 
     test("operator adds four missions", () => {
-        expect(missions.getMissions().length).toBe(0);
+        expect(missions.getMissions().size).toBe(0);
         missions.addMissionSet(missionSet1);
-        expect(missions.getMissions().length).toBe(4);
-        expect(missions.getMission(1)).toBe(missionA);
-        expect(missions.getMission(2)).toBe(missionB);
-        expect(missions.getMission(3)).toBe(missionC);
-        expect(missions.getMission(4)).toBe(missionD);
+        expect(missions.getMissions().size).toBe(4);
+        expect(missions.getMission(1).getMissionID()).toBe(missionA.getMissionID());
+        expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
+        expect(missions.getMission(3).getMissionID()).toBe(missionC.getMissionID());
+        expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
     });
 
     test("operator deletes all missions", () => {
         missions.deleteAllMissions();
-        expect(missions.getMissions().length).toBe(0);
+        expect(missions.getMissions().size).toBe(0);
     });
 
     test("operator appends mission set to existing missions", () => {
-        expect(missions.getMissions().length).toBe(0);
+        expect(missions.getMissions().size).toBe(0);
         missions.addMissionSet(missionSet1);
-        expect(missions.getMissions().length).toBe(4);
+        expect(missions.getMissions().size).toBe(4);
         missions.addMissionSet(missionSet2);
-        expect(missions.getMissions().length).toBe(6);
-        expect(missions.getMission(1)).toBe(missionA);
-        expect(missions.getMission(2)).toBe(missionB);
-        expect(missions.getMission(3)).toBe(missionC);
-        expect(missions.getMission(4)).toBe(missionD);
-        expect(missions.getMission(5)).toBe(missionB);
-        expect(missions.getMission(6)).toBe(missionC);
+        expect(missions.getMissions().size).toBe(6);
+        expect(missions.getMission(1).getMissionID()).toBe(missionA.getMissionID());
+        expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
+        expect(missions.getMission(3).getMissionID()).toBe(missionC.getMissionID());
+        expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
+        expect(missions.getMission(5).getMissionID()).toBe(missionE.getMissionID());
+        expect(missions.getMission(6).getMissionID()).toBe(missionF.getMissionID());
     });
 
     test("reset missions singleton", () => {

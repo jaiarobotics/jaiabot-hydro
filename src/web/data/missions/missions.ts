@@ -1,56 +1,62 @@
 import Mission from "./mission";
 
 class Missions {
-    private missions: Mission[];
+    private missions: Map<number, Mission>;
+    private missionID: number;
+    private nextMissionID: number;
 
     constructor() {
-        this.missions = [];
+        this.missions = new Map<number, Mission>();
+        this.nextMissionID = 1;
     }
 
     getMissions() {
         return this.missions;
     }
 
-    setMissions(missions: Mission[]) {
+    setMissions(missions: Map<number, Mission>) {
         this.missions = missions;
     }
 
+    getMissionID() {
+        return this.missionID;
+    }
+
+    setMissionID(missionID: number) {
+        this.missionID = missionID;
+    }
+
+    getNextMissionID() {
+        return this.nextMissionID;
+    }
+
+    setNextMissionID(nextMissionID: number) {
+        this.nextMissionID = nextMissionID;
+    }
+
     getMission(missionNum: number) {
-        if (missionNum > 0 && missionNum <= this.getMissions().length) {
-            return this.getMissions()[missionNum - 1];
-        }
-        return null;
+        return this.getMissions().get(missionNum);
     }
 
     addMission(mission: Mission) {
-        this.getMissions().push(mission);
+        this.getMissions().set(this.getNextMissionID(), mission);
+        mission.setMissionID(this.getNextMissionID());
+        this.setNextMissionID(this.getNextMissionID() + 1);
     }
 
-    addMissionSet(missionSet: Mission[]) {
-        this.getMissions().push(...missionSet);
+    addMissionSet(missions: Mission[]) {
+        for (let mission of missions) {
+            this.addMission(mission);
+        }
     }
 
-    deleteMission(missionNum: number) {
-        let missions = this.getMissions();
-
-        // Remove last mission in constant time
-        if (missionNum === missions.length) {
-            missions.pop();
-        }
-        // Remove other missions in linear time
-        else {
-            this.setMissions(
-                missions.filter((mission, index) => {
-                    if (index + 1 != missionNum) {
-                        return mission;
-                    }
-                }),
-            );
-        }
+    deleteMission(missionID: number) {
+        this.getMissions().delete(missionID);
     }
 
     deleteAllMissions() {
-        this.setMissions([]);
+        this.getMissions().clear();
+        this.setNextMissionID(1);
     }
 }
 

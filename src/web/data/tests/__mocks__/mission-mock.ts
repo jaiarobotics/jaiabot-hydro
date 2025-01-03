@@ -17,3 +17,6 @@ missionC.setWaypoints(waypoints3);
 
 export const missionD = new Mission();
 missionD.setWaypoints(waypoints4);
+
+export const missionE = new Mission();
+export const missionF = new Mission();
