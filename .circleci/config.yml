@@ -222,6 +222,7 @@ filter-template-docker-sim-builds: &filter-template-docker-sim-builds
     branches:
       only:
         - "1.y"
+        - "bug/docker-sim-ci-builds-fail-on-tags/jaia-1805"
 
 ## Begin actual config
 version: 2.1
