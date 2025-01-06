@@ -1,0 +1,43 @@
+#cloud-config
+
+# Allows this config to merge correctly with first-boot.preseed.yml
+# See https://cloudinit.readthedocs.io/en/latest/reference/merging.html
+merge_how:
+ - name: list
+   settings: [append]
+ - name: dict
+   settings: [no_replace, recurse_list]
+   
+# Set temporary hostname, will be updated by jaiabot-embedded postinst
+hostname: jaia-unnamed
+manage_etc_hosts: true
+
+# jaia user
+users:
+  - name: jaia
+    groups: users,adm,dialout,audio,netdev,video,plugdev,cdrom,games,input,gpio,spi,i2c,render,sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+
+# Disallow password login on SSH
+ssh_pwauth: false
+
+# Resize data partition to fill disk
+growpart:
+  mode: auto
+  devices: /var/log
+
+packages:
+  - apt:
+      - /opt/jaiabot-embedded*.deb
+  
+runcmd:
+  # Set up log disk
+  - btrfs filesystem resize max /var/log
+  - mkdir -p /var/log/jaiabot
+  # allow jaia user to write logs
+  - chown -R jaia:jaia /var/log/jaiabot
+  - mkdir -p /var/log/apache2
+  # Set up I2C
+  - /boot/firmware/jaiabot/init/setup-i2c.sh

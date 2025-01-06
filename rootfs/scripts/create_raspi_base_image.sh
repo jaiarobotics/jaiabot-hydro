@@ -254,7 +254,7 @@ if [ -z "$ROOTFS_TARBALL" ]; then
     echo "JAIABOT_IMAGE_BUILD_DATE=\"`date -u`\""  >> config/includes.chroot/etc/jaiabot/version
     echo "RASPI_FIRMWARE_VERSION=$RASPI_FIRMWARE_VERSION"  >> config/includes.chroot/etc/jaiabot/version
 
-    # Do not include cloud packages in Raspi image - cloud-init seems to cause long hangs on first-boot
+    # Do not include cloud packages in Raspi image - no need for s3fs 
     [ -z "$VIRTUALBOX" ] && rm config/package-lists/cloud.list.chroot
     
     lb build
@@ -325,7 +325,7 @@ dtoverlay=spi1-3cs
 
 EOF
 cat > "$BOOT_PARTITION"/cmdline.txt <<EOF
-console=tty1 root=LABEL=rootfs rootfstype=ext4 fsck.repair=yes rootwait fixrtc net.ifnames=0 dwc_otg.lpm_enable=0
+console=tty1 root=LABEL=rootfs rootfstype=ext4 fsck.repair=yes rootwait fixrtc net.ifnames=0 dwc_otg.lpm_enable=0 ds=nocloud;s=/boot/firmware/jaiabot/init network-config=disabled
 EOF
 
 # Flash the kernel
@@ -341,9 +341,9 @@ OUTPUT_ROOTFS_TARBALL=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.tar.gz/")
 OUTPUT_METADATA=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.metadata.txt/")
 cp "${ROOTFS_TARBALL}" "${OUTPUT_ROOTFS_TARBALL}"
 
-# Copy the preseed example on the boot partition
+# Copy the cloud init info to the boot partition where it is more easily modified on a Windows machine
 sudo mkdir -p "$BOOT_PARTITION"/jaiabot/init
-sudo cp "$ROOTFS_PARTITION"/etc/jaiabot/init/first-boot.preseed.ex "$BOOT_PARTITION"/jaiabot/init
+sudo cp -r "$ROOTFS_BUILD_PATH"/nocloud-init/* "$BOOT_PARTITION"/jaiabot/init
 
 # Write metadata
 echo "export JAIABOT_ROOTFS_GEN_TAG='$ROOTFS_BUILD_TAG'" > ${OUTPUT_METADATA}
