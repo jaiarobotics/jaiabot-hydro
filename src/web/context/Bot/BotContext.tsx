@@ -2,22 +2,17 @@
 import React, { createContext, ReactNode, useEffect, useReducer } from "react";
 
 // Jaia
-import { PortalBotStatus } from "../../shared/PortalStatus";
-import { BotActions } from "./BotActions";
-import { jaiaAPI } from "../../utils/jaia-api";
-
-// Utilities
-import { isError } from "lodash";
-
-type BotStatuses = { [key: number]: PortalBotStatus };
+import { BotActions } from "./bot-actions";
+import { bots } from "../../data/bots/bots";
+import Bot from "../../data/bots/bot";
 
 interface BotContextType {
-    botStatuses: BotStatuses;
+    bots: Map<number, Bot>;
 }
 
 interface Action {
     type: string;
-    botStatuses?: BotStatuses;
+    bots?: Map<number, Bot>;
 }
 
 interface BotContextProviderProps {
@@ -40,7 +35,7 @@ function botReducer(state: BotContextType, action: Action) {
     let mutableState = { ...state };
     switch (action.type) {
         case BotActions.BOT_STATUS_POLLED:
-            return handleBotStatusPolled(mutableState, action.botStatuses);
+            return handleBotsPolled(mutableState, action.bots);
         default:
             return state;
     }
@@ -52,9 +47,8 @@ function botReducer(state: BotContextType, action: Action) {
  * @param {BotContextType} mutableState State object ref for making modifications
  * @returns {BotContextType} Updated mutable state object
  */
-function handleBotStatusPolled(mutableState: BotContextType, botStatuses: BotStatuses) {
-    if (!botStatuses) throw new Error("Invalid botStatuses");
-    mutableState.botStatuses = botStatuses;
+function handleBotsPolled(mutableState: BotContextType, bots: Map<number, Bot>) {
+    mutableState.bots = bots;
     return mutableState;
 }
 
@@ -67,7 +61,7 @@ export function BotContextProvider({ children }: BotContextProviderProps) {
      * @returns {void}
      */
     useEffect(() => {
-        const intervalId = pollBotStatuses(dispatch);
+        const intervalId = pollBots(dispatch);
 
         // Clean up when component dismounts
         return () => clearInterval(intervalId);
@@ -86,14 +80,11 @@ export function BotContextProvider({ children }: BotContextProviderProps) {
  * @param {React.Dispatch<Action>} dispatch Connects event trigger to event handler
  * @returns {void}
  */
-function pollBotStatuses(dispatch: React.Dispatch<Action>) {
-    return setInterval(async () => {
-        const response = await jaiaAPI.getStatus();
-        if (!isError(response)) {
-            dispatch({
-                type: BotActions.BOT_STATUS_POLLED,
-                botStatuses: response.bots,
-            });
-        }
+function pollBots(dispatch: React.Dispatch<Action>) {
+    return setInterval(() => {
+        dispatch({
+            type: BotActions.BOT_STATUS_POLLED,
+            bots: bots.getBots(),
+        });
     }, BOT_POLL_TIME);
 }

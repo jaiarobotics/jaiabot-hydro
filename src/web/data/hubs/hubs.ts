@@ -90,5 +90,4 @@ class Hubs {
     }
 }
 
-const hubs = new Hubs();
-module.exports = hubs;
+export const hubs = new Hubs();

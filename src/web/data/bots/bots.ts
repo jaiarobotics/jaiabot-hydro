@@ -151,5 +151,4 @@ class Bots {
     }
 }
 
-const bots = new Bots();
-module.exports = bots;
+export const bots = new Bots();
