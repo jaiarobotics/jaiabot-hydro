@@ -34,6 +34,8 @@ import {
     mdiWrenchCog,
 } from "@mdi/js";
 
+const DEFAULT_HUB_ID = 1;
+
 export function HubDetails() {
     const globalContext = useContext(GlobalContext);
     const globalDispatch = useContext(GlobalDispatchContext);
@@ -58,7 +60,7 @@ export function HubDetails() {
         return <div></div>;
     }
 
-    const hub = hubContext.hubs.get(1);
+    const hub = hubContext.hubs.get(DEFAULT_HUB_ID);
 
     if (!hub) {
         return <div></div>;
