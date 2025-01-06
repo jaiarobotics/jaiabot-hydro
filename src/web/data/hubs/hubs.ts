@@ -1,5 +1,5 @@
 import { PortalHubStatus } from "../../shared/PortalStatus";
-import { Hub } from "./hub";
+import Hub from "./hub";
 
 class Hubs {
     private hubs: Map<number, Hub>;

@@ -42,7 +42,7 @@ function botReducer(state: BotContextType, action: Action) {
 }
 
 /**
- * Saves the latest bot statuses to state
+ * Saves the latest data for Bots to state
  *
  * @param {BotContextType} mutableState State object ref for making modifications
  * @returns {BotContextType} Updated mutable state object
@@ -56,15 +56,15 @@ export function BotContextProvider({ children }: BotContextProviderProps) {
     const [state, dispatch] = useReducer(botReducer, null);
 
     /**
-     * Starts polling bot statuses when component mounts
+     * Starts polling data model when component mounts
      *
      * @returns {void}
      */
     useEffect(() => {
-        const intervalId = pollBots(dispatch);
+        const intervalID = pollBots(dispatch);
 
         // Clean up when component dismounts
-        return () => clearInterval(intervalId);
+        return () => clearInterval(intervalID);
     }, []);
 
     return (
@@ -75,7 +75,7 @@ export function BotContextProvider({ children }: BotContextProviderProps) {
 }
 
 /**
- * Retrieves the latest bot statuses from the server
+ * Retrieves latest data posted for Bots
  *
  * @param {React.Dispatch<Action>} dispatch Connects event trigger to event handler
  * @returns {void}
