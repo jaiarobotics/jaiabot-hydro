@@ -50,6 +50,19 @@ class BotPidControl : public goby::zeromq::MultiThreadApplication<config::BotPid
 
     float actual_depth_ = 0.0;
     float target_depth_ = 0.0;
+
+    void set_target_depth(const float new_target_depth)
+    {
+        setThrottleMode(PID_DEPTH);
+
+        // If the depth target has changed, reset the I term, so bot doesn't grind motor against seafloor.
+        if (target_depth_ != new_target_depth)
+        {
+            throttle_depth_pid_->reset_iterm();
+            target_depth_ = new_target_depth;
+        }
+    }
+
     Pid* throttle_depth_pid_;
 
     bool use_throttle_table_for_speed_ = false;
