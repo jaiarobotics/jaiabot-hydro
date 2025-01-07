@@ -18,7 +18,7 @@ type MissionControllerProps = {
     deleteAllRunsInMission: any;
     autoAssignBotsToRuns: any;
     deleteSingleRun: (runId: string) => void;
-    toggleEditMode: (evt: React.ChangeEvent, run: RunInterface) => boolean;
+    toggleEditMode: (run: RunInterface) => void;
     unSelectHubOrBot: () => void;
     setRunList: (mission: MissionInterface) => void;
     updateMissionHistory: (mission: MissionInterface) => void;

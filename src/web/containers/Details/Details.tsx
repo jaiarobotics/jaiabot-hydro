@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 // Jaia Imports
-import EditModeToggle from "../../components/EditModeToggle/EditModeToggle";
+import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
 import { Missions } from "../../missions/missions";
 import { GlobalSettings } from "../../missions/settings";
 import { JaiaAPI } from "../../utils/jaia-api";
@@ -606,7 +606,7 @@ export interface BotDetailsProps {
     setDetailsExpanded: (section: keyof DetailsExpandedState, expanded: boolean) => void;
     isRCModeActive: (botId: number) => boolean;
     setRcMode: (botId: number, rcMode: boolean) => void;
-    toggleEditMode: (evt: React.ChangeEvent, run: RunInterface) => boolean;
+    toggleEditMode: (run: RunInterface) => void;
     downloadIndividualBot: (bot: PortalBotStatus, disableMessage: string) => void;
 }
 
@@ -887,13 +887,12 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             <Icon path={mdiDelete} title="Clear Mission" />
                         </Button>
 
-                        <EditModeToggle
-                            onClick={props.toggleEditMode}
-                            runIdInEditMode={props.mission.runIdInEditMode}
-                            run={props.run}
+                        <JaiaToggle
+                            checked={() => props.mission.runIdInEditMode === props.run?.id}
+                            onClick={() => props.toggleEditMode(props.run)}
                             label="Edit"
                             title="ToggleEditMode"
-                            isDisabled={getBotRun(bot.bot_id, mission.runs) ? false : true}
+                            disabled={() => (getBotRun(bot.bot_id, mission.runs) ? false : true)}
                         />
                     </div>
                 </div>

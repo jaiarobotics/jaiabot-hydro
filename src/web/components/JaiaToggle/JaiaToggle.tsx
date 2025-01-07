@@ -1,4 +1,3 @@
-import React from "react";
 import Switch from "@mui/material/Switch";
 import { FormGroup, FormControlLabel } from "@mui/material";
 import { amber } from "@mui/material/colors";
