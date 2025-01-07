@@ -18,10 +18,6 @@ message XbeeInfo
 
 message DeviceMetadata
 {
-    option (dccl.msg) = {
-        unit_system: "si"
-    };
-
     optional string name = 1 [(jaia.field).rest_api.presence = GUARANTEED];
 
     message Version

@@ -15,7 +15,7 @@ sudo apt-get -y update
 # Install the required dependencies
 sudo apt-get -y install dccl4-apps libdccl4-dev libgoby3-dev libgoby3-moos-dev libgoby3-gui-dev gpsd libnanopb-dev nanopb rsync python3-venv python3-protobuf python3-netifaces gdal-bin
 # Install the build tools necessary
-sudo apt-get -y install cmake g++ npm clang-format clang graphviz
+sudo apt-get -y install cmake g++ npm clang-format clang graphviz doxygen
 # Install Arduino command line interface for local compilation of ino files into hex
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sudo BINDIR=/usr/local/bin sh && \
     arduino-cli config init --overwrite && \
@@ -47,3 +47,13 @@ nvm use ${NODE_VERSION}
 npm install -g npm@${jaia_version_npm}
 # Then, npm can install webpack
 npm install -g --no-audit webpack@${jaia_version_webpack} webpack-cli@${jaia_version_webpack_cli}
+
+# Check if pre-commit hook is installed
+if [ ! -e ${script_dir}/../.git/hooks/pre-commit ]; then
+   # Check if there is a broken symlink
+   if [ -L ${script_dir}/../.git/hooks/pre-commit ]; then
+      rm ${script_dir}/../.git/hooks/pre-commit
+   fi
+   # Install the pre-commit hook
+   ${script_dir}/../scripts/git-hooks/clang-format-hooks/git-pre-commit-format install
+fi
