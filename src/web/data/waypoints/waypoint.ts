@@ -1,27 +1,19 @@
+import { GeographicCoordinate } from "../../utils/protobuf-types";
 import Task from "../tasks/task";
 
 export default class Waypoint {
-    private lat: number;
-    private lon: number;
+    private position: GeographicCoordinate;
     private task: Task;
-    private canMove: boolean;
+    private canMoveOnMap: boolean;
 
     constructor() {}
 
-    getLat() {
-        return this.lat;
+    getPosition() {
+        return this.position;
     }
 
-    setLat(lat: number) {
-        this.lat = lat;
-    }
-
-    getLon() {
-        return this.lon;
-    }
-
-    setLon(lon: number) {
-        this.lon = lon;
+    setPosition(position: GeographicCoordinate) {
+        this.position = position;
     }
 
     getTask() {
@@ -32,11 +24,11 @@ export default class Waypoint {
         this.task = task;
     }
 
-    getCanMove() {
-        return this.canMove;
+    getCanMoveOnMap() {
+        return this.canMoveOnMap;
     }
 
-    setCanMove(canMove: boolean) {
-        this.canMove = canMove;
+    setCanMoveOnMap(canMoveOnMap: boolean) {
+        this.canMoveOnMap = canMoveOnMap;
     }
 }

@@ -19,7 +19,7 @@ interface HubContextProviderProps {
     children: ReactNode;
 }
 
-const HUB_POLL_TIME = 1000; // ms
+const HUB_POLL_TIME = 500; // ms
 
 export const HubContext = createContext<HubContextType>(null);
 export const HubDispatchContext = createContext(null);

@@ -1,7 +1,6 @@
 import { DivePacket, DriftPacket, TaskType } from "../../utils/protobuf-types";
 
 export default class TaskPacket {
-    private botID: number;
     private startTime: number;
     private endTime: number;
     private taskType: TaskType;
@@ -9,14 +8,6 @@ export default class TaskPacket {
     private driftPacket: DriftPacket;
 
     constructor() {}
-
-    getBotID() {
-        return this.botID;
-    }
-
-    setBotID(botID: number) {
-        this.botID = botID;
-    }
 
     getStartTime() {
         return this.startTime;

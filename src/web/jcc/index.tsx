@@ -6,7 +6,8 @@ import { bots } from "../data/bots/bots";
 import { hubs } from "../data/hubs/hubs";
 import { PortalBotStatus, PortalHubStatus } from "../shared/PortalStatus";
 
-const statusIntervalTimeout = 1000;
+// Sample status messages twice as fast as produced by Bots and Hubs to reduce potential data age issues
+const statusIntervalTimeout = 500; // ms
 const statusURL = "http://localhost:40001/jaia/v0/status";
 
 const statusInterval = setInterval(async () => {

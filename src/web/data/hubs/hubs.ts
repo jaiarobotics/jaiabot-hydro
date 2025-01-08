@@ -35,7 +35,7 @@ class Hubs {
             hub.setHubID(hubStatus.hub_id);
         }
 
-        if (hubStatus.fleet_id) {
+        if (hubStatus.fleet_id >= 0) {
             hub.setFleetID(hubStatus.fleet_id);
         }
 
@@ -59,7 +59,7 @@ class Hubs {
             hub.setWarnings([]);
         }
 
-        if (hubStatus.portalStatusAge) {
+        if (hubStatus.portalStatusAge >= 0) {
             hub.setStatusAge(hubStatus.portalStatusAge);
         }
 
