@@ -8,63 +8,59 @@ import {
     missionF,
 } from "../../tests/__mocks__/mission-mock";
 
-describe("operator adding and deleting single missions", () => {
-    test("adds first mission", () => {
+describe("Operator adding and deleting single missions", () => {
+    // Running various additions and deletions in single test because jest runs multiple tests in parallel
+    test("Operator adding and deleting single missions", () => {
+        // Add first mission
         missions.addMission(missionA);
         expect(missions.getMissions().size).toBe(1);
         expect(missions.getMission(1).getMissionID()).toBe(missionA.getMissionID());
-    });
 
-    test("adds second mission", () => {
+        // Add second mission
         missions.addMission(missionB);
         expect(missions.getMissions().size).toBe(2);
         expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
-    });
 
-    test("adds third mission", () => {
+        // Add third mission
         missions.addMission(missionC);
         expect(missions.getMissions().size).toBe(3);
         expect(missions.getMission(3).getMissionID()).toBe(missionC.getMissionID());
-    });
 
-    test("adds fourth mission", () => {
+        // Add fourth mission
         missions.addMission(missionD);
         expect(missions.getMissions().size).toBe(4);
         expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
-    });
 
-    test("deletes first mission", () => {
+        // Delete first mission
         missions.deleteMission(1);
         expect(missions.getMissions().size).toBe(3);
         expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
         expect(missions.getMission(3).getMissionID()).toBe(missionC.getMissionID());
         expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
-    });
 
-    test("deletes middle mission", () => {
+        // Delete middle mission
         missions.deleteMission(3);
         expect(missions.getMissions().size).toBe(2);
         expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
         expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
-    });
 
-    test("deletes last mission", () => {
+        // Delete last mission
         missions.deleteMission(4);
         expect(missions.getMissions().size).toBe(1);
         expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
-    });
 
-    test("reset missions singleton", () => {
-        // Keep as the last "test" in the suite
+        // Reset missions singleton to clean state
         missions.deleteAllMissions();
     });
 });
 
-describe("operator adding and deleting multiple missions at once", () => {
+describe("Operator adding and deleting multiple missions at once", () => {
     const missionSet1 = [missionA, missionB, missionC, missionD];
     const missionSet2 = [missionE, missionF];
 
-    test("operator adds four missions", () => {
+    // Running various additions and deletions in single test because jest runs multiple tests in parallel
+    test("Operator adding and deleting multiple missions at once", () => {
+        // Add four missions
         expect(missions.getMissions().size).toBe(0);
         missions.addMissionSet(missionSet1);
         expect(missions.getMissions().size).toBe(4);
@@ -72,14 +68,12 @@ describe("operator adding and deleting multiple missions at once", () => {
         expect(missions.getMission(2).getMissionID()).toBe(missionB.getMissionID());
         expect(missions.getMission(3).getMissionID()).toBe(missionC.getMissionID());
         expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
-    });
 
-    test("operator deletes all missions", () => {
+        // Delete all missions
         missions.deleteAllMissions();
         expect(missions.getMissions().size).toBe(0);
-    });
 
-    test("operator appends mission set to existing missions", () => {
+        // Append mission set to existing missions
         expect(missions.getMissions().size).toBe(0);
         missions.addMissionSet(missionSet1);
         expect(missions.getMissions().size).toBe(4);
@@ -91,10 +85,8 @@ describe("operator adding and deleting multiple missions at once", () => {
         expect(missions.getMission(4).getMissionID()).toBe(missionD.getMissionID());
         expect(missions.getMission(5).getMissionID()).toBe(missionE.getMissionID());
         expect(missions.getMission(6).getMissionID()).toBe(missionF.getMissionID());
-    });
 
-    test("reset missions singleton", () => {
-        // Keep as the last "test" in the suite
+        // Reset missions singleton to clean state
         missions.deleteAllMissions();
     });
 });
