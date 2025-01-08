@@ -19,7 +19,7 @@ interface BotContextProviderProps {
     children: ReactNode;
 }
 
-const BOT_POLL_TIME = 1000; // ms
+const BOT_POLL_TIME = 500; // ms
 
 export const BotContext = createContext<BotContextType>(null);
 export const BotDispatchContext = createContext(null);
