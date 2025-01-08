@@ -1,6 +1,9 @@
 {
     "validTaskTestCases": [
         {
+            "description": "Valid No Task"
+        },
+        {
             "description": "Valid Constant Heading",
             "task": {
                 "type": "CONSTANT_HEADING",
