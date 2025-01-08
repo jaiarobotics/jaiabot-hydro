@@ -22,6 +22,9 @@
     - [Verifying Component Outputs](#verifying-component-outputs)
       - [Using jest.fn()](#using-jestfn)
       - [Checking Values of Modified Props](#checking-values-of-modified-props)
+  - [More on Mocking](#more-on-mocking)
+    - [Mocking a Class](#mocking-a-class)
+    - [Mocking Partials](#mocking-partials)
 
 ## Introduction
 
@@ -324,3 +327,68 @@ switch (task?.type) {
         expect(task.surface_drift).toBeUndefined();
         break;
 ```
+
+## More on Mocking
+
+A very common use of mocks is to replace things that use a lot of resources or exercise external interfaces that are not need for the test with mocks that take their place in the test environment. This makes the tests run faster and avoids potential issues timing out waiting for external events.
+
+We are still evolving in out use of mocks. Detailed informaiton is available here [Jest Mock Functions](https://jestjs.io/docs/mock-functions). Please update this section if you learn a new way of using mocks.
+
+### Mocking a Class
+
+`CommandControl.tsx` Imports and uses `CustomLayerGroupFactory` to create map layers that require data downloaded from the web at run time. We do not need these for our tests and do not want our tests to depend on data being downloaded from the web. We don't want to modify the source code being tested so we create a mock to take the place of `CustomLayerGroupFactory`. General mocks like this should be placed in the `src/web/tests/__mocks__/` directory
+
+`src/web/tests/__mocks__/customLayers.mock.ts`
+
+Here we have create a mock of the MockCustomLayerGroupFactory class and the methods needed to support our test
+
+```
+// Mock the CustomLayers, replace  createCustomLayerGroup
+// Create a mock class for CustomLayerGroupFactory
+const MockCustomLayerGroupFactory = jest.fn().mockImplementation(() => ({
+    // Mock all methods or properties used by the module under test
+    createCustomLayerGroup: jest.fn().mockResolvedValue(undefined), // Example method
+    on: jest.fn(), // Mock event subscription
+    off: jest.fn(), // Mock event unsubscription
+}));
+
+module.exports = {
+    CustomLayerGroupFactory: MockCustomLayerGroupFactory,
+};
+```
+
+Using the Mock in `src/web/containers/CommandControl/__tests__/CommandControl.test.tsx`
+
+```
+// Mock the CustomLayers, replace  createCustomLayerGroup
+jest.mock("../../../openlayers/map/layers/geotiffs/CustomLayers", () =>
+    require("../../../tests/__mocks__/customLayers.mock.ts"),
+);
+```
+
+### Mocking Partials
+
+Sometimes we want to mock part of a module in our test to avoid costly operations that are not needed for the test but do not need or want to mock the entire module. In this case we need to only need a partial mock of the module.
+
+The `JaiaAPI` is a good example of this. The `JaiaAPI` class includes many methods used throughout our code. However all external communication is handled by the `hit` method. Rather than mocking every method in the class and trying to figure out what implementation may be needed for each one we want to simply replace the `hit` method with a mock and use the rest of the real `JaiaAPI` class. We use the `jest.requireActual` function to achieve this.
+
+`src/web/tests/__mocks__/jaiaAPI.mock.ts`
+
+Here we tell jest we want to use the real `JaiaAPI` class from `src/web/utils/jaia-api.ts` but replace it's `hit` method with a mock that returns a mocked response.
+
+```
+// Mock JaiaAPI, replace the hit method on the jaiaAPI instance
+// Import the real module to access the original jaiaAPI instance
+const originalModule = jest.requireActual("../../utils/jaia-api");
+
+originalModule.jaiaAPI.hit = jest
+    .fn()
+    .mockResolvedValue({ code: 200, msg: "Mocked Success", bots: [], hubs: [] });
+
+module.exports = {
+    ...originalModule, // Spread the real module
+    jaiaAPI: originalModule.jaiaAPI, // Keep the original jaiaAPI instance with the mocked hit
+};
+```
+
+## Test Suites
