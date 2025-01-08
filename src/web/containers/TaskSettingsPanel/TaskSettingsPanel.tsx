@@ -379,7 +379,7 @@ function TaskOptionsPanel(props: Props) {
                                             type="number"
                                             step="0.1"
                                             min="0"
-                                            max="60"
+                                            max="50"
                                             className="NumberInput"
                                             name="max_depth"
                                             value={dive.max_depth.toString()}
@@ -396,7 +396,7 @@ function TaskOptionsPanel(props: Props) {
                                             type="number"
                                             step="0.1"
                                             min="0.1"
-                                            max="60"
+                                            max="50"
                                             className="NumberInput"
                                             name="depth_interval"
                                             value={dive.depth_interval.toString()}
@@ -413,7 +413,7 @@ function TaskOptionsPanel(props: Props) {
                                             type="number"
                                             step="1"
                                             min="0"
-                                            max="3600"
+                                            max="80"
                                             className="NumberInput"
                                             name="hold_time"
                                             value={dive.hold_time.toString()}

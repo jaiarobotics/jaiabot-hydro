@@ -544,8 +544,7 @@ void jaiabot::apps::BotPidControl::handle_engineering_command(const jaiabot::pro
 
         if (depth.has_target())
         {
-            setThrottleMode(PID_DEPTH);
-            target_depth_ = depth.target();
+            set_target_depth(depth.target());
         }
 
         if (depth.has_kp())
@@ -741,8 +740,7 @@ void jaiabot::apps::BotPidControl::handle_dive_depth(
     // Depth PID for dive
     if (command.has_dive_depth())
     {
-        setThrottleMode(PID_DEPTH);
-        target_depth_ = command.dive_depth();
+        set_target_depth(command.dive_depth());
     }
     else if (bounds_.motor().has_throttle_dive())
     {
