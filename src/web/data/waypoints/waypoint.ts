@@ -4,7 +4,7 @@ import Task from "../tasks/task";
 export default class Waypoint {
     private position: GeographicCoordinate;
     private task: Task;
-    private canMove: boolean;
+    private canMoveOnMap: boolean;
 
     constructor() {}
 
@@ -24,11 +24,11 @@ export default class Waypoint {
         this.task = task;
     }
 
-    getCanMove() {
-        return this.canMove;
+    getCanMoveOnMap() {
+        return this.canMoveOnMap;
     }
 
-    setCanMove(canMove: boolean) {
-        this.canMove = canMove;
+    setCanMoveOnMap(canMoveOnMap: boolean) {
+        this.canMoveOnMap = canMoveOnMap;
     }
 }
