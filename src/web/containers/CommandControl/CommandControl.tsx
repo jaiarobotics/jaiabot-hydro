@@ -1160,14 +1160,6 @@ export default class CommandControl extends React.Component {
 
     didClickBot(bot_id: number) {
         this.toggleBot(bot_id);
-        if (this.state.visiblePanel === PanelType.GOAL_SETTINGS) {
-            this.setMoveWptMode(
-                false,
-                `run-${this.state.goalBeingEdited?.runNumber}`,
-                this.state.goalBeingEdited?.goalIndex,
-            );
-            this.setVisiblePanel(PanelType.NONE);
-        }
     }
 
     didClickHub(hub_id: number) {
@@ -2153,12 +2145,13 @@ export default class CommandControl extends React.Component {
             // Clicked on goal / waypoint
             const goal = feature.get("goal");
             if (goal) {
-                // Ignore event if this waypoint is already being edited
+                let moveWptMode = false;
                 if (
                     feature.get("runNumber") == this.state.goalBeingEdited?.runNumber &&
                     feature.get("goalIndex") == this.state.goalBeingEdited?.goalIndex
                 ) {
-                    return false;
+                    // Use the current value if the user clicks on the same wpt
+                    moveWptMode = this.state.goalBeingEdited?.moveWptMode;
                 }
                 const goalBeingEdited = {
                     goal: goal,
@@ -2166,7 +2159,7 @@ export default class CommandControl extends React.Component {
                     goalIndex: feature.get("goalIndex"),
                     botId: feature.get("botId"),
                     runNumber: feature.get("runNumber"),
-                    moveWptMode: false,
+                    moveWptMode: moveWptMode,
                 };
                 this.setState({ goalBeingEdited }, () =>
                     this.setVisiblePanel(PanelType.GOAL_SETTINGS),
@@ -2353,14 +2346,13 @@ export default class CommandControl extends React.Component {
     /**
      * Called when an EditModeToggle is turned on/off and updates runList.runIdInEditMode to the input run
      *
-     * @param {React.ChangeEvent<HTMLInputElement>} evt Event activating the edit mode toggle
      * @param {RunInterface} run The run being put into Edit Mode
      * @returns {void}
      */
-    toggleEditMode(evt: React.ChangeEvent<HTMLInputElement>, run: RunInterface) {
+    toggleEditMode(run: RunInterface) {
         const runList = this.getRunList();
 
-        if (evt.target.checked) {
+        if (runList.runIdInEditMode === "" || runList.runIdInEditMode != run?.id) {
             runList.runIdInEditMode = run?.id;
         } else {
             if (this.state.visiblePanel === "GOAL_SETTINGS") {
