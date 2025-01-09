@@ -41,7 +41,12 @@ runcmd:
   - /boot/firmware/jaiabot/init/setup-i2c.sh
   # Install jaiabot embedded
   - apt -y install /opt/jaiabot-embedded*.deb
+  # Disable networkd wait as we're using /etc/network/interfaces on Rasp Pi
+  - if [ "$(cloud-init query cloud_id)" = "nocloud" ]; then
+       systemctl mask systemd-networkd-wait-online.service
+    fi
 
+  
 write_files:
   - path: /etc/overlayroot.conf
     content: |
