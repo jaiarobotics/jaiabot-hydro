@@ -7,10 +7,6 @@ merge_how:
    settings: [append]
  - name: dict
    settings: [no_replace, recurse_list]
-   
-# Set temporary hostname, will be updated by jaiabot-embedded postinst
-hostname: jaia-unnamed
-manage_etc_hosts: localhost
 
 # jaia user
 users:

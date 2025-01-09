@@ -22,8 +22,8 @@ apt:
       jaiabot-embedded  jaiabot-embedded/user_role                select user
       jaiabot-embedded  jaiabot-embedded/hub_id                   select 0
 
-# SSH authorized keys
 write_files:
+  ## SSH authorized keys
   # temporary keys
   - path: /etc/jaiabot/ssh/tmp_authorized_keys
     content: |
@@ -35,10 +35,8 @@ write_files:
   # permanent keys
   - path: /home/jaia/.ssh/authorized_keys
     content: |
-      # ssh-rsa AAAA_B64_KEY username
-
-# Wifi
-write_files:
+      # ssh-rsa AAAA_B64_KEY username   
+  ## Wifi
   # SSID, address and gateway XXX and YYY will be automatically updated by jaiabot-embedded postinst
   # Only <PASSWORD> needs to be manually updated
   - path: /etc/network/interfaces.d/wlan0
