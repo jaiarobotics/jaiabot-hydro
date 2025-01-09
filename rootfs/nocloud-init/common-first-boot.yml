@@ -26,6 +26,7 @@ growpart:
 
 bootcmd:
   # Disable networkd wait as we're using /etc/network/interfaces on Rasp Pi
+  # REMOVE IN V2
   - if [ "$(cloud-init query cloud_id)" = "nocloud" ]; then systemctl mask systemd-networkd-wait-online.service; fi
   
 runcmd:
@@ -37,8 +38,14 @@ runcmd:
   - mkdir -p /var/log/apache2
   # Set up I2C
   - /boot/firmware/jaiabot/init/setup-i2c.sh
+  # For backwards compatibility
+  # REMOVE IN V2
+  - mkdir -p /etc/jaiabot/dev
+  - ln -s -f /dev/gps0 /etc/jaiabot/dev/gps
+  - ln -s -f /dev/arduino /etc/jaiabot/dev/arduino
+  - ln -s -f /dev/xbee /etc/jaiabot/dev/xbee
   # Install jaiabot embedded for unprivileged jaia user
-  - env USER=jaia apt -y install /opt/jaiabot-embedded*.deb
+  - env USER=jaia apt -y -o Dpkg::Options::="--force-confdef" install /opt/jaiabot-embedded*.deb
   # Append first boot date to version file
   - echo "JAIABOT_FIRST_BOOT_DATE=\"`date -u`\"" >> /etc/jaiabot/version
   # Set overlay to take effect on next boot
