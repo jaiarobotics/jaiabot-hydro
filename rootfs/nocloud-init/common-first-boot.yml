@@ -18,9 +18,7 @@ users:
     groups: users,adm,dialout,audio,netdev,video,plugdev,cdrom,games,input,gpio,spi,i2c,render,sudo
     shell: /bin/bash
     sudo: ALL=(ALL) NOPASSWD:ALL
-#    lock_passwd: true
-    lock_passwd: false
-    plain_text_passwd: test1234
+    lock_passwd: true
 
 # Disallow password login on SSH
 ssh_pwauth: false
@@ -29,6 +27,10 @@ ssh_pwauth: false
 growpart:
   mode: auto
   devices: [/var/log]
+
+bootcmd:
+  # Disable networkd wait as we're using /etc/network/interfaces on Rasp Pi
+  - if [ "$(cloud-init query cloud_id)" = "nocloud" ]; then systemctl mask systemd-networkd-wait-online.service; fi
   
 runcmd:
   # Set up log disk
@@ -39,20 +41,12 @@ runcmd:
   - mkdir -p /var/log/apache2
   # Set up I2C
   - /boot/firmware/jaiabot/init/setup-i2c.sh
-  # Install jaiabot embedded
-  - apt -y install /opt/jaiabot-embedded*.deb
-  # Disable networkd wait as we're using /etc/network/interfaces on Rasp Pi
-  - if [ "$(cloud-init query cloud_id)" = "nocloud" ]; then
-       systemctl mask systemd-networkd-wait-online.service
-    fi
-
-  
-write_files:
-  - path: /etc/overlayroot.conf
-    content: |
-      overlayroot=device:dev=/dev/disk/by-label/overlay,timeout=60,recurse=0
-    append: true
-
+  # Install jaiabot embedded for unprivileged jaia user
+  - env USER=jaia apt -y install /opt/jaiabot-embedded*.deb
+  # Append first boot date to version file
+  - echo "JAIABOT_FIRST_BOOT_DATE=\"`date -u`\"" >> /etc/jaiabot/version
+  # Set overlay to take effect on next boot
+  - echo "overlayroot=device:dev=/dev/disk/by-label/overlay,timeout=60,recurse=0" >> /etc/overlayroot.conf
   
 # Reboot for overlay to take effect
 power_state:

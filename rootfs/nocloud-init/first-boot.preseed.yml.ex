@@ -39,12 +39,13 @@ write_files:
 
 # Wifi
 write_files:
-  # address and gateway XXX and YYY will be automatically updated by jaiabot-embedded postinst
+  # SSID, address and gateway XXX and YYY will be automatically updated by jaiabot-embedded postinst
+  # Only <PASSWORD> needs to be manually updated
   - path: /etc/network/interfaces.d/wlan0
     content: |
       #auto wlan0
       #iface wlan0 inet static
-      #  wpa-essid <SSID>
+      #  wpa-essid SSID
       #  wpa-psk <PASSWORD>
       #  address 10.23.XXX.YYY
       #  netmask 255.255.255.0
@@ -56,12 +57,3 @@ write_files:
         address 10.23.0.100
         netmask 255.255.255.0
         gateway 10.23.0.1
-
-
-# Allows this config to merge correctly with standard-user-data.yml
-# Generally this section should not be changed
-merge_how:
- - name: list
-   settings: [append]
- - name: dict
-   settings: [no_replace, recurse_list]
