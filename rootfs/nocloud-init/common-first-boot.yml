@@ -38,6 +38,19 @@ runcmd:
   - chown -R jaia:jaia /var/log/jaiabot
   - mkdir -p /var/log/apache2
   # Set up I2C
-  - ./setup-i2c.sh
+  - /boot/firmware/jaiabot/init/setup-i2c.sh
   # Install jaiabot embedded
   - apt -y install /opt/jaiabot-embedded*.deb
+
+write_files:
+  - path: /etc/overlayroot.conf
+    content: |
+      overlayroot=device:dev=/dev/disk/by-label/overlay,timeout=60,recurse=0
+    append: true
+
+  
+# Reboot for overlay to take effect
+power_state:
+  mode: reboot
+  timeout: 30
+  condition: true

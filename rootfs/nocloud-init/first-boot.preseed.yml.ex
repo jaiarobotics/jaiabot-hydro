@@ -4,21 +4,23 @@
 apt:
   debconf_selections:
     jaiabot_embedded_set: |
-      jaiabot-embedded        jaiabot-embedded/warp                      select 1
-      jaiabot-embedded        jaiabot-embedded/type                      select bot
-      jaiabot-embedded        jaiabot-embedded/hub_id                    select 0
-      jaiabot-embedded        jaiabot-embedded/bot_id                    select 0
-      jaiabot-embedded        jaiabot-embedded/data_offload_ignore_type  select none
-      jaiabot-embedded        jaiabot-embedded/user_role                 select user
-      jaiabot-embedded        jaiabot-embedded/imu_type                  select bno085
-      jaiabot-embedded        jaiabot-embedded/bot_type                  select hydro
-      jaiabot-embedded        jaiabot-embedded/fleet_id                  select 0
-      jaiabot-embedded        jaiabot-embedded/led_type                  select none
-      jaiabot-embedded        jaiabot-embedded/mode                      select runtime
-      jaiabot-embedded        jaiabot-embedded/imu_install_type          select embedded
-      jaiabot-embedded        jaiabot-embedded/electronics_stack         select 2
-      jaiabot-embedded        jaiabot-embedded/arduino_type              select usb
-      jaiabot-embedded        jaiabot-embedded/motor_harness_type        select none
+      jaiabot-embedded  jaiabot-embedded/led_type                 select  none
+      jaiabot-embedded  jaiabot-embedded/motor_harness_type       select  none
+      jaiabot-embedded  jaiabot-embedded/bot_type                 select  hydro
+      jaiabot-embedded  jaiabot-embedded/warp                     select  1
+      jaiabot-embedded  jaiabot-embedded/arduino_type             select  usb
+      jaiabot-embedded  jaiabot-embedded/pressure_sensor_type     select  bar30
+      jaiabot-embedded  jaiabot-embedded/fleet_id                 select  0
+      jaiabot-embedded  jaiabot-embedded/imu_install_type         select  embedded
+      jaiabot-embedded  jaiabot-embedded/imu_type                 select  bno085
+      jaiabot-embedded  jaiabot-embedded/type                     select  bot
+      jaiabot-embedded  jaiabot-embedded/mode                     select  runtime
+      jaiabot-embedded  jaiabot-embedded/electronics_stack        select  2
+      jaiabot-embedded  jaiabot-embedded/data_offload_ignore_type select  none
+      jaiabot-embedded  jaiabot-embedded/bot_id                   select  0
+      jaiabot-embedded  jaiabot-embedded/temperature_sensor_type  select  bar30
+      jaiabot-embedded  jaiabot-embedded/user_role                select  user
+      jaiabot-embedded  jaiabot-embedded/hub_id                   select  0
 
 # SSH authorized keys
 write_files:
@@ -40,15 +42,20 @@ write_files:
   # address and gateway XXX and YYY will be automatically updated by jaiabot-embedded postinst
   - path: /etc/network/interfaces.d/wlan0
     content: |
-      wpa-essid <SSID>
-      wpa-psk <PASSWORD>
-      address 10.23.XXX.YYY
-      netmask 255.255.255.0
-      gateway 10.23.XXX.1
+      #auto wlan0
+      #iface wlan0 inet static
+      #  wpa-essid <SSID>
+      #  wpa-psk <PASSWORD>
+      #  address 10.23.XXX.YYY
+      #  netmask 255.255.255.0
+      #  gateway 10.23.XXX.1
   - path: /etc/network/interfaces.d/eth0
     content: |
-      # auto eth0
-      # iface eth0 inet dhcp
+      auto eth0
+      iface eth0 inet static
+        address 10.23.0.100
+        netmask 255.255.255.0
+        gateway 10.23.0.1
 
 
 # Allows this config to merge correctly with standard-user-data.yml
