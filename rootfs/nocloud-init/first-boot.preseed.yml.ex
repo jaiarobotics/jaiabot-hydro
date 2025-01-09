@@ -26,6 +26,10 @@ write_files:
   - path: /etc/jaiabot/ssh/tmp_authorized_keys
     content: |
       # ssh-rsa AAAA_B64_KEY username
+  # hub keys
+  - path: /etc/jaiabot/ssh/hub_authorized_keys
+    content: |
+      # ssh-rsa AAAA_B64_KEY username
   # permanent keys
   - path: /home/jaia/.ssh/authorized_keys
     content: |

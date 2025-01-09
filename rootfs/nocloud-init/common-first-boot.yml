@@ -10,7 +10,7 @@ merge_how:
    
 # Set temporary hostname, will be updated by jaiabot-embedded postinst
 hostname: jaia-unnamed
-manage_etc_hosts: true
+manage_etc_hosts: localhost
 
 # jaia user
 users:
@@ -18,7 +18,9 @@ users:
     groups: users,adm,dialout,audio,netdev,video,plugdev,cdrom,games,input,gpio,spi,i2c,render,sudo
     shell: /bin/bash
     sudo: ALL=(ALL) NOPASSWD:ALL
-    lock_passwd: true
+#    lock_passwd: true
+    lock_passwd: false
+    plain_text_passwd: test1234
 
 # Disallow password login on SSH
 ssh_pwauth: false
@@ -26,11 +28,7 @@ ssh_pwauth: false
 # Resize data partition to fill disk
 growpart:
   mode: auto
-  devices: /var/log
-
-packages:
-  - apt:
-      - /opt/jaiabot-embedded*.deb
+  devices: [/var/log]
   
 runcmd:
   # Set up log disk
@@ -40,4 +38,6 @@ runcmd:
   - chown -R jaia:jaia /var/log/jaiabot
   - mkdir -p /var/log/apache2
   # Set up I2C
-  - /boot/firmware/jaiabot/init/setup-i2c.sh
+  - ./setup-i2c.sh
+  # Install jaiabot embedded
+  - apt -y install /opt/jaiabot-embedded*.deb
