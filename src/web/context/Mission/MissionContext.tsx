@@ -10,7 +10,7 @@ interface MissionContextType {
 }
 
 interface Action {
-    type: string;
+    type: MissionActions;
     missions?: Map<number, Mission>;
 }
 
