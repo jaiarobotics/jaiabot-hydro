@@ -8,6 +8,8 @@
     - [Integration Testing](#integration-testing)
     - [Functional Testing](#functional-testing)
   - [Test File Stucture](#test-file-stucture)
+  - [Running the Test](#running-the-test)
+    - [Debugging a Test](#debugging-a-test)
   - [Anatomy of a React Test](#anatomy-of-a-react-test)
     - [Setting up the Test](#setting-up-the-test)
       - [Props](#props)
@@ -25,6 +27,12 @@
   - [More on Mocking](#more-on-mocking)
     - [Mocking a Class](#mocking-a-class)
     - [Mocking Partials](#mocking-partials)
+  - [Test Setup, Teardown and Scoping](#test-setup-teardown-and-scoping)
+  - [Parameterized Tests](#parameterized-tests)
+  - [Test Configuration](#test-configuration)
+    - [src/web/jest.config.js](#srcwebjestconfigjs)
+    - [src/web/tests/jest.setup.js](#srcwebtestsjestsetupjs)
+    - [src/web/tsconfig.json](#srcwebtsconfigjson)
 
 ## Introduction
 
@@ -68,6 +76,108 @@ CommandControl/
 └── __tests__
     └── CommandControl.test.tsx
 ```
+
+## Running the Test
+
+The simplest way to run a test is to enter `npm test` from anywhere withint the `src/web` directory tree. This will cause Jest to
+run all the tests in the directory tree.  
+Notice in the example below Jest ran all the tests under `src/web` even though we were down in the `TaskSettingsPanel` folder.
+
+```
+:~/jaiabot/src/web/containers/TaskSettingsPanel$ npm test
+
+> test
+> jest
+
+ PASS  containers/RallyPointPanel/__tests__/RallyPointPanel.test.tsx (12.796 s)
+  RallyPointPanel: Button Interaction Tests
+    ✓ Test Go To Button using test-id (122 ms)
+    ✓ Test Go To Button using label (32 ms)
+    ✓ Test Go To Button using title (39 ms)
+    ✓ Test Delete Button using test-id (28 ms)
+    ✓ Test Delete Button using label (25 ms)
+    ✓ Test Delete Button using title (36 ms)
+
+... (more tests)
+
+Test Suites: 8 passed, 8 total
+Tests:       62 passed, 62 total
+Snapshots:   0 total
+Time:        15.374 s, estimated 18 s
+Ran all test suites.
+```
+
+If you want to run the Test Suites in a particular directory you just need the name of the directory, you do not need the entire path.
+In the example below we are in the src/web directory and ran all the tests under src/web/containers/TaskSettingsPanel directory. It ran 3 Test Suites (files) from that directory.
+
+```
+:~/jaiabot/src/web$ npm test TaskSettingsPanel
+
+> test
+> jest TaskSettingsPanel
+
+ PASS  containers/TaskSettingsPanel/__tests__/utils/ValidateTask.test.ts
+  Placeholder to prevent Jest from failing due to no explicit test for a file inside __test__ dir
+    ✓ Placeholder test (5 ms)
+  ValidateTask Unit Tests
+
+... (more individual tests)
+
+ PASS  containers/TaskSettingsPanel/__tests__/utils/validate-task.ts
+  Placeholder to prevent jest from failing due to no explicit test for a file inside __test__ dir
+    ✓ Placeholder test
+
+ PASS  containers/TaskSettingsPanel/__tests__/TaskSettingsPanel.test.tsx (7.199 s)
+  Placeholder to prevent jest from failing due to no explicit test for a file inside __test__ dir
+    ✓ Placeholder test (3 ms)
+  TaskSettingsPanel: Should update task type correctly for all options
+    ✓ Input Task: Valid No Task, Select all Options (265 ms)
+
+ ... (more individual tests)
+
+   Unit Test Bottom Dive Toggle JAIA-1512
+    ✓ Toggle Bottom Dive, Verify Task (110 ms)
+
+Test Suites: 3 passed, 3 total
+Tests:       46 passed, 46 total
+Snapshots:   0 total
+Time:        8.08 s
+Ran all test suites matching /TaskSettingsPanel/i.
+
+```
+
+If you want to run a single Test Suite you can provide the entire path to the file containing the Test Suite.
+
+```
+:~/jaiabot/src/web$ npm test containers/TaskSettingsPanel/__tests__/TaskSettingsPanel.test.tsx
+
+> test
+> jest containers/TaskSettingsPanel/__tests__/TaskSettingsPanel.test.tsx
+
+ PASS  containers/TaskSettingsPanel/__tests__/TaskSettingsPanel.test.tsx (6.144 s)
+  Placeholder to prevent jest from failing due to no explicit test for a file inside __test__ dir
+    ✓ Placeholder test (1 ms)
+  TaskSettingsPanel: Should update task type correctly for all options
+    ✓ Input Task: Valid No Task, Select all Options (261 ms)
+    ✓ Input Task: Valid Constant Heading, Select all Options (130 ms)
+    ✓ Input Task: Valid Non-Bottom Dive, Select all Options (130 ms)
+    ✓ Input Task: Valid Bottom Dive, Select all Options (123 ms)
+    ✓ Input Task: Valid Surface Drift, Select all Options (120 ms)
+    ✓ Input Task: Valid Station Keeping, Select all Options (118 ms)
+    ✓ Input Task: Valid None Task Type, Select all Options (137 ms)
+  Unit Test Bottom Dive Toggle JAIA-1512
+    ✓ Toggle Bottom Dive, Verify Task (124 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        6.601 s, estimated 7 s
+Ran all test suites matching /containers\/TaskSettingsPanel\/__tests__\/TaskSettingsPanel.test.tsx/i.
+```
+
+### Debugging a Test
+
+You can debug your tests right in `VSCode`. Simply insert breakpoints where you need them and click on the `Debug` button or `Ctrl + Shift + D` to debug the current file.
 
 ## Anatomy of a React Test
 
@@ -117,7 +227,7 @@ const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
 
 #### Declaring the Test
 
-Tests are objects that include a test method that get run using the tools from `jest` and RTL. The keyword `test` or `it` is used to declare a test object. The attributeS of a Test are a `description` followed by a test method and then an optional timeout value. Tests methods should be declared using Arrow Function syntax.
+Tests are objects that include a test method that get run using the tools from `Jest` and RTL. The keyword `test` or `it` is used to declare a test object. The attributeS of a Test are a `description` followed by a test method and then an optional timeout value. Tests methods should be declared using Arrow Function syntax.
 
 Example of complete simple test
 
@@ -152,6 +262,7 @@ rerender(<TaskSettingsPanel {...mockProps} />);
 ### Accessing React Elements
 
 RTL provides many different ways to query the rendered component to get access to a specific element. [About Queries](https://testing-library.com/docs/queries/about)
+
 The object `screen` represents the rendered object being tested. The most common queries are listed below. In general these use attributes of the element already existing in the code.
 
 - getByRole
@@ -193,7 +304,7 @@ Once you have access to an element you will need to trigger it somehow to make t
 - [fireEvent method](https://testing-library.com/docs/dom-testing-library/api-events)
 - [user-event library](https://testing-library.com/docs/user-event/intro)
 
-In general we always want to use the methods in the user-event companion library. `fireEvent` creates DOM events directly. `user-event` more closely emulates user interactions in a browser, which may trigger more than one DOM Event.
+In general we always want to use the methods in the `user-event` companion library. `fireEvent` creates DOM events directly. `user-event` more closely emulates user interactions in a browser, which may trigger more than one DOM Event.
 
 Triggering the Button Element described above
 
@@ -374,7 +485,7 @@ The `JaiaAPI` is a good example of this. The `JaiaAPI` class includes many metho
 
 `src/web/tests/__mocks__/jaiaAPI.mock.ts`
 
-Here we tell jest we want to use the real `JaiaAPI` class from `src/web/utils/jaia-api.ts` but replace it's `hit` method with a mock that returns a mocked response.
+Here we tell Jest we want to use the real `JaiaAPI` class from `src/web/utils/jaia-api.ts` but replace it's `hit` method with a mock that returns a mocked response.
 
 ```
 // Mock JaiaAPI, replace the hit method on the jaiaAPI instance
@@ -391,4 +502,185 @@ module.exports = {
 };
 ```
 
-## Test Suites
+## Test Setup, Teardown and Scoping
+
+A file with Jest tests in it is considered a "Test Suite". A single `test` or `it` declares a "Test". Tests within a Test Suite can be further grouped by wrapping them with a `describe` block. It is important to keep the scope of these blocks in mind when declaring tests or items to support your tests.
+
+Often when running multiple tests and groups of tests we need to run some code before and/or after each test or group to put the system in the correct state for each run. This is typically referred to as "Setup" and "Teardown" in testing. Mocks in particular often need to be reset as well as props used in tests as part of a Setup. Teardown can be used to free up resources allocated during a test (sockets, memory etc), reset state or anything else that has no use after a test is run. It is important to remember that you can not count on Jest running your tests in any particular order, so do not rely on the end state of one test as the starting state of another test.
+
+Jest uses `beforeAll()`, `beforeEach()` for Setup and `afterAll()` and `afterEach()` for Teardown.  
+`beforeAll()` and `afterAll()` are run once, before and after all the files in a particular block scope (either entire file, a describe block or a single test). `beforeEach()`and `afterEach()` are run before and after each individual test in a block.
+
+## Parameterized Tests
+
+Often we want to run the same test code over and over with different data. Rather than copy/paste a test and changing a few items, look for ways to extract what is different into parameters, just as you would if you were going to turn a block of code into a more general function. A set of parameters used for a particular test run is typically refered to as a 'Test Case'. Jest provides a test.each() wrapper method to achieve this. The parameters are an array and each element can contain as much data as needed.
+
+In the example below we define our Parameters to include a `string` to help identify the test case and a `MissionTask` to be used for the test run and put them in an array named `validTaskTestCases` to pass to our parameterized test. Because there was a large number of different `MissionTask` to be tested we put them in a `json` file to make the code cleaner and make it easier to add, modify or delete test cases. (This same file of test cases is used in another Test Suite and contains both `validTaskTestCases` and a set of `invalidTaskTestCases`. For this Test Suite we are only using the `validTaskTestCases`.)
+
+```
+import testCases from "./cases/missionTaskTestCases.json";
+ ...
+type TaskParams = {
+    description: string;
+    task: MissionTask;
+};
+
+type TaskTestCases = {
+    validTaskTestCases: TaskParams[];
+};
+
+// Use all of the Valid Task Test Cases
+const validTaskTestCases = (testCases as TaskTestCases).validTaskTestCases;
+```
+
+Next we declare our parameterized test. We use the `beforeEach()` method in a `describe` block to reset the Props used and to reset all mock call data. We use `test.each(validTaskTestCases)` to tell Jest to run this test with each Test Case in the `validTaskTestCases`. We use the `description` of the Test Case to augment the Test description to make the test output more useful and then pass the `task` of the Test Case into the test function as a parameter and add it to the default Props for our test.
+
+```
+describe("TaskSettingsPanel: Should update task type correctly for all options", () => {
+    beforeEach(() => {
+        resetProps();
+        jest.clearAllMocks(); // Ensure a clean state for each test
+    });
+
+    test.each(validTaskTestCases)(
+        "Input Task: $description, Select all Options",
+        async ({ task }) => {
+
+            // Add Test Case Task to Props
+            mockProps.task = task;
+
+```
+
+Here is the output from the parameterized test
+
+```
+  TaskSettingsPanel: Should update task type correctly for all options
+    ✓ Input Task: Valid No Task, Select all Options (257 ms)
+    ✓ Input Task: Valid Constant Heading, Select all Options (135 ms)
+    ✓ Input Task: Valid Non-Bottom Dive, Select all Options (128 ms)
+    ✓ Input Task: Valid Bottom Dive, Select all Options (127 ms)
+    ✓ Input Task: Valid Surface Drift, Select all Options (121 ms)
+    ✓ Input Task: Valid Station Keeping, Select all Options (119 ms)
+    ✓ Input Task: Valid None Task Type, Select all Options (119 ms)
+```
+
+## Test Configuration
+
+Our testing environment includes a lot of individual tools working together, each with their own configurations. Here we will discuss these but only focus on the test related configuration parameters.
+
+### src/web/jest.config.js
+
+Automatically reset the data associated with mock calls so it does not need to be done explicitly in a `beforeEach()` method.
+
+```
+    // Automatically clear mock calls, instances, contexts and results before every test
+    clearMocks: true,
+```
+
+Tell Jest to use `babel` for test coverage instrumentation. Currently we are not accessing any test coverage data.
+
+```
+    // Indicates which provider should be used to instrument code for coverage
+    coverageProvider: "babel",
+```
+
+Tell Jest to use `file-mock.ts` for things like image files and `style-mock.ts` for `css` and `less` files.
+
+```
+    // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
+    moduleNameMapper: {
+        "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$":
+            "<rootDir>/tests/__mocks__/file-mock.ts",
+        "\\.(css|less)$": "<rootDir>/tests/__mocks__/style-mock.ts",
+    },
+```
+
+Tell Jest to ignore the files in the `dist` directory
+
+```
+    // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
+    modulePathIgnorePatterns: ["dist"],
+```
+
+Tell Jest to use ts-jest as the preset for translating Typescript
+
+```
+    // A preset that is used as a base for Jest's configuration
+    preset: "ts-jest",
+```
+
+TODO Add explanation @Michael Twomey
+
+```
+    // The paths to modules that run some code to configure or set up the testing environment before each test
+    setupFiles: ["fake-indexeddb/auto", "<rootDir>/tests/jest.setup.js"],
+
+    // A list of paths to modules that run some code to configure or set up the testing framework before each test
+    setupFilesAfterEnv: ["<rootDir>/tests/setup-tests.ts"],
+```
+
+Tell Jest we want to use the `jsdom` for our testing environment
+
+```
+    // The test environment that will be used for testing
+    testEnvironment: "jsdom",
+```
+
+Tell Jest to use `ts-jest` to translate `.ts` & `.tsx` files and to use `babel-jest` to translate `.js` & `.jsx` files.
+
+```
+    // A map from regular expressions to paths to transformers
+    transform: {
+        "^.+\\.(ts|tsx)?$": "ts-jest",
+        "^.+\\.(js|jsx)$": "babel-jest",
+    },
+```
+
+This parameter must be present. It tells Jest to ignore some files. We are not ignoreing any at this time.
+
+```
+    // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
+    transformIgnorePatterns: [],
+```
+
+Runtime parameters for tests. We increased the `testTimeout` and reduced the `maxWorkers` to insure our tests can run in `CircleCI`. You may want to change these locally if you have a faster or slower machine.
+
+```
+    // Whether to use watchman for file crawling
+    // watchman: true,
+    testTimeout: 20000,
+    maxWorkers: 2,
+```
+
+### src/web/tests/jest.setup.js
+
+TODO @Michael Twomey Add explanations
+
+```
+// Provide the Web API ResizeObserver interface to Jest
+global.ResizeObserver = class ResizeObserver {
+    constructor(callback) {
+        this.callback = callback;
+    }
+
+    observe(target) {
+        this.callback([{ target }]);
+    }
+
+    unobserve() {}
+
+    disconnect() {}
+};
+
+// Silence non error output while running tests
+global.console.log = jest.fn();
+global.console.debug = jest.fn();
+```
+
+### src/web/tsconfig.json
+
+Tell Typescript to use the types in `@testing-library/jest-dom`
+`"types": ["@testing-library/jest-dom", "@types/plotly.js"],`
+
+Tell `Typescript` to exclude our test files from our application code base
+`exclude": ["node_modules", "dist", "coverage", "webpack.*.js", "*.config.js", "*.test.ts*"]`
