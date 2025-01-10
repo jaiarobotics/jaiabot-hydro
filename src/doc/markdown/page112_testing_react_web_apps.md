@@ -52,7 +52,7 @@ Using RTL we want to ensure that our user interfaces work as intended under all 
 
 ### Unit Testing
 
-Unit testing focuses on a specific software entitiy in isolation and exercises it's functionality by varying inputs and verifying expected outputs. In general, the entitiy will be one of our container modules (`src/web/containers`), and the focus of the test may be specific to an individual element in that container. The inputs of any given test are comprised of the Props passed into the container and simulated user actions. The outputs of the test are comprised of updates to props via the use of callback methods and changes to the visual components of the container being tested. An important concept in unit testing is exercising "Edge Conditions". Edge Conditions are sets of inputs and actions that present unique situations likely to cause problems for software. Think "how many different ways does this container need to render?"
+Unit testing focuses on a specific software entitiy in isolation and exercises it's functionality by varying inputs and verifying expected outputs. In general, the entitiy will be one of our container modules (`src/web/containers`), and the focus of the test may be specific to an individual element in that container. The inputs of any given test are comprised of the Props passed into the container and simulated user actions. The outputs of the test are comprised of updates to props via the use of callback functions and changes to the visual components of the container being tested. An important concept in unit testing is exercising "Edge Conditions". Edge Conditions are sets of inputs and actions that present unique situations likely to cause problems for software. Think "how many different ways does this container need to render?"
 
 ### Integration Testing
 
@@ -107,8 +107,8 @@ Time:        15.374 s, estimated 18 s
 Ran all test suites.
 ```
 
-If you want to run the Test Suites in a particular directory, you just need the name of the directory, you do not need the entire path.
-In the example below, we are in the `src/web` directory and ran all the tests the `src/web/containers/TaskSettingsPanel` directory. It ran 3 Test Suites (files) from that directory.
+If you want to run the test suites in a particular directory, you just need the name of the directory, you do not need the entire path.
+In the example below, we are in the `src/web` directory and ran all the tests under `src/web/containers/TaskSettingsPanel`. It ran 3 test suites (files) from that directory.
 
 ```
 :~/jaiabot/src/web$ npm test TaskSettingsPanel
@@ -196,7 +196,7 @@ For a Component test to function properly several things must be considered. We 
 
 #### Props
 
-You will need to determine the minimum set of Prop parameters for the Component to function properly. This will depend on the specific functionality being tested. Props can be declared statically, created dynamically in the test, or read in from files. Typically, you will need to provide any data needed to put the Component in the correct state and callback methods to verify results and support the component behavior.
+You will need to determine the minimum set of Prop parameters for the Component to function properly. This will depend on the specific functionality being tested. Props can be declared statically, created dynamically in the test, or read in from files. Typically, you will need to provide any data needed to put the Component in the correct state and callback functions to verify results and support the component behavior.
 
 ```
 const mockProps: Props = {
@@ -249,7 +249,7 @@ render(<JaiaAbout metadata={sampleMetadata1} />);
 
 #### Re-Rendering
 
-Unlike the usual DOM, `jsdom` does not automatically re-render components based on changes to Props or Context. Most of our components are "controlled components", meaning their state is controlled by props and functionality is provided by callback methods. This means we need to explicitly re-render a component under test to cause changes to it. The `render` method of RTL returns a reference to the rendered object which includes a `rerender` method.
+Unlike the usual DOM, `jsdom` does not automatically re-render components based on changes to Props or Context. Most of our components are "controlled components", meaning their state is controlled by props and functionality is provided by callback functions. This means we need to explicitly re-render a component under test to cause changes to it. The `render` method of RTL returns a reference to the rendered object which includes a `rerender` method.
 
 ```
 // Get the rerender method from the object returned when rendering the panel
@@ -372,7 +372,7 @@ expect(toggle.disabled).toBe(true);
 
 ### Verifying Component Outputs
 
-As stated above, most of our components are controlled, therefore, the outputs of them are passed as arguments to callback methods provided in the Props. In general, we create mock callback functions for our tests. These can be declared in the test object itself, outside the test object, or in a different file. It depends on the scope and reusability of the mock callback as to which location makes the most sense.
+As stated above, most of our components are controlled, therefore, the outputs of them are passed as arguments to callback functions provided in the Props. In general, we create mock callback functions for our tests. These can be declared in the test object itself, outside the test object, or in a different file. It depends on the scope and reusability of the mock callback as to which location makes the most sense.
 
 #### Using jest.fn()
 
@@ -480,7 +480,7 @@ jest.mock("../../../openlayers/map/layers/geotiffs/CustomLayers", () =>
 
 Sometimes we want to mock part of a module in our test to avoid costly operations that are not needed for the test but do not need or want to mock the entire module. In this case, we need only a partial mock of the module.
 
-The `JaiaAPI` is a good example of this. The `JaiaAPI` class includes many methods used throughout our code. However, all external communication is handled by the `hit` method. Rather than mocking every method in the class and trying to figure out what implementation may be needed for each one we want to simply replace the `hit` method with a mock and use the rest of the real `JaiaAPI` class. We use the `jest.requireActual` function to achieve this.
+The `JaiaAPI` is a good example of this. The `JaiaAPI` class includes many methods used throughout our code. However, all external communication is handled by the `hit` method. Rather than mocking every method in the class and trying to figure out what implementation may be needed for each one we simply replace the `hit` method with a mock and use the rest of the real `JaiaAPI` class. We use the `jest.requireActual` function to achieve this.
 
 `src/web/tests/__mocks__/jaiaAPI.mock.ts`
 
@@ -505,7 +505,7 @@ module.exports = {
 
 A file with Jest tests in it is considered a "Test Suite". A single `test` or `it` declares a "Test". Tests within a Test Suite can be further grouped by wrapping them with a `describe` block. It is important to keep the scope of these blocks in mind when declaring tests or items to support your tests.
 
-Often when running multiple tests and groups of tests we need to run some code before and/or after each test or group to put the system in the correct state for each run. This is typically referred to as "Setup" and "Teardown" in testing. Mocks in particular often need to be reset as well as props used in tests as part of a Setup. Teardown can be used to free up resources allocated during a test (sockets, memory, etc), reset state, or anything else that has no use after a test is run. _It is important to remember that you can not count on Jest running your tests in any particular order, so do not rely on the end state of one test as the starting state of another test._
+Often when running multiple tests and groups of tests we need to run some code before and/or after each test or group to put the system in the correct state for each run. This is typically referred to as "Setup" and "Teardown" in testing. Mocks in particular often need to be reset as well as Props used in tests as part of a Setup. Teardown can be used to free up resources allocated during a test (sockets, memory, etc), reset state, or anything else that has no use after a test is run. _It is important to remember that you can not count on Jest running your tests in any particular order, so do not rely on the end state of one test as the starting state of another test._
 
 Jest uses `beforeAll()`, `beforeEach()` for setup and `afterAll()` and `afterEach()` for teardown.  
 `beforeAll()` and `afterAll()` are run once, before and after all the files in a particular block scope (either entire file, a describe block, or a single test). `beforeEach()`and `afterEach()` are run before and after each individual test in a block.
@@ -682,7 +682,9 @@ global.console.debug = jest.fn();
 ### src/web/tsconfig.json
 
 Tell Typescript to use the types in `@testing-library/jest-dom`
+
 `"types": ["@testing-library/jest-dom", "@types/plotly.js"],`
 
-Tell `Typescript` to exclude our test files from our application codebase
+Tell Typescript to exclude our test files from our application code base
+
 `exclude": ["node_modules", "dist", "coverage", "webpack.*.js", "*.config.js", "*.test.ts*"]`
