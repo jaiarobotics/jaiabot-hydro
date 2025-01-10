@@ -52,9 +52,11 @@ runcmd:
   - chmod 700 /home/jaia/.ssh
   - mv /etc/jaiabot/ssh/jaia_authorized_keys /home/jaia/.ssh/authorized_keys
   - chown -R jaia:jaia /home/jaia/.ssh
-  # Permissions for /etc/jaiabot/ssh to work
+  # Permissions for /etc/jaiabot to work
   - chown root:jaia /etc/jaiabot
   - chown -R jaia:jaia /etc/jaiabot/ssh
+  - chmod 700 /etc/jaiabot/ssh
+  - chmod 600 /etc/jaiabot/ssh/*authorized_keys
   # Check and install any hub keys
   - /boot/firmware/jaiabot/init/install-hub-ssh-keys.sh
   
