@@ -24,55 +24,65 @@ function write_preseed()
     vboximg-mount -i "${DISKUUID}" --rw --root "${VBOX_MOUNT_PATH}"
     sudo mount "${VBOX_MOUNT_PATH}/vol0" /mnt
 
-    ssh_keys=$(cat $HOME/.ssh/*.pub)
+    # Add space to the front so we can use these later in the YAML file
+    ssh_keys=$(cat $HOME/.ssh/*.pub | sed "s/^/      /")
     
-    cat <<EOF | sudo tee /mnt/jaiabot/init/first-boot.preseed
-# Preseed configuration. Booleans can be "true" or "yes"
-# This is a bash script so any bash command is allowed
-# Edit and rename to "/boot/firmware/jaiabot/init/first-boot.preseed" to take effect
+    cat <<EOF | sudo tee /mnt/jaiabot/init/first-boot.preseed.yml
+#cloud-config
 
-jaia_run_first_boot=true
-jaia_stress_tests=false
+# Bot/Hub information (debconf for jaiabot-embedded)
+apt:
+  debconf_selections:
+    jaiabot_embedded_set: |
+      jaiabot-embedded  jaiabot-embedded/led_type                 select none
+      jaiabot-embedded  jaiabot-embedded/motor_harness_type       select none
+      jaiabot-embedded  jaiabot-embedded/bot_type                 select hydro
+      jaiabot-embedded  jaiabot-embedded/warp                     select 10
+      jaiabot-embedded  jaiabot-embedded/arduino_type             select none
+      jaiabot-embedded  jaiabot-embedded/pressure_sensor_type     select bar30
+      jaiabot-embedded  jaiabot-embedded/fleet_id                 select ${FLEET}
+      jaiabot-embedded  jaiabot-embedded/imu_install_type         select embedded
+      jaiabot-embedded  jaiabot-embedded/imu_type                 select bno085
+      jaiabot-embedded  jaiabot-embedded/type                     select ${BOT_OR_HUB}
+      jaiabot-embedded  jaiabot-embedded/mode                     select simulation
+      jaiabot-embedded  jaiabot-embedded/electronics_stack        select 2
+      jaiabot-embedded  jaiabot-embedded/data_offload_ignore_type select none
+      jaiabot-embedded  jaiabot-embedded/bot_id                   select ${N}
+      jaiabot-embedded  jaiabot-embedded/temperature_sensor_type  select bar30
+      jaiabot-embedded  jaiabot-embedded/user_role                select user
+      jaiabot-embedded  jaiabot-embedded/hub_id                   select ${N}
 
-########################################################
-# Network
-########################################################
-jaia_disable_ethernet=true
-jaia_configure_wifi=true
-jaia_wifi_ssid=dummy
-jaia_wifi_password=dummy
-
-########################################################
-# SSH authorized keys
-########################################################
-jaia_do_add_authorized_keys=true
-jaia_perm_authorized_keys=\$(cat << EOM
+write_files:
+  ## SSH authorized keys
+  # temporary keys
+  - path: /etc/jaiabot/ssh/tmp_authorized_keys
+    content: |
+      # ssh-rsa AAAA_B64_KEY username
+  # hub keys
+  - path: /etc/jaiabot/ssh/hub_authorized_keys
+    content: |
+      # ssh-rsa AAAA_B64_KEY username
+  # permanent keys
+  - path: /home/jaia/.ssh/authorized_keys
+    content: |
 ${ssh_keys}
-EOM
-)
-jaia_tmp_authorized_keys=
 
-#########################################################
-# Preseed jaiabot-embedded package debconf queries
-# See jaiabot-embedded.templates from jaiabot-debian 
-# https://github.com/jaiarobotics/jaiabot-debian/blob/1.y/jaiabot-embedded.templates
-# To dump config in the correct format on a bot that is configured use: "debconf-get-selections  | grep jaia"
-#########################################################
-jaia_install_jaiabot_embedded=true
-jaia_embedded_debconf=\$(cat << EOM
-jaiabot-embedded	jaiabot-embedded/fleet_id	select	${FLEET}
-jaiabot-embedded	jaiabot-embedded/type	select	${BOT_OR_HUB}
-jaiabot-embedded	jaiabot-embedded/mode	select	simulation
-jaiabot-embedded	jaiabot-embedded/warp	select	10
-jaiabot-embedded	jaiabot-embedded/bot_id	select	${N}
-jaiabot-embedded	jaiabot-embedded/hub_id	select	${N}
-jaiabot-embedded	jaiabot-embedded/arduino_type	select	none
-jaiabot-embedded	jaiabot-embedded/electronics_stack	select	2
-jaiabot-embedded	jaiabot-embedded/led_type	select	none
-EOM
-)
-
-jaia_reboot=true
+  ## Wifi
+  # SSID, address and gateway XXX and YYY will be automatically updated by jaiabot-embedded postinst
+  # Only <PASSWORD> needs to be manually updated
+  - path: /etc/network/interfaces.d/wlan0
+    content: |
+      auto wlan0
+      iface wlan0 inet static
+      #  wpa-essid SSID
+      #  wpa-psk dummy
+        address 10.23.XXX.YYY
+        netmask 255.255.255.0
+        gateway 10.23.XXX.1
+  - path: /etc/network/interfaces.d/eth0
+    content: |
+      # auto eth0
+      # iface eth0 inet dhcp
 EOF
 
     sudo umount /mnt

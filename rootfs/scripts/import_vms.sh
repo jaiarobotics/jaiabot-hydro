@@ -12,6 +12,9 @@ if [ ! $# -eq 4 ]; then
    exit 1;
 fi
 
+# prompt for sudo up front
+sudo bash -c "exit"
+
 OVA="$1"
 N_BOTS="$2"
 N_HUBS="$3"

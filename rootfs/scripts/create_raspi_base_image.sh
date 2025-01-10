@@ -325,7 +325,7 @@ dtoverlay=spi1-3cs
 
 EOF
 cat > "$BOOT_PARTITION"/cmdline.txt <<EOF
-console=serial0,115200 console=tty1 root=LABEL=rootfs rootfstype=ext4 fsck.repair=yes rootwait fixrtc net.ifnames=0 dwc_otg.lpm_enable=0 ds=nocloud;s=/boot/firmware/jaiabot/init network-config=disabled
+console=serial0,115200 console=tty1 root=LABEL=rootfs rootfstype=ext4 fsck.repair=yes rootwait fixrtc net.ifnames=0 dwc_otg.lpm_enable=0 ds=nocloud;s=file:///boot/firmware/jaiabot/init/ network-config=disabled
 EOF
 
 # Flash the kernel
@@ -353,8 +353,8 @@ echo "export GOBY_VERSION='$GOBY_VERSION'" >> ${OUTPUT_METADATA}
 if [ ! -z "$VIRTUALBOX" ]; then
     sudo chroot rootfs apt-get -y install linux-image-virtual
     
-    # ensure VM uses eth0, etc. naming like Raspi
-    sudo chroot rootfs sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/' /etc/default/grub
+    # ensure VM uses eth0, etc. naming like Raspi and that cloud-init runs
+    sudo chroot rootfs sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0 ds=nocloud\\;s=file:///boot/firmware/jaiabot/init/ network-config=disabled"|' /etc/default/grub
 
     # reduce grub timeout
     sudo chroot rootfs sed -i 's/GRUB_TIMEOUT_STYLE=\(.*\)/#GRUB_TIMEOUT_STYLE=\1/' /etc/default/grub
