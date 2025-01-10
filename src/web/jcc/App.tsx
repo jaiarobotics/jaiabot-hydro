@@ -6,14 +6,19 @@ import { GlobalContextProvider } from "../context/Global/GlobalContext";
 import { HubContextProvider } from "../context/Hub/HubContext";
 import { BotContextProvider } from "../context/Bot/BotContext";
 import { CommandControlWrapper } from "../containers/CommandControl/CommandControl";
+import Map from "../components/Map/Map";
+
+// Style
+import "./App.less";
 
 export default function App() {
     return (
-        <div>
+        <div id="app">
             <GlobalContextProvider>
                 <HubContextProvider>
                     <BotContextProvider>
-                        <CommandControlWrapper />
+                        {/* <CommandControlWrapper /> */}
+                        <Map />
                     </BotContextProvider>
                 </HubContextProvider>
             </GlobalContextProvider>
