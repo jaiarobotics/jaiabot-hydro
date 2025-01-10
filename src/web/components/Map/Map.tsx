@@ -8,6 +8,8 @@ import { Coordinate } from "ol/coordinate";
 import { Point } from "ol/geom";
 import { Icon, Style } from "ol/style";
 
+import "./Map.less";
+
 const waypointSVG = require("../../style/icons/waypoint.svg");
 
 export default function Map() {
