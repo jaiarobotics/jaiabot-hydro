@@ -39,36 +39,23 @@ The result will be something like `jaiabot_img-1.0.0~alpha1+5+g90e72a3.img`.
 
 The newly created image needs certain configuration to run properly: is this a bot or a hub, what ID is it, what fleet does it belong to, etc.?
 
-This information can be provided in two different ways: 1. via a graphical series of prompts upon first login to the new image or 2. via a `first-boot.preseed` text file.
+This information is provided via a `first-boot.preseed.yml` YAML configuration file, conforming to the standards of the `cloud-init` project's [user-data file format](https://cloudinit.readthedocs.io/en/latest/reference/modules.html#modules).
 
-#### Option 1 - graphical first boot configuration
+An example of this text file is provided on the image as `/boot/firmware/jaiabot/init/first-boot.preseed.yml.ex`. Simply copy this file to `/boot/firmware/jaiabot/init/first-boot.preseed.yml` and edit the answers as desired.
 
-To configure just a few bots, it may be easier to simply boot the image and configure via the provided first boot UI.
+Configuration will happen automatically without user intervention or the requirement for connecting a monitor or DHCP based SSH session.
 
-- If you have access to a LAN connection to the internet (DHCP) do so and power up the Pi. You will need to find the ip address from your router. Otherwise, connect a keyboard and monitor.
+To debug the preseed configuration functionality, connect a monitor and/or examine the `cloud-init` logs in `/var/log`.
 
-- ssh or login as `jaia` / `jaia` and follow the prompts to configure the new system.
+Please note: for security reasons the first-boot script will lock the `jaia` user password (disallowing password-based logins). Future logins must be done via SSH using key pairs, and `sudo` is provided without need for a password. You can add any SSH public keys required to login to the appropriate section of the preseed file prior to booting the image.
 
-#### Option 2 - text file first boot preseed
+#### Further details on first-boot setup
 
-When configuring many bots and/or when connecting a monitor would be difficult, the answers to the first boot configuration can be preset ("preseeded") in a text file: `/boot/firmware/jaiabot/init/first-boot.preseed`. An example of this text file is provided on the image as `/etc/jaiabot/init/first-boot.preseed.ex`. Simply copy this file to `/boot/firmware/jaiabot/init/first-boot.preseed` and edit the answers as desired.
+First boot configuration is now handled by `cloud-init` using the `NoCloud` data source for the Raspberry Pi image. `cloud-init` is configured (via the kernel command line parameter `ds=nocloud;s=/boot/firmware/jaiabot/init` in /boot/firmware/cmdline.txt) to use the files in `/boot/firmware/jaiabot/init`. The important file is `user-data` which in our case simply includes two local "user data" YAML files in the same directory:
+- `common-first-boot.yml`: Common actions that must be undertaken on first boot for all systems. This should only be edited if **all** the bots/hubs need to be configured in a different way. Only actions that cannot be performed at rootfs generation time (in CircleCI) should be included in this file (e.g., resizing the log partition to fill a disk of unknown size, installing jaiabot-embedded as this flashes the Arduino, etc.). Otherwise it is preferred to use `jaiabot/rootfs/customization` (either `includes.chroot` for files to include or `hooks` for scripts to run).
+- `first-boot.preseed.yml`: The previously discussed preseed file specific to the bot or hub being configured.
 
-If the preseed file exists, configuration will happen automatically without user intervention or the requirement for connecting a monitor or DHCP based SSH session.
-
-After preseed configuration succeeds, the `first-boot.preseed` file is automatically renamed to `first-boot.preseed.complete` to ensure it does not continue to re-run. To debug the preseed configuration functionality, connect a monitor and/or examine the output of the `first_boot.service` log using `journalctl -u first_boot`.
-
-Please note: for security reasons the first-boot script will set the `jaia` user password to a random string of characters. Future logins must be done via SSH using key pairs, and `sudo` is provided without need for a password. You can add any SSH public keys required to login to the `/home/jaia/.ssh/authorized_keys` file prior to booting the image.
-
-If you want to re-run the first-boot configuration in the future (for example to change the bot ID), do the following:
-
-- chroot into the underlay "read only" partition: `sudo overlayroot-chroot`
-- Disable the overlayroot in the next boot by commenting out this line in /etc/overlayroot.conf (ensure you use two '#'):
-```
-## overlayroot=device:dev=/dev/disk/by-label/overlay,timeout=60,recurse=0
-```
-- Move first-boot.preseed.complete to first-boot.preseed in /boot/firmware/jaiabot/init and edit as required.
-- reboot
-
+These files are separated to reduce clutter in the first-boot.preseed.yml file. The source for both of these files is in `jaiabot/rootfs/nocloud-init` (which is copied to `/boot/firmware/jaiabot/init` on Raspberry Pi image creation). 
 
 ### Fleet configuration
 
