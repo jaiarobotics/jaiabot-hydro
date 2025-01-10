@@ -16,9 +16,6 @@ users:
     sudo: ALL=(ALL) NOPASSWD:ALL
     lock_passwd: true
 
-# Disallow password login on SSH
-ssh_pwauth: false
-
 # Resize data partition to fill disk
 growpart:
   mode: auto
