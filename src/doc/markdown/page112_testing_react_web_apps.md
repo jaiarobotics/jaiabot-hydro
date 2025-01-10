@@ -108,7 +108,7 @@ Ran all test suites.
 ```
 
 If you want to run the Test Suites in a particular directory you just need the name of the directory, you do not need the entire path.
-In the example below we are in the src/web directory and ran all the tests under src/web/containers/TaskSettingsPanel directory. It ran 3 Test Suites (files) from that directory.
+In the example below we are in the `src/web directory` and ran all the tests under `src/web/containers/TaskSettingsPanel` directory. It ran 3 Test Suites (files) from that directory.
 
 ```
 :~/jaiabot/src/web$ npm test TaskSettingsPanel
@@ -196,7 +196,7 @@ For a Component Test to function properly several things must be considered. We 
 
 #### Props
 
-You will need to determine the minimum set of Prop Parameters for the Component to function properly. This will depend on the specific functionality being tested. Props can be declared statically, created dynamically in the test or read in from files. Typically you will need to provide any data needed to put the compenent in the correct state and callback methods to verify results and support the component behavior.
+You will need to determine the minimum set of `Prop` Parameters for the Component to function properly. This will depend on the specific functionality being tested. Props can be declared statically, created dynamically in the test or read in from files. Typically you will need to provide any data needed to put the compenent in the correct state and callback methods to verify results and support the component behavior.
 
 ```
 const mockProps: Props = {
@@ -227,7 +227,7 @@ const mockOnChange = jest.fn().mockImplementation((task?: MissionTask) => {
 
 #### Declaring the Test
 
-Tests are objects that include a test method that get run using the tools from `Jest` and RTL. The keyword `test` or `it` is used to declare a test object. The attributeS of a Test are a `description` followed by a test method and then an optional timeout value. Tests methods should be declared using Arrow Function syntax.
+Tests are objects that include a test method that get run using the tools from `Jest` and RTL. The keyword `test` or `it` is used to declare a test object. The parameters of a Test are a `description` followed by a test method and then an optional timeout value. Tests methods should be declared using Arrow Function syntax.
 
 Example of complete simple test
 
@@ -377,7 +377,7 @@ As stated above most of our components are controlled and therefore the outputs 
 
 #### Using jest.fn()
 
-Jest provides a convenient function for declaring mocks that can be overloaded as needed. The benefit of declaring your mocks as jest.fn is Jest provides a bunch of helper functions and attributes that can be used to verify how the callback has been used.
+Jest provides a convenient function for declaring mocks that can be overloaded as needed. The benefit of declaring your mocks as `jest.fn` is Jest provides a bunch of helper functions and attributes that can be used to verify how the callback has been used.
 
 ```
 const mockGoToRallyPoint = jest.fn();
@@ -481,7 +481,7 @@ jest.mock("../../../openlayers/map/layers/geotiffs/CustomLayers", () =>
 
 Sometimes we want to mock part of a module in our test to avoid costly operations that are not needed for the test but do not need or want to mock the entire module. In this case we need to only need a partial mock of the module.
 
-The `JaiaAPI` is a good example of this. The `JaiaAPI` class includes many methods used throughout our code. However all external communication is handled by the `hit` method. Rather than mocking every method in the class and trying to figure out what implementation may be needed for each one we want to simply replace the `hit` method with a mock and use the rest of the real `JaiaAPI` class. We use the `jest.requireActual` function to achieve this.
+The `JaiaAPI` is a good example of this. The `JaiaAPI` class includes many methods used throughout our code. However all external communication is handled by the `hit` method. Rather than mocking every method in the class and trying to figure out what implementation may be needed for each one we simply replace the `hit` method with a mock and use the rest of the real `JaiaAPI` class. We use the `jest.requireActual` function to achieve this.
 
 `src/web/tests/__mocks__/jaiaAPI.mock.ts`
 
@@ -506,7 +506,7 @@ module.exports = {
 
 A file with Jest tests in it is considered a "Test Suite". A single `test` or `it` declares a "Test". Tests within a Test Suite can be further grouped by wrapping them with a `describe` block. It is important to keep the scope of these blocks in mind when declaring tests or items to support your tests.
 
-Often when running multiple tests and groups of tests we need to run some code before and/or after each test or group to put the system in the correct state for each run. This is typically referred to as "Setup" and "Teardown" in testing. Mocks in particular often need to be reset as well as props used in tests as part of a Setup. Teardown can be used to free up resources allocated during a test (sockets, memory etc), reset state or anything else that has no use after a test is run. It is important to remember that you can not count on Jest running your tests in any particular order, so do not rely on the end state of one test as the starting state of another test.
+Often when running multiple tests and groups of tests we need to run some code before and/or after each test or group to put the system in the correct state for each run. This is typically referred to as "Setup" and "Teardown" in testing. Mocks in particular often need to be reset as well as Props used in tests as part of a Setup. Teardown can be used to free up resources allocated during a test (sockets, memory etc), reset state or anything else that has no use after a test is run. It is important to remember that you can not count on Jest running your tests in any particular order, so do not rely on the end state of one test as the starting state of another test.
 
 Jest uses `beforeAll()`, `beforeEach()` for Setup and `afterAll()` and `afterEach()` for Teardown.  
 `beforeAll()` and `afterAll()` are run once, before and after all the files in a particular block scope (either entire file, a describe block or a single test). `beforeEach()`and `afterEach()` are run before and after each individual test in a block.
@@ -680,7 +680,9 @@ global.console.debug = jest.fn();
 ### src/web/tsconfig.json
 
 Tell Typescript to use the types in `@testing-library/jest-dom`
+
 `"types": ["@testing-library/jest-dom", "@types/plotly.js"],`
 
-Tell `Typescript` to exclude our test files from our application code base
+Tell Typescript to exclude our test files from our application code base
+
 `exclude": ["node_modules", "dist", "coverage", "webpack.*.js", "*.config.js", "*.test.ts*"]`
