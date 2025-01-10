@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 
 import { newMap } from "../../openlayers/map_new/map-new";
-import { missionLayer } from "../../openlayers/map_new/layers-new";
+import { missionLayer } from "../../openlayers/layers/mission-layer";
 
 import { Feature, MapBrowserEvent } from "ol";
 import { Coordinate } from "ol/coordinate";

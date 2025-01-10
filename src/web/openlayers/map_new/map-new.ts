@@ -3,12 +3,12 @@ import { Map, View } from "ol";
 import { Zoom, Rotate, ScaleLine, Attribution } from "ol/control";
 
 // Jaia
-import { newLayers } from "./layers-new";
+import { layers } from "../layers/layers";
 
 const MERCATOR = "EPSG:3857";
 
 export const newMap = new Map({
-    layers: Array.from(newLayers.values()),
+    layers: Array.from(layers.values()),
     controls: [
         new Zoom(),
         new Rotate(),
