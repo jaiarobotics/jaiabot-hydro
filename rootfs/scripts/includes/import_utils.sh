@@ -62,8 +62,8 @@ write_files:
   - path: /etc/jaiabot/ssh/hub_authorized_keys
     content: |
       # ssh-rsa AAAA_B64_KEY username
-  # permanent keys
-  - path: /home/jaia/.ssh/authorized_keys
+  # permanent keys - gets moved to /home/jaia/.ssh/authorized_keys after jaia user is created
+  - path: /etc/jaiabot/ssh/jaia_authorized_keys
     content: |
 ${ssh_keys}
 
@@ -86,6 +86,6 @@ ${ssh_keys}
 EOF
 
     sudo umount /mnt
-    
+   
     sudo umount -l "${VBOX_MOUNT_PATH}"
 }
