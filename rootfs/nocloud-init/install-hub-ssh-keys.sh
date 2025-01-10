@@ -24,6 +24,7 @@ if [ "$INCLUDES_HUB_KEYS" = true ]; then
     echo "Found private key: $HUB_PRIVATE_KEY and public key: $HUB_PUBLIC_KEY. Proceeding with setup..."
 
     # Move the files to the .ssh directory
+    mount -o remount,rw /boot/firmware
     mv "$HUB_PRIVATE_KEY" "$SSH_DIR/"
     mv "$HUB_PUBLIC_KEY" "$SSH_DIR/"
 

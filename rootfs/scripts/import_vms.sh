@@ -69,6 +69,12 @@ function import_bot_or_hub()
     HOST_SSH_PORT=$((HOST_SSH_PORT + 1))    
 }
 
+HUB_KEY_DIR=/tmp/jaia_vm_hub_keys
+mkdir -p ${HUB_KEY_DIR}
+for n in `seq 1 $((N_HUBS))`; do
+    create_hub_ssh_key $n
+done
+
 for n in `seq 1 $((N_BOTS))`; do
     import_bot_or_hub bot $n
 done
@@ -76,5 +82,7 @@ done
 for n in `seq 1 $((N_HUBS))`; do
     import_bot_or_hub hub $n
 done
+
+rm -rf ${HUB_KEY_DIR}
 
 echo -e "Add to .ssh/config if desired:\n${SSH_CONFIG}"

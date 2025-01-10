@@ -25,7 +25,8 @@ function write_preseed()
     sudo mount "${VBOX_MOUNT_PATH}/vol0" /mnt
 
     # Add space to the front so we can use these later in the YAML file
-    ssh_keys=$(cat $HOME/.ssh/*.pub | sed "s/^/      /")
+    perm_ssh_keys=$(cat $HOME/.ssh/*.pub | sed "s/^/      /")
+    hub_ssh_keys=$(cat ${HUB_KEY_DIR}/*.pub | sed "s/^/      /")
     
     cat <<EOF | sudo tee /mnt/jaiabot/init/first-boot.preseed.yml
 #cloud-config
@@ -61,11 +62,11 @@ write_files:
   # hub keys
   - path: /etc/jaiabot/ssh/hub_authorized_keys
     content: |
-      # ssh-rsa AAAA_B64_KEY username
+${hub_ssh_keys}
   # permanent keys - gets moved to /home/jaia/.ssh/authorized_keys after jaia user is created
   - path: /etc/jaiabot/ssh/jaia_authorized_keys
     content: |
-${ssh_keys}
+${perm_ssh_keys}
 
   ## Wifi
   # SSID, address and gateway XXX and YYY will be automatically updated by jaiabot-embedded postinst
@@ -85,7 +86,20 @@ ${ssh_keys}
       # iface eth0 inet dhcp
 EOF
 
+    # install hub key onto hub
+    if [ "${BOT_OR_HUB}" = "hub" ]; then
+        sudo cp ${HUB_KEY_DIR}/hub${N}_fleet${FLEET}* /mnt/jaiabot/init/
+    fi
+    
     sudo umount /mnt
    
     sudo umount -l "${VBOX_MOUNT_PATH}"
+}
+
+
+function create_hub_ssh_key()
+{
+    local N="$1"
+    rm -f ${HUB_KEY_DIR}/hub${N}_fleet${FLEET}*
+    ssh-keygen -t ed25519 -f ${HUB_KEY_DIR}/hub${N}_fleet${FLEET} -N "" -C "hub${N}_fleet${FLEET}"
 }
