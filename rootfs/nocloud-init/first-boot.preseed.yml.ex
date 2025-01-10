@@ -32,10 +32,11 @@ write_files:
   - path: /etc/jaiabot/ssh/hub_authorized_keys
     content: |
       # ssh-rsa AAAA_B64_KEY username
-  # permanent keys
-  - path: /home/jaia/.ssh/authorized_keys
+  # permanent keys - gets moved to /home/jaia/.ssh/authorized_keys after jaia user is created
+  - path: /etc/jaiabot/ssh/jaia_authorized_keys
+    owner: jaia:jaia
     content: |
-      # ssh-rsa AAAA_B64_KEY username   
+      # ssh-rsa AAAA_B64_KEY username
   ## Wifi
   # SSID, address and gateway XXX and YYY will be automatically updated by jaiabot-embedded postinst
   # Only <PASSWORD> needs to be manually updated

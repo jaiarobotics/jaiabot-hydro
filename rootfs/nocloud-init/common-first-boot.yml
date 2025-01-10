@@ -47,6 +47,10 @@ runcmd:
   - echo "JAIABOT_FIRST_BOOT_DATE=\"`date -u`\"" >> /etc/jaiabot/version
   # Set overlay to take effect on next boot
   - echo "overlayroot=device:dev=/dev/disk/by-label/overlay,timeout=60,recurse=0" >> /etc/overlayroot.conf
+  # Move /etc/jaiabot/ssh/jaia_authorized_keys to /home/jaia/.ssh/authorized_keys now that jaia user exists
+  - mkdir -p /home/jaia/.ssh
+  - mv /etc/jaiabot/ssh/jaia_authorized_keys /home/jaia/.ssh/authorized_keys
+  - chown -R jaia:jaia /home/jaia/.ssh
   
 # Reboot for overlay to take effect
 power_state:
