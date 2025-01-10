@@ -17,39 +17,9 @@ from pyjaia.waves.filters import *
 from pathlib import *
 from statistics import *
 from pyjaia.waves.series_set import *
-from pyjaia.waves.drift import Drift
+from pyjaia.waves.types import *
 from pyjaia.waves import doAnalysis
 from pyjaia.waves.analysis_html import *
-
-
-def htmlForSummaryTable(drifts: List[Drift]):
-    html = '<h1>Summary</h1>'
-    html += '<table><tr><td>Drift #</td><td>Duration</td><td>Significant Wave Height</td></tr>'
-
-    swhSum = 0.0
-    durationSum = 0.0
-
-    for index, drift in enumerate(drifts):
-        duration = drift.rawVerticalAcceleration.duration()
-        durationString = formatTimeDelta(duration)
-
-        if len(drift.waveHeights) == 0:
-            html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>No waves detected</td></tr>'
-            continue
-
-        swh = drift.significantWaveHeight
-        swhSum += (swh * duration.total_seconds())
-        durationSum += duration.total_seconds()
-
-        html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>{swh:0.2f}</td></tr>'
-
-    if durationSum > 0:
-        meanWaveHeight = swhSum / durationSum
-        html += f'<tr><td><b>Mean (duration-weighted)</b></td><td></td><td><b>{meanWaveHeight:0.2f}</b></td></tr>'
-
-    html += '</table>'
-
-    return html
 
 
 cssTag = '''<style>

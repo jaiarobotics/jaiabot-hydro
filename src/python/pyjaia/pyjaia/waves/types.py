@@ -1,6 +1,12 @@
-from pyjaia.series import *
+from dataclasses import dataclass
 from typing import *
-from dataclasses import *
+from pyjaia.series import Series
+
+
+@dataclass
+class Wave:
+    height: float
+    period: float
 
 
 @dataclass
@@ -9,12 +15,12 @@ class Drift:
     filteredVerticalAcceleration: Series
     elevation: Series
 
-    waveHeights: List[float]
+    waves: List[Wave]
     significantWaveHeight: float
 
     def __init__(self):
         self.rawVerticalAcceleration = Series('Raw Vertical Acceleration')
         self.filteredVerticalAcceleration = Series('Filtered Vertical Acceleration')
         self.elevation = Series('Elevation')
-        self.waveHeights = []
+        self.waves = []
         self.significantWaveHeight = 0.0

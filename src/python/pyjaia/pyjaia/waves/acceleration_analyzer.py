@@ -18,7 +18,7 @@ from pyjaia.series import *
 from . import doAnalysis
 from .processing import *
 from .filters import *
-from .analysis_html import *
+# from .analysis_html import *
 
 import csv
 import os

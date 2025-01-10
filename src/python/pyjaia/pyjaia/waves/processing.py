@@ -5,6 +5,7 @@ import numpy
 import statistics
 from math import *
 from .filters import cos2Filter
+from .types import *
 
 
 def applyHannWindow(series: Series, fadePeriod: float=2e6):
@@ -187,20 +188,22 @@ def deMean(series: Series):
     return newSeries
 
 
-def calculateSortedWaveHeights(elevationSeries: Series):
-    """Gets a sorted list of wave heights from an input elevation series.
+def getSortedWaves(elevationSeries: Series) -> List[Wave]:
+    """Gets a sorted list of Wave objects from an input elevation series.
 
     Args:
         elevationSeries (Series): Input elevation series.
 
     Returns:
-        list[float]: A sorted list of wave heights.
+        list[Wave]: A sorted list of wave heights.
     """
-    waveHeights: List[float] = []
+    waves: List[Wave] = []
     ys = elevationSeries.y_values
 
     trough = None
     peak = None
+    trough_t = None
+    peak_t = None
 
     oldDy = 0
 
@@ -212,20 +215,23 @@ def calculateSortedWaveHeights(elevationSeries: Series):
 
             if dy > 0 and oldDy <=0:
                 trough = previous_y
+                trough_t = elevationSeries.utime[index] / 1e6
             elif dy < 0 and oldDy >= 0:
                 peak = previous_y
+                peak_t = elevationSeries.utime[index] / 1e6
 
                 if trough is not None:
-                    waveHeights.append(peak - trough)
+                    wave = Wave(height=peak - trough, period=(peak_t - trough_t) * 2)
+                    waves.append(wave)
 
             oldDy = dy
 
-    sortedWaveHeights = sorted(waveHeights)
+    sortedWaves = sorted(waves, key=lambda w: w.height)
 
-    return sortedWaveHeights
+    return sortedWaves
 
 
-def significantWaveHeight(waveHeights: List[float]):
+def significantWaveHeight(waves: List[Wave]):
     """Returns the significant wave height from an unsorted list of wave heights.
 
     Args:
@@ -234,10 +240,10 @@ def significantWaveHeight(waveHeights: List[float]):
     Returns:
         float: The significant wave height (mean of the tallest 2/3 of the waves).
     """
-    if len(waveHeights) == 0:
+    if len(waves) == 0:
         return 0.0
 
-    sortedWaveHeights = sorted(waveHeights)
+    sortedWaveHeights = sorted([wave.height for wave in waves])
     N = floor(len(sortedWaveHeights) * 2 / 3)
     significantWaveHeights = sortedWaveHeights[N:]
 
@@ -245,7 +251,7 @@ def significantWaveHeight(waveHeights: List[float]):
 
 
 BandPassFilterFunc = Callable[[float], float]
-bandPassFilter = cos2Filter(1/20, 1/100, 5, 5)
+bandPassFilter = cos2Filter(1/10, 1/100, 5, 5)
 
 
 def calculateElevationSeries(accelerationSeries: Series, sampleFreq: float):
