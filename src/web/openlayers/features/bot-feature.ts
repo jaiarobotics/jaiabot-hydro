@@ -17,7 +17,7 @@ const botIcon = require("../../style/icons/bot.svg");
 
 const TEXT_OFFSET_RADIUS = 11;
 
-export function createBotFeature(botID: number) {
+export function generateBotFeature(botID: number) {
     const bot = bots.getBot(botID);
 
     if (!bot) {

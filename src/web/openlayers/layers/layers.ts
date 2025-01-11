@@ -1,8 +1,8 @@
 import { Layer } from "ol/layer";
-import { OSMLayer } from "../layers/osm-layer";
-import { botLayer } from "../layers/bot-layer";
+import { OSMLayer } from "./osm-layer";
+import { botLayer } from "./bot-layer";
 import { hubLayer } from "./hub-layer";
-import { missionLayer } from "../layers/mission-layer";
+import { missionLayer } from "./mission-layer";
 
 export const layers: Map<string, Layer> = new Map<string, Layer>();
 
