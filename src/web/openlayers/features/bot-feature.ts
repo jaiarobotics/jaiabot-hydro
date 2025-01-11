@@ -1,7 +1,6 @@
 // OpenLayers
 import { Feature } from "ol";
-import { Fill, Style, Text } from "ol/style";
-import { Icon } from "ol/style";
+import { Fill, Icon, Style, Text } from "ol/style";
 import { Point } from "ol/geom";
 import { fromLonLat } from "ol/proj";
 import { Coordinate } from "ol/coordinate";
@@ -22,6 +21,10 @@ export function createBotFeature(botID: number) {
     const bot = bots.getBot(botID);
 
     if (!bot) {
+        return new Feature();
+    }
+
+    if (!bot.getLocation()) {
         return new Feature();
     }
 
