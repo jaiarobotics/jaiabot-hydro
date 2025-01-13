@@ -14,6 +14,7 @@ FLEET_ID=""
 NODE_TYPE=$2
 NODE_ID=$3
 IPVERSION="6"
+SUBNET_BITS="128"
 
 if [[ "$VPN_TYPE" = "cloudhub_vpn" ]]; then
     set -a; source /etc/jaiabot/cloud.env; set -a
@@ -43,6 +44,7 @@ elif [[ "$VPN_TYPE" = "fleet_vpn" ]]; then
     WG_CLIENT_PROFILE=wg_jaia_sf${FLEET_ID}
     VPN_PORT=$((51821+${FLEET_ID}))
     IPVERSION="4"
+    SUBNET_BITS="32"
 else
     echo "Invalid VPN: $VPN_TYPE; must be cloudhub_vpn, vfleet_vpn, or fleet_vpn"
     exit 1
@@ -88,13 +90,13 @@ EOF
     fi
 fi
 
-sudo grep -q "${CLIENT_IP}/128" /etc/wireguard/${WG_SERVER_PROFILE}.conf && (echo "${NODE_TYPE} ${NODE_ID} is already configured in /etc/wireguard/${WG_SERVER_PROFILE}.conf. If you wish to continue, manually remove this Peer entry" && exit 1)
+sudo grep -q "${CLIENT_IP}" /etc/wireguard/${WG_SERVER_PROFILE}.conf && (echo "${NODE_TYPE} ${NODE_ID} is already configured in /etc/wireguard/${WG_SERVER_PROFILE}.conf. If you wish to continue, manually remove this Peer entry" && exit 1)
 
 cat <<EOF | sudo tee -a /etc/wireguard/${WG_SERVER_PROFILE}.conf
 # BEGIN PEER ${NODE_TYPE} ${NODE_ID}: CONFIGURED BY vpn_gen.sh
 [Peer]
 PublicKey = $PUBKEY
-AllowedIPs = ${CLIENT_IP}/128
+AllowedIPs = ${CLIENT_IP}/${SUBNET_BITS}
 # END PEER ${NODE_TYPE} ${NODE_ID}: CONFIGURED BY vpn_gen.sh
 EOF
 
@@ -106,7 +108,7 @@ cat <<EOF > /tmp/${NODE_TYPE}${NODE_ID}/${WG_CLIENT_PROFILE}.conf
 PrivateKey = ${PRIVKEY}
 
 # this client's VPN IP address
-Address = ${CLIENT_IP}/128
+Address = ${CLIENT_IP}/${SUBNET_BITS}
 
 [Peer]
 # Server public key (from /etc/wireguard/publickey on server)

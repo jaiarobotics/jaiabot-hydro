@@ -195,6 +195,7 @@ set(scripts_to_install
   # Utilities
   jaia-ip.py
   jaia-doc.py
+  jaia-vpn-gen.sh
 )
 
 # Iterate over each script to install and copy
