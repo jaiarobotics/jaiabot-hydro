@@ -34,7 +34,6 @@ write_files:
       # ssh-rsa AAAA_B64_KEY username
   # permanent keys - gets moved to /home/jaia/.ssh/authorized_keys after jaia user is created
   - path: /etc/jaiabot/ssh/jaia_authorized_keys
-    owner: jaia:jaia
     content: |
       # ssh-rsa AAAA_B64_KEY username
   ## Wifi
@@ -56,3 +55,4 @@ write_files:
         address 10.23.0.100
         netmask 255.255.255.0
         gateway 10.23.0.1
+
