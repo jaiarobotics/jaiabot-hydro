@@ -53,6 +53,7 @@ const rcMode = require("../../style/icons/controller.svg");
 
 let prec = 2;
 
+// TODO Only used in display helper functiond
 interface CommandInfo {
     commandType: CommandType | HubCommandType;
     description: string;
@@ -63,6 +64,8 @@ interface CommandInfo {
     humanReadableNotAvailable?: string;
 }
 
+// TODO Commands Used all over the file but no other files
+// Check to see if these attributes are of any use in other panels
 const commands: { [key: string]: CommandInfo } = {
     active: {
         commandType: CommandType.ACTIVATE,
@@ -174,7 +177,7 @@ const commands: { [key: string]: CommandInfo } = {
         humanReadableNotAvailable: "",
     },
 };
-
+// TODO This is not even used, look to see if it ever was
 let commandsForHub: { [key: string]: CommandInfo } = {
     shutdown: {
         commandType: CommandType.SHUTDOWN_COMPUTER,
@@ -196,6 +199,7 @@ let commandsForHub: { [key: string]: CommandInfo } = {
     },
 };
 
+// TODO This is also used in CommandControl
 export interface DetailsExpandedState {
     quickLook: boolean;
     commands: boolean;
@@ -208,7 +212,7 @@ export interface DetailsExpandedState {
     power: boolean;
     links: boolean;
 }
-
+//TODO Only used in this panel's helper functions
 interface DisableInfo {
     isDisabled: boolean;
     disableMessage: string;
@@ -216,6 +220,7 @@ interface DisableInfo {
 
 var takeControlFunction: (onSuccess: () => void) => void;
 
+//TODO only used in this file, used by React Elements
 function issueCommand(
     api: JaiaAPI,
     botId: number,
@@ -251,7 +256,7 @@ function issueCommand(
         );
     });
 }
-
+// TODO NOT Used
 function issueCommandForHub(api: JaiaAPI, hub_id: number, commandForHub: CommandInfo) {
     console.log("Hub Command");
 
@@ -273,6 +278,7 @@ function issueCommandForHub(api: JaiaAPI, hub_id: number, commandForHub: Command
     });
 }
 
+//TODO Only used in this files React Elements
 function issueRunCommand(
     api: JaiaAPI,
     bot: PortalBotStatus,
@@ -307,7 +313,7 @@ function issueRunCommand(
         });
     });
 }
-
+//TODO only used in this file, used by React Elements
 function issueRCCommand(
     api: JaiaAPI,
     bot: PortalBotStatus,
@@ -361,7 +367,7 @@ function issueRCCommand(
         }
     });
 }
-
+//TODO only used in this file, used by React Element
 async function runRCMode(bot: PortalBotStatus) {
     const botId = bot.bot_id;
     if (!botId) {
@@ -386,6 +392,7 @@ async function runRCMode(bot: PortalBotStatus) {
 }
 
 // Check if there is a mission to run
+//TODO only used in this file, used by React Elements
 function runMission(botId: number, mission: MissionInterface) {
     let runs = mission.runs;
     let runId = mission.botsAssignedToRuns[botId];
@@ -407,6 +414,7 @@ function runMission(botId: number, mission: MissionInterface) {
  * @param bot
  * @returns boolean
  */
+//TODO only used in this file, used by React Elements
 function disableButton(
     command: CommandInfo,
     missionState: MissionState,
@@ -473,6 +481,7 @@ function disableButton(
  * @param bot
  * @returns boolean
  */
+//TODO only used in this file, used by React Elements
 function disableClearRunButton(bot: PortalBotStatus, mission: MissionInterface) {
     let disableInfo: DisableInfo;
 
@@ -489,6 +498,7 @@ function disableClearRunButton(bot: PortalBotStatus, mission: MissionInterface) 
     return disableInfo;
 }
 
+//TODO only used in this file, used by React Elements
 function disablePlayButton(
     bot: PortalBotStatus,
     mission: MissionInterface,
@@ -529,6 +539,7 @@ function disablePlayButton(
 }
 
 // Get the table row for the health of the vehicle
+// TODO Only used in this file, see if we can separate the React code from the non-React
 function healthRow(bot: BotStatus, allInfo: boolean) {
     let healthClassName =
         {
@@ -577,7 +588,8 @@ function healthRow(bot: BotStatus, allInfo: boolean) {
         );
     }
 }
-
+// TODO Only used in this file, used in BotDetailsComponent
+// Should probably break up BotDetailsComponent so this can be isolated from React
 function getBotRun(botId: number, runs: { [key: string]: RunInterface }) {
     try {
         for (const runId of Object.keys(runs)) {
@@ -591,7 +603,7 @@ function getBotRun(botId: number, runs: { [key: string]: RunInterface }) {
     }
     return null;
 }
-
+// TODO Used here and in CommandControl
 export interface BotDetailsProps {
     bot: PortalBotStatus;
     hub: PortalHubStatus;
@@ -610,6 +622,9 @@ export interface BotDetailsProps {
     downloadIndividualBot: (bot: PortalBotStatus, disableMessage: string) => void;
 }
 
+// TODO Used here and in CommandControl
+// This has a lot of business logic mixed with React, try
+// to separate the logic from display code
 export function BotDetailsComponent(props: BotDetailsProps) {
     const bot = props.bot;
     const hub = props.hub;
