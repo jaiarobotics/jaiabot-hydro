@@ -1,45 +1,8 @@
-import {
-    Command,
-    CommandType,
-    HubCommandType,
-    BotStatus,
-    MissionState,
-    HubStatus,
-} from "../shared/JAIAProtobuf";
+import { HubCommandType } from "../utils/protobuf-types.js";
 import { jaiaAPI } from "./jaia-api";
 import { CustomAlert } from "../shared/CustomAlert";
 import { isError } from "lodash";
-
-export interface CommandInfo {
-    commandType: CommandType | HubCommandType;
-    description: string;
-    confirmationButtonText: string;
-    statesAvailable?: RegExp[];
-    statesNotAvailable?: RegExp[];
-    humanReadableAvailable?: string;
-    humanReadableNotAvailable?: string;
-}
-
-export const hubCommands: { [key: string]: CommandInfo } = {
-    shutdown: {
-        commandType: CommandType.SHUTDOWN_COMPUTER,
-        description: "Shutdown Hub",
-        confirmationButtonText: "Shutdown Hub",
-        statesNotAvailable: [],
-    },
-    restartServices: {
-        commandType: CommandType.RESTART_ALL_SERVICES,
-        description: "Restart Services",
-        confirmationButtonText: "Restart Services",
-        statesNotAvailable: [],
-    },
-    reboot: {
-        commandType: CommandType.REBOOT_COMPUTER,
-        description: "Reboot Hub",
-        confirmationButtonText: "Reboot Hub",
-        statesNotAvailable: [],
-    },
-};
+import { CommandInfo } from "../types/commands";
 
 /**
  * Saves client ID associated with the user session as the controlling client ID

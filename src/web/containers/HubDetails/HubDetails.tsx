@@ -13,7 +13,8 @@ import {
     formatLatitude,
     formatLongitude,
 } from "../../shared/Utilities";
-import { CommandInfo, hubCommands, sendHubCommand, takeControl } from "../../utils/commands";
+import { sendHubCommand, takeControl } from "../../utils/commands";
+import { CommandInfo, hubCommands } from "../../types/commands";
 import { getIPPrefix } from "../../shared/IPPrefix";
 
 // Styles

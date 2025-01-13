@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 // Jaia Imports
+import { CommandInfo, botCommands } from "../../types/commands";
 import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
 import { Missions } from "../../missions/missions";
 import { GlobalSettings } from "../../missions/settings";
@@ -14,7 +15,7 @@ import {
     HubCommandType,
     BotStatus,
     MissionState,
-} from "../../shared/JAIAProtobuf";
+} from "../../utils/protobuf-types";
 import {
     formatLatitude,
     formatLongitude,
@@ -23,7 +24,7 @@ import {
 } from "../../shared/Utilities";
 
 // Style Imports
-import "./Details.less";
+import "./BotDetails.less";
 import {
     mdiPlay,
     mdiStop,
@@ -48,158 +49,13 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 // Utility Imports
 import * as turf from "@turf/turf";
 import { CustomAlert } from "../../shared/CustomAlert";
+import { types } from "util";
 
 const rcMode = require("../../style/icons/controller.svg");
 
 let prec = 2;
 
-// TODO Only used in display helper functiond
-interface CommandInfo {
-    commandType: CommandType | HubCommandType;
-    description: string;
-    confirmationButtonText: string;
-    statesAvailable?: RegExp[];
-    statesNotAvailable?: RegExp[];
-    humanReadableAvailable?: string;
-    humanReadableNotAvailable?: string;
-}
-
-// TODO Commands Used all over the file but no other files
-// Check to see if these attributes are of any use in other panels
-const commands: { [key: string]: CommandInfo } = {
-    active: {
-        commandType: CommandType.ACTIVATE,
-        description: "system check",
-        confirmationButtonText: "Run System Check",
-        statesAvailable: [/^.+__IDLE$/, /^PRE_DEPLOYMENT__FAILED$/],
-        humanReadableAvailable: "*__IDLE, PRE_DEPLOYMENT__FAILED",
-        humanReadableNotAvailable: "",
-    },
-    nextTask: {
-        commandType: CommandType.NEXT_TASK,
-        description: "go to the Next Task for",
-        confirmationButtonText: "Go To Next Task",
-        statesAvailable: [/^IN_MISSION__.+$/],
-        statesNotAvailable: [/REMOTE_CONTROL/],
-        humanReadableAvailable: "IN_MISSION__*",
-        humanReadableNotAvailable: "*REMOTE_CONTROL*",
-    },
-    goHome: {
-        commandType: CommandType.RETURN_TO_HOME,
-        description: "Return Home",
-        confirmationButtonText: "Return Home",
-        statesAvailable: [/^IN_MISSION__.+$/],
-        humanReadableAvailable: "IN_MISSION__*",
-        humanReadableNotAvailable: "",
-    },
-    stop: {
-        commandType: CommandType.STOP,
-        description: "Stop",
-        confirmationButtonText: "Stop",
-        statesAvailable: [/^IN_MISSION__.+$/],
-        statesNotAvailable: [/^IN_MISSION__UNDERWAY__RECOVERY__STOPPED$/],
-        humanReadableAvailable: "IN_MISSION__*",
-        humanReadableNotAvailable: "IN_MISSION__UNDERWAY__RECOVERY__STOPPED",
-    },
-    play: {
-        commandType: CommandType.START_MISSION,
-        description: "Play mission",
-        confirmationButtonText: "Play Mission",
-        statesAvailable: [/^IN_MISSION__.+$/, /^PRE_DEPLOYMENT__WAIT_FOR_MISSION_PLAN$/],
-        humanReadableAvailable: "IN_MISSION__*, PRE_DEPLOYMENT__WAIT_FOR_MISSION_PLAN",
-        humanReadableNotAvailable: "",
-    },
-    rcMode: {
-        commandType: CommandType.REMOTE_CONTROL_TASK,
-        description: "RC mission",
-        confirmationButtonText: "RC Mission",
-        statesAvailable: [
-            /^IN_MISSION__.+$/,
-            /^PRE_DEPLOYMENT__WAIT_FOR_MISSION_PLAN$/,
-            /^.+__FAILED$/,
-        ],
-        humanReadableAvailable: "IN_MISSION__*, PRE_DEPLOYMENT__WAIT_FOR_MISSION_PLAN, *__FAILED",
-        humanReadableNotAvailable: "",
-    },
-    recover: {
-        commandType: CommandType.RECOVERED,
-        description: "Recover",
-        confirmationButtonText: "Recover",
-        statesAvailable: [/^PRE_DEPLOYMENT.+$/, /^IN_MISSION__UNDERWAY__RECOVERY__STOPPED$/],
-        humanReadableAvailable: "PRE_DEPLOYMENT*, IN_MISSION__UNDERWAY__RECOVERY__STOPPED",
-        humanReadableNotAvailable: "",
-    },
-    retryDataOffload: {
-        commandType: CommandType.RETRY_DATA_OFFLOAD,
-        description: "Retry Data Offload for",
-        confirmationButtonText: "Retry Data Offload",
-        statesAvailable: [/^POST_DEPLOYMENT__FAILED$/],
-        humanReadableAvailable: "POST_DEPLOYMENT__IDLE, POST_DEPLOYMENT__WAIT_FOR_MISSION_PLAN",
-        humanReadableNotAvailable: "",
-    },
-    shutdown: {
-        commandType: CommandType.SHUTDOWN,
-        description: "Shutdown",
-        confirmationButtonText: "Shutdown",
-        statesAvailable: [
-            /^IN_MISSION__UNDERWAY__RECOVERY__STOPPED$/,
-            /^PRE_DEPLOYMENT.+$/,
-            /^POST_DEPLOYMENT.+$/,
-        ],
-        humanReadableAvailable:
-            "IN_MISSION__UNDERWAY__RECOVERY__STOPPED, PRE_DEPLOYMENT*, POST_DEPLOYMENT*",
-        humanReadableNotAvailable: "",
-    },
-    restartServices: {
-        commandType: CommandType.RESTART_ALL_SERVICES,
-        description: "Restart Services for",
-        confirmationButtonText: "Restart Services",
-        statesAvailable: [
-            /^IN_MISSION__UNDERWAY__RECOVERY__STOPPED$/,
-            /^PRE_DEPLOYMENT.+$/,
-            /^POST_DEPLOYMENT.+$/,
-        ],
-        humanReadableAvailable:
-            "IN_MISSION__UNDERWAY__RECOVERY__STOPPED, PRE_DEPLOYMENT*, POST_DEPLOYMENT*",
-        humanReadableNotAvailable: "",
-    },
-    reboot: {
-        commandType: CommandType.REBOOT_COMPUTER,
-        description: "Reboot",
-        confirmationButtonText: "Reboot",
-        statesAvailable: [
-            /^IN_MISSION__UNDERWAY__RECOVERY__STOPPED$/,
-            /^PRE_DEPLOYMENT.+$/,
-            /^POST_DEPLOYMENT.+$/,
-        ],
-        humanReadableAvailable:
-            "IN_MISSION__UNDERWAY__RECOVERY__STOPPED, PRE_DEPLOYMENT*, POST_DEPLOYMENT*",
-        humanReadableNotAvailable: "",
-    },
-};
-// TODO This is not even used, look to see if it ever was
-let commandsForHub: { [key: string]: CommandInfo } = {
-    shutdown: {
-        commandType: CommandType.SHUTDOWN_COMPUTER,
-        description: "Shutdown Hub",
-        confirmationButtonText: "Shutdown Hub",
-        statesNotAvailable: [],
-    },
-    restartServices: {
-        commandType: CommandType.RESTART_ALL_SERVICES,
-        description: "Restart Services",
-        confirmationButtonText: "Restart Services",
-        statesNotAvailable: [],
-    },
-    reboot: {
-        commandType: CommandType.REBOOT_COMPUTER,
-        description: "Reboot Hub",
-        confirmationButtonText: "Reboot Hub",
-        statesNotAvailable: [],
-    },
-};
-
-// TODO This is also used in CommandControl
+/// TODO This is also used in CommandControl
 export interface DetailsExpandedState {
     quickLook: boolean;
     commands: boolean;
@@ -254,27 +110,6 @@ function issueCommand(
                 });
             },
         );
-    });
-}
-// TODO NOT Used
-function issueCommandForHub(api: JaiaAPI, hub_id: number, commandForHub: CommandInfo) {
-    console.log("Hub Command");
-
-    takeControlFunction(async () => {
-        if (
-            await CustomAlert.confirmAsync(
-                "Are you sure you'd like to " + commandForHub.description + "?",
-                commandForHub.confirmationButtonText,
-            )
-        ) {
-            let c = {
-                hub_id: hub_id,
-                type: commandForHub.commandType as HubCommandType,
-            };
-
-            console.log(c);
-            api.postCommandForHub(c);
-        }
     });
 }
 
@@ -362,7 +197,7 @@ function issueRCCommand(
                 },
             );
         } else {
-            issueCommand(api, bot.bot_id, commands.stop, disableMessage);
+            issueCommand(api, bot.bot_id, botCommands.stop, disableMessage);
             setRcMode(bot.bot_id, false);
         }
     });
@@ -704,17 +539,21 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     let dataOffloadButton = (
         <Button
             className={
-                disableButton(commands.recover, missionState).isDisabled || !linkQualityPercentage
+                disableButton(botCommands.recover, missionState).isDisabled ||
+                !linkQualityPercentage
                     ? "inactive button-jcc"
                     : "button-jcc"
             }
             onClick={() => {
-                let disableMessage = disableButton(commands.recover, missionState).disableMessage;
+                let disableMessage = disableButton(
+                    botCommands.recover,
+                    missionState,
+                ).disableMessage;
 
                 if (!linkQualityPercentage) {
                     disableMessage +=
                         "The command: " +
-                        commands.recover.commandType +
+                        botCommands.recover.commandType +
                         " cannot be sent because the bot is not connected to Wifi (Check Link Quality in Quick Look)";
                 }
 
@@ -725,25 +564,25 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         </Button>
     );
 
-    if (disableButton(commands.recover, missionState).isDisabled) {
+    if (disableButton(botCommands.recover, missionState).isDisabled) {
         dataOffloadButton = (
             <Button
                 className={
-                    disableButton(commands.retryDataOffload, missionState).isDisabled ||
+                    disableButton(botCommands.retryDataOffload, missionState).isDisabled ||
                     !linkQualityPercentage
                         ? "inactive button-jcc"
                         : "button-jcc"
                 }
                 onClick={() => {
                     let disableMessage = disableButton(
-                        commands.retryDataOffload,
+                        botCommands.retryDataOffload,
                         missionState,
                     ).disableMessage;
 
                     if (!linkQualityPercentage) {
                         disableMessage +=
                             "The command: " +
-                            commands.retryDataOffload.commandType +
+                            botCommands.retryDataOffload.commandType +
                             " cannot be sent because the bot is not connected to Wifi (Check Link Quality in Quick Look)";
                     }
 
@@ -814,7 +653,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                     <div className="botDetailsToolbar">
                         <Button
                             className={
-                                disableButton(commands.stop, missionState).isDisabled
+                                disableButton(botCommands.stop, missionState).isDisabled
                                     ? "inactive button-jcc"
                                     : " button-jcc stopMission"
                             }
@@ -822,8 +661,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                 issueCommand(
                                     api,
                                     bot.bot_id,
-                                    commands.stop,
-                                    disableButton(commands.stop, missionState).disableMessage,
+                                    botCommands.stop,
+                                    disableButton(botCommands.stop, missionState).disableMessage,
                                     props.setRcMode,
                                 );
                             }}
@@ -835,7 +674,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                 disablePlayButton(
                                     bot,
                                     mission,
-                                    commands.play,
+                                    botCommands.play,
                                     missionState,
                                     props.downloadQueue,
                                 ).isDisabled
@@ -861,7 +700,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                               disablePlayButton(
                                                   bot,
                                                   mission,
-                                                  commands.play,
+                                                  botCommands.play,
                                                   missionState,
                                                   props.downloadQueue,
                                               ).disableMessage,
@@ -876,7 +715,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         disablePlayButton(
                                             bot,
                                             mission,
-                                            commands.play,
+                                            botCommands.play,
                                             missionState,
                                             props.downloadQueue,
                                         ).disableMessage,
@@ -995,7 +834,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             <AccordionDetails className="botDetailsCommands">
                                 <Button
                                     className={
-                                        disableButton(commands.active, missionState).isDisabled
+                                        disableButton(botCommands.active, missionState).isDisabled
                                             ? "inactive button-jcc"
                                             : "button-jcc"
                                     }
@@ -1003,8 +842,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         issueCommand(
                                             api,
                                             bot.bot_id,
-                                            commands.active,
-                                            disableButton(commands.active, missionState)
+                                            botCommands.active,
+                                            disableButton(botCommands.active, missionState)
                                                 .disableMessage,
                                         );
                                     }}
@@ -1017,7 +856,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                                 <Button
                                     className={`
-                                        ${disableButton(commands.rcMode, missionState, bot, props.downloadQueue).isDisabled ? "inactive button-jcc" : "button-jcc"} 
+                                        ${disableButton(botCommands.rcMode, missionState, bot, props.downloadQueue).isDisabled ? "inactive button-jcc" : "button-jcc"} 
                                         ${props.isRCModeActive(bot?.bot_id) ? "rc-active" : "rc-inactive"}
                                         `}
                                     onClick={async () => {
@@ -1028,7 +867,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                             props.isRCModeActive,
                                             props.setRcMode,
                                             disableButton(
-                                                commands.rcMode,
+                                                botCommands.rcMode,
                                                 missionState,
                                                 bot,
                                                 props.downloadQueue,
@@ -1041,7 +880,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                                 <Button
                                     className={
-                                        disableButton(commands.nextTask, missionState).isDisabled
+                                        disableButton(botCommands.nextTask, missionState).isDisabled
                                             ? "inactive button-jcc"
                                             : "button-jcc"
                                     }
@@ -1049,8 +888,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         issueCommand(
                                             api,
                                             bot.bot_id,
-                                            commands.nextTask,
-                                            disableButton(commands.nextTask, missionState)
+                                            botCommands.nextTask,
+                                            disableButton(botCommands.nextTask, missionState)
                                                 .disableMessage,
                                         );
                                     }}
@@ -1079,7 +918,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         <Button
                                             className={
                                                 disableButton(
-                                                    commands.shutdown,
+                                                    botCommands.shutdown,
                                                     missionState,
                                                     bot,
                                                     props.downloadQueue,
@@ -1099,9 +938,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         ? issueCommand(
                                                               api,
                                                               bot.bot_id,
-                                                              commands.shutdown,
+                                                              botCommands.shutdown,
                                                               disableButton(
-                                                                  commands.shutdown,
+                                                                  botCommands.shutdown,
                                                                   missionState,
                                                                   bot,
                                                                   props.downloadQueue,
@@ -1112,9 +951,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                     issueCommand(
                                                         api,
                                                         bot.bot_id,
-                                                        commands.shutdown,
+                                                        botCommands.shutdown,
                                                         disableButton(
-                                                            commands.shutdown,
+                                                            botCommands.shutdown,
                                                             missionState,
                                                             bot,
                                                             props.downloadQueue,
@@ -1128,7 +967,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         <Button
                                             className={
                                                 disableButton(
-                                                    commands.reboot,
+                                                    botCommands.reboot,
                                                     missionState,
                                                     bot,
                                                     props.downloadQueue,
@@ -1148,9 +987,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         ? issueCommand(
                                                               api,
                                                               bot.bot_id,
-                                                              commands.reboot,
+                                                              botCommands.reboot,
                                                               disableButton(
-                                                                  commands.reboot,
+                                                                  botCommands.reboot,
                                                                   missionState,
                                                                   bot,
                                                                   props.downloadQueue,
@@ -1161,9 +1000,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                     issueCommand(
                                                         api,
                                                         bot.bot_id,
-                                                        commands.reboot,
+                                                        botCommands.reboot,
                                                         disableButton(
-                                                            commands.reboot,
+                                                            botCommands.reboot,
                                                             missionState,
                                                             bot,
                                                             props.downloadQueue,
@@ -1177,7 +1016,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         <Button
                                             className={
                                                 disableButton(
-                                                    commands.restartServices,
+                                                    botCommands.restartServices,
                                                     missionState,
                                                     bot,
                                                     props.downloadQueue,
@@ -1197,9 +1036,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         ? issueCommand(
                                                               api,
                                                               bot.bot_id,
-                                                              commands.restartServices,
+                                                              botCommands.restartServices,
                                                               disableButton(
-                                                                  commands.restartServices,
+                                                                  botCommands.restartServices,
                                                                   missionState,
                                                                   bot,
                                                                   props.downloadQueue,
@@ -1210,9 +1049,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                     issueCommand(
                                                         api,
                                                         bot.bot_id,
-                                                        commands.restartServices,
+                                                        botCommands.restartServices,
                                                         disableButton(
-                                                            commands.restartServices,
+                                                            botCommands.restartServices,
                                                             missionState,
                                                             bot,
                                                             props.downloadQueue,

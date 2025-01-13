@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 // Styling
 import "./DownloadPanel.less";
-import "../Details/Details.less";
+import "../BotDetails/BotDetails.less";
 import { Button } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
 import Typography from "@mui/material/Typography";

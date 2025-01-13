@@ -55,7 +55,11 @@ import {
     GlobalContextType,
     GlobalAction,
 } from "../../context/Global/GlobalContext";
-import { BotDetailsComponent, DetailsExpandedState, BotDetailsProps } from "../Details/Details";
+import {
+    BotDetailsComponent,
+    DetailsExpandedState,
+    BotDetailsProps,
+} from "../BotDetails/BotDetails";
 import {
     Goal,
     TaskType,
