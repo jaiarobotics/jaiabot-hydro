@@ -61,7 +61,6 @@ CLOUDHUB_CIDR_BLOCK=$($IP_PY net --net cloudhub_eth --fleet_id ${FLEET_ID} --ipv
 CLOUDHUB_ID=30
 CLOUDHUB_ETH_IP_ADDRESS=$($IP_PY addr --net cloudhub_eth --fleet_id ${FLEET_ID} --node hub --node_id ${CLOUDHUB_ID}  --ipv4)
 
-
 # IPv6 address to use for VirtualFleet VPN (fd6e:cf0d:aefa:FLEET_ID_HEX::/64)
 VIRTUALFLEET_VPN_NETWORK_IPV6=$($IP_PY net --net vfleet_vpn --fleet_id ${FLEET_ID} --ipv6)
 VIRTUALFLEET_VPN_CLIENT_IPV6=$($IP_PY addr --net vfleet_vpn --fleet_id ${FLEET_ID} --node desktop --node_id 1 --ipv6)

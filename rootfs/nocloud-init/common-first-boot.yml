@@ -59,6 +59,8 @@ runcmd:
   - chmod 600 /etc/jaiabot/ssh/*authorized_keys
   # Check and install any hub keys
   - /boot/firmware/jaiabot/init/install-hub-ssh-keys.sh
+  # Setup wireguard VPN (if temporary key is provided)
+  - /boot/firmware/jaiabot/init/configure-wireguard-service-vpn.sh
   
 # Reboot for overlay to take effect
 power_state:

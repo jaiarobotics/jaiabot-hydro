@@ -2,6 +2,9 @@
 
 set -u -e
 
+# expects 'create-ansible-inventory.sh -b 1,2,3 -h 1,2' where -b is the comma separated list of bot IDs, and -h is the comma separated list of hub IDs
+# optionally takes '-f N' for fleet ID N, otherwise the fleet ID is read from debconf for jaiabot-embedded
+
 bots=""
 hubs=""
 fleet=""

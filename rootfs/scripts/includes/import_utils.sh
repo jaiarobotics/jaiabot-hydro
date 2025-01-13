@@ -31,6 +31,15 @@ function write_preseed()
     cat <<EOF | sudo tee /mnt/jaiabot/init/first-boot.preseed.yml
 #cloud-config
 
+
+# Allows this config to merge correctly with common-first-boot.yml
+# See https://cloudinit.readthedocs.io/en/latest/reference/merging.html
+merge_how:
+ - name: list
+   settings: [append]
+ - name: dict
+   settings: [no_replace, recurse_list]
+
 # Bot/Hub information (debconf for jaiabot-embedded)
 apt:
   debconf_selections:
@@ -84,6 +93,9 @@ ${perm_ssh_keys}
     content: |
       # auto eth0
       # iface eth0 inet dhcp
+
+runcmd:
+  - /boot/firmware/jaiabot/init/create-ansible-inventory.sh -b $(seq -s ',' 1 $((N_BOTS))) -h $(seq -s ',' 1 $((N_HUBS))) > /etc/jaiabot/inventory.yml
 EOF
 
     # install hub key onto hub
