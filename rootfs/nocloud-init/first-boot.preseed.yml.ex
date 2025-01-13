@@ -1,5 +1,14 @@
 #cloud-config
 
+# Allows this config to merge correctly with common-first-boot.yml
+# See https://cloudinit.readthedocs.io/en/latest/reference/merging.html
+merge_how:
+ - name: list
+   settings: [append]
+ - name: dict
+   settings: [no_replace, recurse_list]
+
+   
 # Bot/Hub information (debconf for jaiabot-embedded)
 apt:
   debconf_selections:
@@ -56,3 +65,5 @@ write_files:
         netmask 255.255.255.0
         gateway 10.23.0.1
 
+runcmd:
+  - /boot/firmware/jaiabot/init/create-ansible-inventory.sh -b 1,2 -h 1,2 > /etc/jaiabot/inventory.yml
