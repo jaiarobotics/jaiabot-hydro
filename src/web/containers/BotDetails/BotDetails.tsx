@@ -2,6 +2,13 @@ import React, { useState, useEffect } from "react";
 
 // Jaia Imports
 import { CommandInfo, botCommands } from "../../types/commands";
+import {
+    disableButton,
+    disableClearRunButton,
+    disablePlayButton,
+    runMission,
+    getBotRun,
+} from "./BotDetailsUtils";
 import { sendBotCommand, sendBotRunCommand, sendBotRCCommand } from "../../utils/command";
 import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
 import { Missions } from "../../missions/missions";
@@ -61,12 +68,12 @@ export interface DetailsExpandedState {
     power: boolean;
     links: boolean;
 }
-//TODO Only used in this panel's helper functions
-interface DisableInfo {
-    isDisabled: boolean;
-    disableMessage: string;
-}
 
+// TODO The Take Control and RC Control logic needs a complete refactor
+// This will probably go away and all of the uses of takeControlFunction
+// will need rework
+// Once those are reworked we can probably move more of the non-React logic
+// into other files
 var takeControlFunction: (onSuccess: () => void) => void;
 
 function issueCommand(
@@ -172,7 +179,7 @@ function issueRCCommand(
     });
 }
 
-//TODO only used in this file, used by React Element
+// TODO only used in this file, used by React Element
 async function runRCMode(bot: PortalBotStatus) {
     const botId = bot.bot_id;
     if (!botId) {
@@ -194,153 +201,6 @@ async function runRCMode(bot: PortalBotStatus) {
     }
 
     return Missions.RCMode(botId, datumLocation);
-}
-
-// Check if there is a mission to run
-//TODO only used in this file, used by React Elements
-function runMission(botId: number, mission: MissionInterface) {
-    let runs = mission.runs;
-    let runId = mission.botsAssignedToRuns[botId];
-    let run = runs[runId];
-
-    if (run) {
-        if (mission.runIdInEditMode === run.id) {
-            mission.runIdInEditMode = "";
-        }
-        return run.command;
-    } else {
-        return null;
-    }
-}
-
-/**
- * Checks if a details button should be disabled
- *
- * @param bot
- * @returns boolean
- */
-//TODO only used in this file, used by React Elements
-function disableButton(
-    command: CommandInfo,
-    missionState: MissionState,
-    bot?: PortalBotStatus,
-    downloadQueue?: PortalBotStatus[],
-) {
-    let disableInfo: DisableInfo;
-
-    disableInfo = {
-        isDisabled: true,
-        disableMessage: "",
-    };
-
-    const statesAvailable = command.statesAvailable;
-    const statesNotAvailable = command.statesNotAvailable;
-    const humanReadableAvailable = command.humanReadableAvailable;
-    const humanReadableNotAvailable = command.humanReadableNotAvailable;
-
-    const disableMessage =
-        "The command: " + command.commandType + " cannot be sent because the bot";
-    const disableState =
-        disableMessage +
-        " is in the incorrect state." +
-        `${humanReadableAvailable !== "" ? "\nAvailable States: " + humanReadableAvailable + "\n" : ""}` +
-        `${humanReadableNotAvailable !== "" ? "States Not Available: " + humanReadableNotAvailable + "\n" : ""}`;
-
-    if (statesAvailable) {
-        for (let stateAvailable of statesAvailable) {
-            if (stateAvailable.test(missionState)) {
-                disableInfo.isDisabled = false;
-                break;
-            }
-        }
-    }
-
-    if (statesNotAvailable) {
-        for (let stateNotAvailable of statesNotAvailable) {
-            if (stateNotAvailable.test(missionState)) {
-                disableInfo.isDisabled = true;
-                break;
-            }
-        }
-    }
-
-    if (disableInfo.isDisabled) {
-        disableInfo.disableMessage += disableState;
-    }
-
-    if (bot && downloadQueue) {
-        const downloadQueueBotIds = downloadQueue.map((bot) => bot.bot_id);
-        if (downloadQueueBotIds.includes(bot.bot_id)) {
-            disableInfo.isDisabled = true;
-            disableInfo.disableMessage +=
-                disableMessage +
-                " currently preparing for data offload. Check the data offload queue panel. \n";
-        }
-    }
-    return disableInfo;
-}
-
-/**
- * Checks if clear run button should be disabled
- *
- * @param bot
- * @returns boolean
- */
-//TODO only used in this file, used by React Elements
-function disableClearRunButton(bot: PortalBotStatus, mission: MissionInterface) {
-    let disableInfo: DisableInfo;
-
-    disableInfo = {
-        isDisabled: false,
-        disableMessage: "",
-    };
-
-    if (!mission?.botsAssignedToRuns[bot.bot_id]) {
-        disableInfo.disableMessage = "Cannot perform this action because there is no run to delete";
-        disableInfo.isDisabled = true;
-    }
-
-    return disableInfo;
-}
-
-//TODO only used in this file, used by React Elements
-function disablePlayButton(
-    bot: PortalBotStatus,
-    mission: MissionInterface,
-    command: CommandInfo,
-    missionState: MissionState,
-    downloadQueue: PortalBotStatus[],
-) {
-    let disableInfo: DisableInfo;
-
-    disableInfo = {
-        isDisabled: false,
-        disableMessage: "",
-    };
-
-    if (!mission.botsAssignedToRuns[bot.bot_id]) {
-        disableInfo.disableMessage +=
-            "The command: " +
-            command.commandType +
-            " cannot be sent because the bot because it does not have a run available\n";
-        disableInfo.isDisabled = true;
-    }
-
-    if (disableButton(command, missionState).isDisabled) {
-        disableInfo.disableMessage += disableButton(command, missionState).disableMessage;
-        disableInfo.isDisabled = true;
-    }
-
-    const downloadQueueBotIds = downloadQueue.map((bot) => bot.bot_id);
-    if (downloadQueueBotIds.includes(bot.bot_id)) {
-        disableInfo.disableMessage +=
-            "The command: " +
-            command.commandType +
-            " cannot be sent because the bot because it is in the data offload queue\n";
-        disableInfo.isDisabled = true;
-    }
-
-    return disableInfo;
 }
 
 // Get the table row for the health of the vehicle
@@ -393,22 +253,7 @@ function healthRow(bot: BotStatus, allInfo: boolean) {
         );
     }
 }
-// TODO Only used in this file, used in BotDetailsComponent
-// Should probably break up BotDetailsComponent so this can be isolated from React
-function getBotRun(botId: number, runs: { [key: string]: RunInterface }) {
-    try {
-        for (const runId of Object.keys(runs)) {
-            if (runs[runId].assigned === botId) {
-                return runs[runId];
-            }
-        }
-    } catch (error) {
-        console.error("Cannot getBotRun:\n", error);
-        console.log("Cannot getBotRun:\n", error);
-    }
-    return null;
-}
-// TODO Used here and in CommandControl
+
 export interface BotDetailsProps {
     bot: PortalBotStatus;
     hub: PortalHubStatus;

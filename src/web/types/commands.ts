@@ -1,10 +1,4 @@
-import {
-    Command,
-    CommandType,
-    HubCommandType,
-    BotStatus,
-    MissionState,
-} from "../utils/protobuf-types";
+import { CommandType, HubCommandType } from "../utils/protobuf-types";
 
 export interface CommandInfo {
     commandType: CommandType | HubCommandType;
