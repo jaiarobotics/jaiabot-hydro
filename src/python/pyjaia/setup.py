@@ -19,6 +19,7 @@ setup(name='pyjaia',
           'turfpy'
           ],
         scripts=[
-            'pyjaia/waves/jaia-analyze-waves.py'
+            'pyjaia/waves/jaia-analyze-waves.py',
+            'pyjaia/waves/jaia-simulate-h5.py'
         ]
     )
