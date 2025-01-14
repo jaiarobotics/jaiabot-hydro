@@ -50,20 +50,20 @@ write_files:
   # Only <PASSWORD> needs to be manually updated
   - path: /etc/network/interfaces.d/wlan0
     content: |
-      #auto wlan0
-      #iface wlan0 inet static
-      #  wpa-essid SSID
-      #  wpa-psk <PASSWORD>
-      #  address 10.23.XXX.YYY
-      #  netmask 255.255.255.0
-      #  gateway 10.23.XXX.1
+      auto wlan0
+      iface wlan0 inet static
+        wpa-essid SSID
+        wpa-psk <PASSWORD>
+        address 10.23.XXX.YYY
+        netmask 255.255.255.0
+        gateway 10.23.XXX.1
   - path: /etc/network/interfaces.d/eth0
     content: |
-      auto eth0
-      iface eth0 inet static
-        address 10.23.0.100
-        netmask 255.255.255.0
-        gateway 10.23.0.1
+      # auto eth0
+      # iface eth0 inet static
+      #   address 10.23.XXX.YYY
+      #   netmask 255.255.255.0
+      #   gateway 10.23.XXX.1
 
 runcmd:
   # Generate inventory

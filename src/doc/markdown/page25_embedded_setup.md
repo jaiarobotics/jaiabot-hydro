@@ -43,8 +43,19 @@ This information is provided via a `first-boot.preseed.yml` YAML configuration f
 
 Additionally, two optional SSH key pairs can be provided (in /boot/firmware/jaiabot/init):
 
-- For hubs: A key called `hub<N>_fleet<F>` (private) / `hub<N>_fleet<F>.pub` (public), where `<N>` is the hub ID and `<F>` is the fleet ID. If this is present, it will be installed to /home/jaiabot/.ssh and an SSH `config` file generated to allow host keys to be automatically added upon first connection to the bots.
-- For Wireguard setup: A key called `id_vpn_tmp` (private) / `id_vpn_tmp.pub` (public) can be provided. This key must first be added to `vpn.jaia.tech` as a temporary access key (e.g. for 1 day of validity) using `jaia admin ssh add`. It will then be used by the first-boot setup to configure both the server and client sides of the service (fleet) VPN.
+- For hubs: A key called `hub<N>_fleet<F>` (private) / `hub<N>_fleet<F>.pub` (public), where `<N>` is the hub ID and `<F>` is the fleet ID. If this is present, it will be installed to /home/jaiabot/.ssh and an SSH `config` file generated to allow host keys to be automatically added upon first connection to the bots. This key can be generated using:
+```
+cd /path/to/boot/jaiabot/init
+HUB=1; FLEET=5; ssh-keygen -f hub${HUB}_fleet${FLEET} -t ed25519 -N "" -C "hub${HUB}_fleet${FLEET}"
+```
+
+- For Wireguard setup: A key called `id_vpn_tmp` (private) / `id_vpn_tmp.pub` (public) can be provided. This key must first be added to `vpn.jaia.tech` as a temporary access key (e.g. for 1 day of validity) using `jaia admin ssh add`. It will then be used by the first-boot setup to configure both the server and client sides of the service (fleet) VPN. This key can be generated and provisioned using:
+```
+cd /path/to/boot/jaiabot/init
+ssh-keygen -f id_vpn_tmp -t ed25519 -N "" -C "id_vpn_tmp"
+jaia admin ssh add --user=ubuntu vpn.jaia.tech "$(cat id_vpn_tmp.pub)" 1d
+```
+
 
 An example of this text file is provided on the image as `/boot/firmware/jaiabot/init/first-boot.preseed.yml.ex`. Simply copy this file to `/boot/firmware/jaiabot/init/first-boot.preseed.yml` and edit the answers as desired.
 

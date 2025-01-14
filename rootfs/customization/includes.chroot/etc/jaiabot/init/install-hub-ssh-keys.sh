@@ -1,7 +1,7 @@
 #!/bin/bash
 
 script_dir=$(dirname $0)
-PRESEED_DIR=${script_dir}
+PRESEED_DIR="/boot/firmware/jaiabot/init"
 SSH_DIR="/home/jaia/.ssh"
 CONFIG_FILE="$SSH_DIR/config"
 

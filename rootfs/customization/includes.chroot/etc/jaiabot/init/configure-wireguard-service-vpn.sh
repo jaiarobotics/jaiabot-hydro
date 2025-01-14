@@ -3,7 +3,7 @@
 set -u -e
 
 script_dir=$(dirname $0)
-PRESEED_DIR=${script_dir}
+PRESEED_DIR="/boot/firmware/jaiabot/init"
 PRIVATE_KEY=${PRESEED_DIR}/id_vpn_tmp
 
 if [ ! -e "${PRIVATE_KEY}" ]; then
