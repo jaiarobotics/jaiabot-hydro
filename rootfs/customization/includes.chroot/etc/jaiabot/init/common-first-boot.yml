@@ -60,6 +60,7 @@ runcmd:
   # Check and install any hub keys
   - /etc/jaiabot/init/install-hub-ssh-keys.sh
   # Setup wireguard VPN (if temporary key is provided)
+  - ifdown wlan0 && ifup wlan0
   - /etc/jaiabot/init/configure-wireguard-service-vpn.sh
   
 # Reboot for overlay to take effect

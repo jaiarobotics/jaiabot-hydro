@@ -11,6 +11,12 @@ if [ ! -e "${PRIVATE_KEY}" ]; then
     exit 0
 fi
 
+if ! timeout 10 bash -c "until ping -c1 1.1.1.1 >/dev/null 2>&1; do :; done"; then
+    echo "No network after 10 seconds, not configuring Wireguard server VPN"
+    exit 1
+fi
+
+
 type=$(debconf-get-selections | grep jaiabot-embedded/type | cut -f 4)
 fleet=$(debconf-get-selections | grep jaiabot-embedded/fleet_id | cut -f 4)
 id=""
