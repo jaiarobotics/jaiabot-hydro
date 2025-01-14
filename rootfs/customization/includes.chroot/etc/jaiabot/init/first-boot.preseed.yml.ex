@@ -67,6 +67,6 @@ write_files:
 
 runcmd:
   # Generate inventory
-  - /boot/firmware/jaiabot/init/create-ansible-inventory.sh -b 1,2 -h 1,2 > /etc/jaiabot/inventory.yml
+  - /etc/jaiabot/init/create-ansible-inventory.sh -b 1,2 -h 1,2 > /etc/jaiabot/inventory.yml
   # Enable service VPN (if desired)
   - sudo systemctl enable wg-quick@wg_jaia

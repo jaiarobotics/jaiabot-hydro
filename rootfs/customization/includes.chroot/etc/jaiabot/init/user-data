@@ -1,3 +1,3 @@
 #include
-file:///boot/firmware/jaiabot/init/common-first-boot.yml
+file:///etc/jaiabot/init/common-first-boot.yml
 file:///boot/firmware/jaiabot/init/first-boot.preseed.yml

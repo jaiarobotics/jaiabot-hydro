@@ -95,7 +95,7 @@ ${perm_ssh_keys}
       # iface eth0 inet dhcp
 
 runcmd:
-  - /boot/firmware/jaiabot/init/create-ansible-inventory.sh -b $(seq -s ',' 1 $((N_BOTS))) -h $(seq -s ',' 1 $((N_HUBS))) > /etc/jaiabot/inventory.yml
+  - /etc/jaiabot/init/create-ansible-inventory.sh -b $(seq -s ',' 1 $((N_BOTS))) -h $(seq -s ',' 1 $((N_HUBS))) > /etc/jaiabot/inventory.yml
 EOF
 
     # install hub key onto hub

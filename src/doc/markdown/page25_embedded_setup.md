@@ -41,6 +41,11 @@ The newly created image needs certain configuration to run properly: is this a b
 
 This information is provided via a `first-boot.preseed.yml` YAML configuration file, conforming to the standards of the `cloud-init` project's [user-data file format](https://cloudinit.readthedocs.io/en/latest/reference/modules.html#modules).
 
+Additionally, two optional SSH key pairs can be provided (in /boot/firmware/jaiabot/init):
+
+- For hubs: A key called `hub<N>_fleet<F>` (private) / `hub<N>_fleet<F>.pub` (public), where `<N>` is the hub ID and `<F>` is the fleet ID. If this is present, it will be installed to /home/jaiabot/.ssh and an SSH `config` file generated to allow host keys to be automatically added upon first connection to the bots.
+- For Wireguard setup: A key called `id_vpn_tmp` (private) / `id_vpn_tmp.pub` (public) can be provided. This key must first be added to `vpn.jaia.tech` as a temporary access key (e.g. for 1 day of validity) using `jaia admin ssh add`. It will then be used by the first-boot setup to configure both the server and client sides of the service (fleet) VPN.
+
 An example of this text file is provided on the image as `/boot/firmware/jaiabot/init/first-boot.preseed.yml.ex`. Simply copy this file to `/boot/firmware/jaiabot/init/first-boot.preseed.yml` and edit the answers as desired.
 
 Configuration will happen automatically without user intervention or the requirement for connecting a monitor or DHCP based SSH session.
@@ -51,11 +56,11 @@ Please note: for security reasons the first-boot script will lock the `jaia` use
 
 #### Further details on first-boot setup
 
-First boot configuration is now handled by `cloud-init` using the `NoCloud` data source for the Raspberry Pi image. `cloud-init` is configured (via the kernel command line parameter `ds=nocloud;s=/boot/firmware/jaiabot/init` in /boot/firmware/cmdline.txt) to use the files in `/boot/firmware/jaiabot/init`. The important file is `user-data` which in our case simply includes two local "user data" YAML files in the same directory:
+First boot configuration is now handled by `cloud-init` using the `NoCloud` data source for the Raspberry Pi image. `cloud-init` is configured (via the kernel command line parameter `ds=nocloud;s=/etc/jaiabot/init` in /boot/firmware/cmdline.txt) to use the files in `/etc/jaiabot/init` (except for first-boot.preseed.yml). The important file is `user-data` which in our case simply includes two local "user data" YAML files in the same directory:
 - `common-first-boot.yml`: Common actions that must be undertaken on first boot for all systems. This should only be edited if **all** the bots/hubs need to be configured in a different way. Only actions that cannot be performed at rootfs generation time (in CircleCI) should be included in this file (e.g., resizing the log partition to fill a disk of unknown size, installing jaiabot-embedded as this flashes the Arduino, etc.). Otherwise it is preferred to use `jaiabot/rootfs/customization` (either `includes.chroot` for files to include or `hooks` for scripts to run).
 - `first-boot.preseed.yml`: The previously discussed preseed file specific to the bot or hub being configured.
 
-These files are separated to reduce clutter in the first-boot.preseed.yml file. The source for both of these files is in `jaiabot/rootfs/nocloud-init` (which is copied to `/boot/firmware/jaiabot/init` on Raspberry Pi image creation). 
+These files are separated to reduce clutter in the first-boot.preseed.yml file. The source for both of these files is in `jaiabot/rootfs/customization/includes.chroot/etc/jaiabot/init`. 
 
 ### Fleet configuration
 
