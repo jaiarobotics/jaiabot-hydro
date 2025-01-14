@@ -3981,7 +3981,6 @@ export default class CommandControl extends React.Component {
                 const botDetailsProps: BotDetailsProps = {
                     bot: bots?.[this.selectedBotId()],
                     hub: hubs?.[Object.keys(hubs)[0]],
-                    api: this.api,
                     mission: this.getRunList(),
                     run: this.getRun(this.selectedBotId()),
                     isExpanded: this.state.detailsExpanded,

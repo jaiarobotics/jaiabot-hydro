@@ -4,7 +4,6 @@ import { GlobalContext, GlobalDispatchContext } from "../../context/Global/Globa
 import { HealthStatusLine } from "../../components/HealthStatusLine/HealthStatusLine";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 import { HubContext } from "../../context/Hub/HubContext";
-import { hubs } from "../../data/hubs/hubs";
 
 // Utilities
 import {
@@ -13,7 +12,7 @@ import {
     formatLatitude,
     formatLongitude,
 } from "../../shared/Utilities";
-import { sendHubCommand, takeControl } from "../../utils/commands";
+import { sendHubCommand, takeControl } from "../../utils/command";
 import { CommandInfo, hubCommands } from "../../types/commands";
 import { getIPPrefix } from "../../shared/IPPrefix";
 

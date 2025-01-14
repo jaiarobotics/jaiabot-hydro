@@ -2,20 +2,14 @@ import React, { useState, useEffect } from "react";
 
 // Jaia Imports
 import { CommandInfo, botCommands } from "../../types/commands";
+import { sendBotCommand, sendBotRunCommand, sendBotRCCommand } from "../../utils/command";
 import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
 import { Missions } from "../../missions/missions";
 import { GlobalSettings } from "../../missions/settings";
-import { JaiaAPI } from "../../utils/jaia-api";
-import { error, warning, info } from "../../notifications/notifications";
+import { warning, info } from "../../notifications/notifications";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
 import { PortalHubStatus, PortalBotStatus } from "../../shared/PortalStatus";
-import {
-    Command,
-    CommandType,
-    HubCommandType,
-    BotStatus,
-    MissionState,
-} from "../../utils/protobuf-types";
+import { Command, BotStatus, MissionState } from "../../utils/protobuf-types";
 import {
     formatLatitude,
     formatLongitude,
@@ -49,7 +43,6 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 // Utility Imports
 import * as turf from "@turf/turf";
 import { CustomAlert } from "../../shared/CustomAlert";
-import { types } from "util";
 
 const rcMode = require("../../style/icons/controller.svg");
 
@@ -76,9 +69,7 @@ interface DisableInfo {
 
 var takeControlFunction: (onSuccess: () => void) => void;
 
-//TODO only used in this file, used by React Elements
 function issueCommand(
-    api: JaiaAPI,
     botId: number,
     command: CommandInfo,
     disableMessage: string,
@@ -95,27 +86,16 @@ function issueCommand(
             `Are you sure you'd like to ${command.description} bot: ${botId}?`,
             command.confirmationButtonText,
             () => {
-                let c = {
-                    bot_id: botId,
-                    type: command.commandType as CommandType,
-                };
-
-                api.postCommand(c).then((response) => {
-                    if (response.message) {
-                        error(response.message);
-                    }
-                    if (setRcMode) {
-                        setRcMode(botId, false);
-                    }
-                });
+                sendBotCommand(botId, command);
+                if (setRcMode) {
+                    setRcMode(botId, false);
+                }
             },
         );
     });
 }
 
-//TODO Only used in this files React Elements
 function issueRunCommand(
-    api: JaiaAPI,
     bot: PortalBotStatus,
     botRun: Command,
     setRcMode: (botId: number, rcMode: boolean) => void,
@@ -137,20 +117,14 @@ function issueRunCommand(
                 botRun.plan.speeds = GlobalSettings.missionPlanSpeeds;
 
                 info("Submitted for Bot: " + bot.bot_id);
-
-                api.postCommand(botRun).then((response) => {
-                    if (response.message) {
-                        error(response.message);
-                    }
-                    setRcMode(bot.bot_id, false);
-                });
+                sendBotRunCommand(botRun);
+                setRcMode(bot.bot_id, false);
             }
         });
     });
 }
-//TODO only used in this file, used by React Elements
+
 function issueRCCommand(
-    api: JaiaAPI,
     bot: PortalBotStatus,
     botMission: Command,
     isRCModeActive: (botId: number) => boolean,
@@ -187,21 +161,17 @@ function issueRCCommand(
                 () => {
                     console.debug("Running Remote Control:");
                     console.debug(botMission);
-
-                    api.postCommand(botMission).then((response) => {
-                        if (response.message) {
-                            error(response.message);
-                        }
-                        setRcMode(bot.bot_id, true);
-                    });
+                    sendBotRCCommand(botMission);
+                    setRcMode(bot.bot_id, true);
                 },
             );
         } else {
-            issueCommand(api, bot.bot_id, botCommands.stop, disableMessage);
+            issueCommand(bot.bot_id, botCommands.stop, disableMessage);
             setRcMode(bot.bot_id, false);
         }
     });
 }
+
 //TODO only used in this file, used by React Element
 async function runRCMode(bot: PortalBotStatus) {
     const botId = bot.bot_id;
@@ -442,7 +412,6 @@ function getBotRun(botId: number, runs: { [key: string]: RunInterface }) {
 export interface BotDetailsProps {
     bot: PortalBotStatus;
     hub: PortalHubStatus;
-    api: JaiaAPI;
     mission: MissionInterface;
     run: RunInterface;
     isExpanded: DetailsExpandedState;
@@ -463,7 +432,6 @@ export interface BotDetailsProps {
 export function BotDetailsComponent(props: BotDetailsProps) {
     const bot = props.bot;
     const hub = props.hub;
-    const api = props.api;
     const mission = props.mission;
     const closeWindow = props.closeWindow;
     const takeControl = props.takeControl;
@@ -659,7 +627,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             }
                             onClick={() => {
                                 issueCommand(
-                                    api,
                                     bot.bot_id,
                                     botCommands.stop,
                                     disableButton(botCommands.stop, missionState).disableMessage,
@@ -693,7 +660,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         "Warning",
                                     ))
                                         ? issueRunCommand(
-                                              api,
                                               bot,
                                               runMission(bot.bot_id, mission),
                                               props.setRcMode,
@@ -708,7 +674,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         : false;
                                 } else {
                                     issueRunCommand(
-                                        api,
                                         bot,
                                         runMission(bot.bot_id, mission),
                                         props.setRcMode,
@@ -840,7 +805,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                     }
                                     onClick={() => {
                                         issueCommand(
-                                            api,
                                             bot.bot_id,
                                             botCommands.active,
                                             disableButton(botCommands.active, missionState)
@@ -861,7 +825,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         `}
                                     onClick={async () => {
                                         issueRCCommand(
-                                            api,
                                             bot,
                                             await runRCMode(bot),
                                             props.isRCModeActive,
@@ -886,7 +849,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                     }
                                     onClick={() => {
                                         issueCommand(
-                                            api,
                                             bot.bot_id,
                                             botCommands.nextTask,
                                             disableButton(botCommands.nextTask, missionState)
@@ -936,7 +898,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         "Shutdown Bot",
                                                     ))
                                                         ? issueCommand(
-                                                              api,
                                                               bot.bot_id,
                                                               botCommands.shutdown,
                                                               disableButton(
@@ -949,7 +910,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         : false;
                                                 } else {
                                                     issueCommand(
-                                                        api,
                                                         bot.bot_id,
                                                         botCommands.shutdown,
                                                         disableButton(
@@ -985,7 +945,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         "Reboot Bot",
                                                     ))
                                                         ? issueCommand(
-                                                              api,
                                                               bot.bot_id,
                                                               botCommands.reboot,
                                                               disableButton(
@@ -998,7 +957,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         : false;
                                                 } else {
                                                     issueCommand(
-                                                        api,
                                                         bot.bot_id,
                                                         botCommands.reboot,
                                                         disableButton(
@@ -1034,7 +992,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         "Restart Bot",
                                                     ))
                                                         ? issueCommand(
-                                                              api,
                                                               bot.bot_id,
                                                               botCommands.restartServices,
                                                               disableButton(
@@ -1047,7 +1004,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         : false;
                                                 } else {
                                                     issueCommand(
-                                                        api,
                                                         bot.bot_id,
                                                         botCommands.restartServices,
                                                         disableButton(

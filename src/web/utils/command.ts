@@ -1,8 +1,9 @@
-import { HubCommandType } from "../utils/protobuf-types.js";
+import { Command, CommandType, HubCommandType } from "./protobuf-types";
 import { jaiaAPI } from "./jaia-api";
 import { CustomAlert } from "../shared/CustomAlert";
 import { isError } from "lodash";
 import { CommandInfo } from "../types/commands";
+import { error, info } from "../notifications/notifications";
 
 /**
  * Saves client ID associated with the user session as the controlling client ID
@@ -55,4 +56,33 @@ export async function sendHubCommand(hubID: number, hubCommand: CommandInfo) {
         };
         jaiaAPI.postCommandForHub(command);
     }
+}
+
+export function sendBotCommand(botId: number, command: CommandInfo) {
+    let c = {
+        bot_id: botId,
+        type: command.commandType as CommandType,
+    };
+
+    jaiaAPI.postCommand(c).then((response) => {
+        if (response.message) {
+            error(response.message);
+        }
+    });
+}
+
+export function sendBotRunCommand(botRun: Command) {
+    jaiaAPI.postCommand(botRun).then((response) => {
+        if (response.message) {
+            error(response.message);
+        }
+    });
+}
+
+export function sendBotRCCommand(botMission: Command) {
+    jaiaAPI.postCommand(botMission).then((response) => {
+        if (response.message) {
+            error(response.message);
+        }
+    });
 }
