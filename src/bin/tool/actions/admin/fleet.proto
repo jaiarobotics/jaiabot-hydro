@@ -76,6 +76,12 @@ message Fleet
             required string public_key = 3;
         }
         repeated HubKey hub = 2;
+        message VPNTempKey
+        {
+            required string private_key = 2;
+            required string public_key = 3;
+        }
+        optional VPNTempKey vpn_tmp = 3;
     }
     required SSHKeys ssh = 4;
 
