@@ -23,10 +23,11 @@
 syntax = "proto2";
 import "goby/middleware/protobuf/app_config.proto";
 import "goby/protobuf/option_extensions.proto";
+import "actions/net.proto";
 
-package jaiabot.config;
+package jaiabot.config.admin;
 
-message AdminTool
+message FleetTool
 {
     option (goby.msg).cfg.tool = {
         is_tool: true
@@ -41,13 +42,13 @@ message AdminTool
     {
         help = 0 [(goby.ev).cfg = {
             short_help_msg: "Print usage information",
-            full_help_msg: "Usage: \"jaia admin help [action]\""
+            full_help_msg: "Usage: \"jaia admin ssh help [action]\""
         }];
-        ssh = 1 [(goby.ev).cfg = {
-            short_help_msg: "SSH key administration",
+        create = 1 [(goby.ev).cfg = {
+            short_help_msg: "Create a new fleet config",
         }];
-        fleet = 2 [(goby.ev).cfg = {
-            short_help_msg: "Fleet administration",
+        validate = 2 [(goby.ev).cfg = {
+            short_help_msg: "Validate a new fleet config",
         }];
     }
     optional Action action = 2 [
@@ -57,4 +58,53 @@ message AdminTool
             cfg { position: { enable: true }, cli_short: "A", action: HIDDEN }
         }
     ];
+}
+
+message Fleet
+{
+    required int32 fleet = 1;
+    repeated int32 hubs = 2;
+    repeated int32 bots = 3;
+
+    message SSHKeys
+    {
+        repeated string permanent_authorized_keys = 1;
+        message HubKey
+        {
+            required int32 id = 1;
+            required string private_key = 2;
+            required string public_key = 3;
+        }
+        repeated HubKey hub = 2;
+    }
+    required SSHKeys ssh = 4;
+
+    message Debconf
+    {
+        enum DebconfType
+        {
+            SELECT = 0;
+        }
+
+        required string key = 1;
+        optional DebconfType type = 2 [default = SELECT];
+        required string value = 3;
+    }
+    repeated Debconf debconf = 5;
+    required string wlan_password = 6;
+    required bool service_vpn_enabled = 7;
+
+    message DebconfOverride
+    {
+        enum NodeType
+        {
+            HUB = 0;
+            BOT = 1;
+        }
+
+        required NodeType type = 1;
+        required int32 id = 2;
+        required Debconf debconf = 3;
+    }
+    repeated DebconfOverride debconf_override = 8;
 }

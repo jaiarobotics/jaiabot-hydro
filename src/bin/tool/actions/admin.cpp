@@ -1,6 +1,7 @@
 #include "goby/middleware/application/tool.h"
 
 #include "admin.h"
+#include "admin/fleet.h"
 #include "admin/ssh.h"
 #include "common.h"
 
@@ -38,6 +39,12 @@ jaiabot::apps::AdminTool::AdminTool()
             case jaiabot::config::AdminTool::ssh:
                 tool_helper.run_subtool<jaiabot::apps::admin::SSHTool,
                                         jaiabot::apps::admin::SSHToolConfigurator>();
+
+                break;
+
+            case jaiabot::config::AdminTool::fleet:
+                tool_helper.run_subtool<jaiabot::apps::admin::FleetTool,
+                                        jaiabot::apps::admin::FleetToolConfigurator>();
 
                 break;
 
