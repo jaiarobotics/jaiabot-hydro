@@ -35,6 +35,7 @@ def moscowitzS(f: float, config: MoscowitzWaveConfig):
 
 
 def generateMoscowitz(config: Config, waveConfig: MoscowitzWaveConfig):
+    # Source: https://wikiwaves.org/Ocean-Wave_Spectra, Pierson and Moscowitz (1964)
     N = config.N
     A: List[float] = [0.0] * N # acceleration spectrum (m / s^2 / Hz)
 
@@ -60,7 +61,59 @@ def generateMoscowitz(config: Config, waveConfig: MoscowitzWaveConfig):
     swh = 0.21 * (waveConfig.U19_5 ** 2) / g
     print(f'Significant wave height = {swh} m')
 
+    powerSpectrum = powerSpectrumFFT(acceleration, config.sampleFrequency)
+    swh = significantWaveHeight(powerSpectrum, config.sampleFrequency)
+    print(f'SWH (FFT) = {swh}')
+
+    powerSpectrum = powerSpectrumPeriodogram(acceleration, config.sampleFrequency)
+    swh = significantWaveHeight(powerSpectrum, config.sampleFrequency)
+    print(f'SWH (periodogram) = {swh}')
+
     return list(acceleration)
+
+
+def heightFromAcceleration(acceleration: List[float], sampleFrequency: float):
+    N = len(acceleration)
+    A = numpy.fft.fft(acceleration)
+    X = [0.0] * N
+
+    for i in range(1, N // 2 + 1):
+        f = i * sampleFrequency / N
+        X[i] = A[i] / (4 * pi**2 * f**2)
+        X[N - i] = A[N - i] / (4 * pi**2 * f**2)
+
+    return numpy.real(numpy.fft.ifft(X))
+
+
+def significantWaveHeight(powerSpectrum: List[float], sampleFrequency: float):
+    df = sampleFrequency / (2 * (len(powerSpectrum) - 1))
+    meanZetaSquared = 0.0 # Mean height
+    for i in range(1, len(powerSpectrum)):
+        meanZetaSquared += powerSpectrum[i] * df
+    return 4 * meanZetaSquared**0.5
+
+
+def powerSpectrumFFT(acceleration: List[float], sampleFrequency: float):
+    A = numpy.fft.fft(acceleration)
+    N = len(acceleration)
+    S: List[float] = [0.0] * (N // 2 + 1) # Power density spectrum
+
+    for i in range(1, N // 2 + 1):
+        f = i * sampleFrequency / N
+        amplitude = numpy.absolute(A[i] / (4 * pi**2 * f**2))
+        S[i] = amplitude**2 / (N // 2 * sampleFrequency)
+
+    return S
+
+
+def powerSpectrumPeriodogram(acceleration: List[float], sampleFrequency: float):
+    from scipy.signal import periodogram
+    N = len(acceleration)
+
+    height = heightFromAcceleration(acceleration, sampleFrequency)
+
+    frequencies, power_spectrum = periodogram(height, fs=sampleFrequency)
+    return power_spectrum
 
 
 def generateSeriesSet(config: Config):
