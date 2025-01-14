@@ -7,7 +7,7 @@ import { Coordinate } from "ol/coordinate";
 
 // Jaia
 import { bots } from "../../data/bots/bots";
-import { newMap } from "../map_new/map-new";
+import { view } from "../views/view";
 
 // Util
 import { angleToXY } from "../../utils/style";
@@ -33,7 +33,7 @@ export function generateBotFeature(botID: number) {
 
     const feature = new Feature({
         name: `BOT-${botID}`,
-        geometry: new Point(fromLonLat(coordinate, newMap.getView().getProjection())),
+        geometry: new Point(fromLonLat(coordinate, view.getProjection())),
     });
     feature.setStyle(generateBotStyle(botID, heading));
     return feature;

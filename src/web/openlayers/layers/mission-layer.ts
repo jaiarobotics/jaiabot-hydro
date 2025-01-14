@@ -3,7 +3,7 @@ import VectorSource from "ol/source/Vector";
 
 export const missionLayer = new VectorLayer({
     properties: {
-        title: "mission",
+        title: "mission-layer",
     },
     source: new VectorSource({ wrapX: false }),
 });

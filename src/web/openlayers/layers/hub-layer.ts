@@ -6,7 +6,7 @@ import { generateHubFeature } from "../features/hub-feature";
 
 export const hubLayer = new VectorLayer({
     properties: {
-        title: "hub",
+        title: "hub-layer",
     },
     source: new VectorSource({ wrapX: false }),
 });

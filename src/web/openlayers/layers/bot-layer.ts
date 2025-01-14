@@ -6,7 +6,7 @@ import { generateBotFeature } from "../features/bot-feature";
 
 export const botLayer = new VectorLayer({
     properties: {
-        title: "bot",
+        title: "bot-layer",
     },
     source: new VectorSource({ wrapX: false }),
 });

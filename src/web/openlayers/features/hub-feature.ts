@@ -7,7 +7,7 @@ import { Coordinate } from "ol/coordinate";
 
 // Jaia
 import { hubs } from "../../data/hubs/hubs";
-import { newMap } from "../map_new/map-new";
+import { view } from "../views/view";
 
 // Style
 const hubIcon = require("../../style/icons/hub.svg");
@@ -29,7 +29,7 @@ export function generateHubFeature(hubID: number) {
 
     const feature = new Feature({
         name: `HUB-${hubID}`,
-        geometry: new Point(fromLonLat(coordinate, newMap.getView().getProjection())),
+        geometry: new Point(fromLonLat(coordinate, view.getProjection())),
     });
     feature.setStyle(generateHubStyle());
     return feature;

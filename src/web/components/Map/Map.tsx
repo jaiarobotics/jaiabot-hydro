@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { newMap } from "../../openlayers/map_new/map-new";
+import { map } from "../../openlayers/maps/map";
 import { missionLayer } from "../../openlayers/layers/mission-layer";
 
 import { Feature, MapBrowserEvent } from "ol";
@@ -14,14 +14,14 @@ const waypointSVG = require("../../style/icons/waypoint.svg");
 
 export default function Map() {
     useEffect(() => {
-        newMap.setTarget("map");
-        newMap.on("click", (event: MapBrowserEvent<UIEvent>) => {
+        map.setTarget("map");
+        map.on("click", (event: MapBrowserEvent<UIEvent>) => {
             handleMapClick(event);
         });
     });
 
     const handleMapClick = (event: MapBrowserEvent<UIEvent>) => {
-        const feature = newMap.forEachFeatureAtPixel(event.pixel, (feature: Feature) => feature);
+        const feature = map.forEachFeatureAtPixel(event.pixel, (feature: Feature) => feature);
 
         if (feature) {
             switch (feature.getProperties().name) {
