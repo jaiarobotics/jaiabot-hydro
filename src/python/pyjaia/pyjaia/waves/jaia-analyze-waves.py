@@ -18,8 +18,8 @@ from pathlib import *
 from statistics import *
 from pyjaia.waves.series_set import *
 from pyjaia.waves.types import *
-from pyjaia.waves import doAnalysis
 from pyjaia.waves.analysis_html import *
+from pyjaia.waves.analysis import *
 
 
 cssTag = '''<style>
@@ -69,7 +69,7 @@ def analyzeFile(h5File: h5py.File, sampleFreq: float, glitchy: bool):
     drifts: List[Drift] = []
 
     for driftSeriesSet in driftSeriesSets:
-        drift = doAnalysis(driftSeriesSet.accelerationVertical, sampleFreq)
+        drift = doAnalysisPowerDensitySpectrum(driftSeriesSet.accelerationVertical, sampleFreq)
         drifts.append(drift)
 
     doPlots(Path(h5File.filename), drifts)

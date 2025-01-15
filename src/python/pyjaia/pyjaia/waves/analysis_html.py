@@ -11,6 +11,7 @@ from .processing import *
 from . import spectrogram
 from pyjaia.series import Series
 from .series_set import SeriesSet
+from .moskowitz import *
 
 def formatTimeDelta(td: timedelta):
     components = []
@@ -96,7 +97,7 @@ def htmlForSummaryTable(drifts: List[Drift]):
         durationSum += duration.total_seconds()
         largestWave = drift.waves[-1]
         maxWaveHeight = largestWave.height
-        peakPeriod = largestWave.period
+        peakPeriod = drift.peakWavePeriod
 
         html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>{swh:0.2f}</td><td>{maxWaveHeight:0.2f}</td><td>{peakPeriod:0.2f}</td></tr>'
 
@@ -143,9 +144,37 @@ def htmlForDriftObject(drift: Drift, driftIndex: int=None) -> str:
     htmlString += htmlForWaves(drift.waves)
 
     htmlString += htmlForChart([drift.rawVerticalAcceleration, drift.filteredVerticalAcceleration, drift.elevation])
-    htmlString += spectrogram.htmlForSpectrogram(drift.rawVerticalAcceleration, fftWindowSeconds=80)
-    htmlString += spectrogram.htmlForSpectrogram(drift.filteredVerticalAcceleration, fftWindowSeconds=80)
+    htmlString += htmlForPowerDensitySpectrum(drift.powerDensitySpectrum, drift.filteredVerticalAcceleration.averageSampleFrequency())
 
     return htmlString
     
 
+def htmlForPowerDensitySpectrum(spectrum: List[float], sampleFrequency: float) -> str:
+    htmlString = ''
+
+    fig = go.Figure()
+    
+    x: List[float] = []
+    N = len(spectrum)
+    for i in range(0, N):
+        f = i * sampleFrequency / 2 / N
+        x.append(f)
+
+    fig.add_trace(go.Scatter(x=x, y=spectrum, name="Power Spectral Density"))
+
+    # Show Moskowitz model power density spectrum
+    moskowitzModelY: List[float] = []
+    for i in range(1, N):
+        f = i * sampleFrequency / 2 / N
+        moskowitzModelY.append(moscowitzS(f, 6.0))
+    fig.add_trace(go.Scatter(x=x, y=moskowitzModelY, name="Moskowitz Model"))
+
+    fig.update_layout(
+        xaxis_title="Frequency (Hz)",
+        yaxis_title="Power Density (m^2/Hz)",
+        legend_title="Legend"
+    )
+
+    htmlString += fig.to_html(full_html=False, include_plotlyjs='cdn', default_width='80%', default_height='60%')
+
+    return htmlString
