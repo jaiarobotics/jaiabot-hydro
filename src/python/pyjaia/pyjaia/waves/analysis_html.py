@@ -54,7 +54,7 @@ def htmlForFilterGraph(filterFunc: Callable[[float], float]):
         legend_title="Legend"
     )
 
-    return '<h1>Band pass filter</h1>' + fig.to_html(full_html=False, include_plotlyjs='cdn')
+    return '<h1>Band pass filter</h1>' + fig.to_html(full_html=False, include_plotlyjs='cdn', default_width='50%', default_height='50%')
 
 
 def htmlForChart(charts: List[Series]) -> str:
@@ -138,7 +138,7 @@ def htmlForDriftObject(drift: Drift, driftIndex: int=None) -> str:
     if len(drift.waves) > 0:
         waveHeights = [wave.height for wave in drift.waves]
         swh = statistics.mean(waveHeights[floor(len(waveHeights)*2/3):])
-        htmlString += f'<h3>Significant Wave Height: {swh:0.2f}<h3>'
+        htmlString += f'<h3>Significant Wave Height via wave counting: {swh:0.2f}<h3>'
 
     # The wave heights
     htmlString += htmlForWaves(drift.waves)
@@ -160,13 +160,10 @@ def htmlForPowerDensitySpectrum(spectrum: List[float], sampleFrequency: float) -
         f = i * sampleFrequency / 2 / N
         x.append(f)
 
-    fig.add_trace(go.Scatter(x=x, y=spectrum, name="Power Spectral Density"))
+    fig.add_trace(go.Scatter(x=x, y=spectrum, name="Power Density Spectrum"))
 
     # Show Moskowitz model power density spectrum
-    moskowitzModelY: List[float] = []
-    for i in range(1, N):
-        f = i * sampleFrequency / 2 / N
-        moskowitzModelY.append(moscowitzS(f, 6.0))
+    moskowitzModelY = [0.0] + [moscowitzS(x[i], 6.0) for i in range(1, len(x))]
     fig.add_trace(go.Scatter(x=x, y=moskowitzModelY, name="Moskowitz Model"))
 
     fig.update_layout(
