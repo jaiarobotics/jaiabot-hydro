@@ -9,67 +9,12 @@ import numpy
 from math import *
 from typing import *
 import random
+from pyjaia.waves.moskowitz import *
 
 
 class Config:
     sampleFrequency: float
     N: int
-
-
-class MoscowitzWaveConfig:
-    U19_5: float # U_19.5, the wind speed 19.5 m above ocean surface
-
-
-g = 9.8 # m/s^2
-
-
-def moscowitzS(f: float, config: MoscowitzWaveConfig):
-    # Source: https://wikiwaves.org/Ocean-Wave_Spectra, Pierson and Moscowitz (1964)
-    alpha = 8.1e-3 # unitless
-    beta = 0.74 # unitless
-    omega_0 = g / config.U19_5 # s^-1
-    omega = 2 * pi * f
-    S = (alpha * g * g) / (omega ** 5) * exp(-beta * (omega_0 / omega) ** 4) # m^2 * s
-    Sf = 2 * pi * S # We want the power spectral density versus frequency
-    return Sf
-
-
-def generateMoscowitz(config: Config, waveConfig: MoscowitzWaveConfig):
-    # Source: https://wikiwaves.org/Ocean-Wave_Spectra, Pierson and Moscowitz (1964)
-    N = config.N
-    A: List[float] = [0.0] * N # acceleration spectrum (m / s^2 / Hz)
-
-    for i in range(1, N // 2 + 1):
-        f = i * config.sampleFrequency / config.N
-        # Get PSD at this frequency
-        S = moscowitzS(f, waveConfig)
-        # Convert to amplitude of this frequency
-        amplitude = sqrt(N // 2 * config.sampleFrequency * S)
-        # Give a random phase
-        amplitude *= numpy.exp(-(1j) * random.uniform(0, 2 * pi))
-        # Convert to acceleration
-        acceleration = amplitude * (4 * pi**2 * f**2)
-
-        A[i] += acceleration
-        A[N - i] += numpy.conj(acceleration)
-    
-    acceleration = numpy.fft.ifft(numpy.array(A))
-    acceleration = numpy.real(acceleration)
-
-    omega_P = 0.877 * 9.8 / waveConfig.U19_5
-    print(f'Peak Frequency = {omega_P / (2 * pi)} Hz')
-    swh = 0.21 * (waveConfig.U19_5 ** 2) / g
-    print(f'Significant wave height = {swh} m')
-
-    powerSpectrum = powerSpectrumFFT(acceleration, config.sampleFrequency)
-    swh = significantWaveHeight(powerSpectrum, config.sampleFrequency)
-    print(f'SWH (FFT) = {swh}')
-
-    powerSpectrum = powerSpectrumPeriodogram(acceleration, config.sampleFrequency)
-    swh = significantWaveHeight(powerSpectrum, config.sampleFrequency)
-    print(f'SWH (periodogram) = {swh}')
-
-    return list(acceleration)
 
 
 def heightFromAcceleration(acceleration: List[float], sampleFrequency: float):
@@ -135,9 +80,7 @@ def generateSeriesSet(config: Config):
         seriesSet.acc_y.append(utime, 0.0)
         seriesSet.acc_z.utime.append(utime)
 
-    waveConfig = MoscowitzWaveConfig()
-    waveConfig.U19_5 = 6.0
-    seriesSet.acc_z.y_values = generateMoscowitz(config, waveConfig)
+    seriesSet.acc_z.y_values = generateMoscowitz(config.N, config.sampleFrequency)
 
     return seriesSet
 
