@@ -1,5 +1,5 @@
 // React -- Jaia
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { GlobalContext, GlobalDispatchContext } from "../../context/Global/GlobalContext";
 import { HealthStatusLine } from "../../components/HealthStatusLine/HealthStatusLine";
 import { GlobalActions } from "../../context/Global/GlobalActions";

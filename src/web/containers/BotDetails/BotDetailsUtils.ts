@@ -34,7 +34,7 @@ export function runMission(botId: number, mission: MissionInterface) {
 export function disableButton(
     command: CommandInfo,
     missionState: MissionState,
-    bot?: PortalBotStatus,
+    botID?: number,
     downloadQueue?: PortalBotStatus[],
 ) {
     let disableInfo: DisableInfo;
@@ -79,9 +79,10 @@ export function disableButton(
         disableInfo.disableMessage += disableState;
     }
 
-    if (bot && downloadQueue) {
-        const downloadQueueBotIds = downloadQueue.map((bot) => bot.bot_id);
-        if (downloadQueueBotIds.includes(bot.bot_id)) {
+    // TODO Download queue needs rework
+    if (botID && downloadQueue) {
+        const downloadQueueBotIds = downloadQueue.map((bot) => botID);
+        if (downloadQueueBotIds.includes(botID)) {
             disableInfo.isDisabled = true;
             disableInfo.disableMessage +=
                 disableMessage +
@@ -97,7 +98,9 @@ export function disableButton(
  * @param bot
  * @returns boolean
  */
-export function disableClearRunButton(bot: PortalBotStatus, mission: MissionInterface) {
+
+// TODO Rework, Runs are no longer defined in JCC
+export function disableClearRunButton(botID: number, mission: MissionInterface) {
     let disableInfo: DisableInfo;
 
     disableInfo = {
@@ -105,7 +108,7 @@ export function disableClearRunButton(bot: PortalBotStatus, mission: MissionInte
         disableMessage: "",
     };
 
-    if (!mission?.botsAssignedToRuns[bot.bot_id]) {
+    if (!mission?.botsAssignedToRuns[botID]) {
         disableInfo.disableMessage = "Cannot perform this action because there is no run to delete";
         disableInfo.isDisabled = true;
     }
@@ -114,7 +117,7 @@ export function disableClearRunButton(bot: PortalBotStatus, mission: MissionInte
 }
 
 export function disablePlayButton(
-    bot: PortalBotStatus,
+    botID: number,
     mission: MissionInterface,
     command: CommandInfo,
     missionState: MissionState,
@@ -127,7 +130,7 @@ export function disablePlayButton(
         disableMessage: "",
     };
 
-    if (!mission.botsAssignedToRuns[bot.bot_id]) {
+    if (!mission.botsAssignedToRuns[botID]) {
         disableInfo.disableMessage +=
             "The command: " +
             command.commandType +
@@ -140,8 +143,9 @@ export function disablePlayButton(
         disableInfo.isDisabled = true;
     }
 
-    const downloadQueueBotIds = downloadQueue.map((bot) => bot.bot_id);
-    if (downloadQueueBotIds.includes(bot.bot_id)) {
+    // TODO Need to rework this queue in CommandControl may not need map
+    const downloadQueueBotIds = downloadQueue.map((bot) => botID);
+    if (downloadQueueBotIds.includes(botID)) {
         disableInfo.disableMessage +=
             "The command: " +
             command.commandType +

@@ -120,6 +120,7 @@ import "./CommandControl.less";
 // Utility
 import cloneDeep from "lodash.clonedeep";
 import { HelpWindow } from "../HelpWindow/HelpWindow";
+import { PlotNumber } from "plotly.js";
 
 const rallyIcon = require("../../shared/rally.svg") as string;
 
@@ -2959,7 +2960,7 @@ export default class CommandControl extends React.Component {
         });
     }
 
-    async processDownloadSingleBot(bot: PortalBotStatus, disableMessage: string) {
+    async processDownloadSingleBot(botID: number, disableMessage: string) {
         this.takeControl(() => {
             // Exit if we have a disableMessage
             if (disableMessage !== "") {
@@ -2968,20 +2969,22 @@ export default class CommandControl extends React.Component {
             }
 
             CustomAlert.confirm(
-                `Would you like to do a data download for Bot ${bot.bot_id}?`,
+                `Would you like to do a data download for Bot ${botID}?`,
                 "Data Download",
                 () => {
                     const queue = this.state.botDownloadQueue;
                     if (queue.length > 0) {
                         for (const queuedBot of queue) {
-                            if (queuedBot.bot_id === bot.bot_id) {
-                                info(`Bot ${bot.bot_id} is already queued`);
+                            if (queuedBot.bot_id === botID) {
+                                info(`Bot ${botID} is already queued`);
                                 return;
                             }
                         }
                     }
-                    const updatedQueue = queue.concat(bot);
-                    info(`Queued Bot ${bot.bot_id} for data download`);
+
+                    //TODO Investigate how queue is used and refactor as necessary
+                    const updatedQueue = queue.concat(botID);
+                    info(`Queued Bot ${botID} for data download`);
                     this.setState({ botDownloadQueue: updatedQueue }, () =>
                         this.downloadBotsInOrder(),
                     );

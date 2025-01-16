@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 
 // Jaia Imports
 import { CommandInfo, botCommands } from "../../types/commands";
@@ -12,17 +12,30 @@ import {
 import { sendBotCommand, sendBotRunCommand, sendBotRCCommand } from "../../utils/command";
 import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
 import { Missions } from "../../missions/missions";
+import { MissionStatus } from "../../types/jaia-system-types";
+import BotSensors from "../../data/bots/bot-sensors";
+import GPS from "../../data/sensors/gps";
+import IMU from "../../data/sensors/imu";
+import PressureSensor from "../../data/sensors/pressure";
+import TemperatureSensor from "../../data/sensors/temperature";
+import ConductivitySensor from "../../data/sensors/conductivity";
+
 import { GlobalSettings } from "../../missions/settings";
 import { warning, info } from "../../notifications/notifications";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
+import Mission from "../../data/missions/mission";
 import { PortalHubStatus, PortalBotStatus } from "../../shared/PortalStatus";
-import { Command, BotStatus, MissionState } from "../../utils/protobuf-types";
+import { Command, BotStatus, MissionState, GeographicCoordinate } from "../../utils/protobuf-types";
+
 import {
     formatLatitude,
     formatLongitude,
     formatAttitudeAngle,
     addDropdownListener,
 } from "../../shared/Utilities";
+import { GlobalContext, GlobalDispatchContext } from "../../context/Global/GlobalContext";
+import { GlobalActions } from "../../context/Global/GlobalActions";
+import { HubContext } from "../../context/Hub/HubContext";
 
 // Style Imports
 import "./BotDetails.less";
@@ -50,6 +63,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 // Utility Imports
 import * as turf from "@turf/turf";
 import { CustomAlert } from "../../shared/CustomAlert";
+import { BotContext } from "../../context/Bot/BotContext";
 
 const rcMode = require("../../style/icons/controller.svg");
 
@@ -102,8 +116,9 @@ function issueCommand(
     });
 }
 
+// TODO look into simplifying the parameter of this
 function issueRunCommand(
-    bot: PortalBotStatus,
+    botID: number,
     botRun: Command,
     setRcMode: (botId: number, rcMode: boolean) => void,
     disableMessage: string,
@@ -116,23 +131,23 @@ function issueRunCommand(
         }
 
         CustomAlert.confirmAsync(
-            "Are you sure you'd like to play this run for Bot: " + bot.bot_id + "?",
+            "Are you sure you'd like to play this run for Bot: " + botID + "?",
             "Play Run",
         ).then((confirmed) => {
             if (confirmed) {
                 // Set the speed values
                 botRun.plan.speeds = GlobalSettings.missionPlanSpeeds;
 
-                info("Submitted for Bot: " + bot.bot_id);
+                info("Submitted for Bot: " + botID);
                 sendBotRunCommand(botRun);
-                setRcMode(bot.bot_id, false);
+                setRcMode(botID, false);
             }
         });
     });
 }
 
 function issueRCCommand(
-    bot: PortalBotStatus,
+    botID: number,
     botMission: Command,
     isRCModeActive: (botId: number) => boolean,
     setRcMode: (botId: number, rcMode: boolean) => void,
@@ -145,11 +160,13 @@ function issueRCCommand(
             return;
         }
 
-        const isRCActive = isRCModeActive(bot?.bot_id);
+        const isRCActive = isRCModeActive(botID);
 
         if (!isRCActive) {
             let isCriticallyLowBattery = "";
 
+            // TODO this needs rework
+            /*
             if (Array.isArray(bot?.error)) {
                 for (let e of bot?.error) {
                     if (e === "ERROR__VEHICLE__CRITICALLY_LOW_BATTERY") {
@@ -158,35 +175,37 @@ function issueRCCommand(
                     }
                 }
             }
+            */
 
             CustomAlert.confirm(
                 isCriticallyLowBattery +
                     "Are you sure you'd like to use remote control mode for Bot: " +
-                    bot?.bot_id +
+                    botID +
                     "?",
                 "Use Remote Control Mode",
                 () => {
                     console.debug("Running Remote Control:");
                     console.debug(botMission);
                     sendBotRCCommand(botMission);
-                    setRcMode(bot.bot_id, true);
+                    setRcMode(botID, true);
                 },
             );
         } else {
-            issueCommand(bot.bot_id, botCommands.stop, disableMessage);
-            setRcMode(bot.bot_id, false);
+            issueCommand(botID, botCommands.stop, disableMessage);
+            setRcMode(botID, false);
         }
     });
 }
 
 // TODO only used in this file, used by React Element
-async function runRCMode(bot: PortalBotStatus) {
-    const botId = bot.bot_id;
-    if (!botId) {
+async function runRCMode(botID: number) {
+    if (!botID) {
         warning("No bots selected");
         return null;
     }
 
+    // TODO Rework this
+    /*
     let datumLocation = bot?.location;
 
     if (!datumLocation) {
@@ -199,8 +218,11 @@ async function runRCMode(bot: PortalBotStatus) {
 
         datumLocation = { lat: 0, lon: 0 };
     }
+        */
 
-    return Missions.RCMode(botId, datumLocation);
+    // TODO temp hack
+    let datumLocation: GeographicCoordinate = { lat: 0, lon: 0 };
+    return Missions.RCMode(botID, datumLocation);
 }
 
 // Get the table row for the health of the vehicle
@@ -268,25 +290,28 @@ export interface BotDetailsProps {
     isRCModeActive: (botId: number) => boolean;
     setRcMode: (botId: number, rcMode: boolean) => void;
     toggleEditMode: (run: RunInterface) => void;
-    downloadIndividualBot: (bot: PortalBotStatus, disableMessage: string) => void;
+    downloadIndividualBot: (botID: Number, disableMessage: string) => void;
 }
 
-// TODO Used here and in CommandControl
 // This has a lot of business logic mixed with React, try
 // to separate the logic from display code
 export function BotDetailsComponent(props: BotDetailsProps) {
-    const bot = props.bot;
-    const hub = props.hub;
-    const mission = props.mission;
+    // TODO We will replace all uses of theses objects from Props with ones from context
+    const botFromProps = props.bot;
+    const hubFromProps = props.hub;
+    const missionFromProps = props.mission;
+
     const closeWindow = props.closeWindow;
     const takeControl = props.takeControl;
     const isExpanded = props.isExpanded;
     const deleteSingleMission = props.deleteSingleMission;
     const setDetailsExpanded = props.setDetailsExpanded;
 
-    if (!bot) {
-        return <div></div>;
-    }
+    const globalContext = useContext(GlobalContext);
+    const globalDispatch = useContext(GlobalDispatchContext);
+
+    const hubContext = useContext(HubContext);
+    const botContext = useContext(BotContext);
 
     const [accordionTheme, setAccordionTheme] = useState(
         createTheme({
@@ -300,7 +325,27 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         addDropdownListener("accordionContainer", "botDetailsAccordionContainer", 30);
     }, []);
 
-    const statusAge = Math.max(0.0, bot.portalStatusAge / 1e6);
+    // Pull Data from the Data Model Context
+    // TODO maybe use DEFAULT_HUB_ID = 1;
+    // This fails [TypeError: Cannot read properties of null (reading 'hubs')]
+    const hub = hubContext.hubs.get(1);
+    const hubGPS: GPS = hub.getHubSensors().getGPS();
+
+    // TODO need to get the right Bot ID May need to add it as a Prop
+    const bot = botContext.bots.get(1);
+    const botID = bot.getBotID();
+
+    const mission: Mission = bot.getMission();
+    const missionStatus: MissionStatus = bot.getMissionStatus();
+
+    const botSensors: BotSensors = bot.getBotSensors();
+    const botGPS: GPS = botSensors.getGPS();
+    const botIMU: IMU = botSensors.getIMU();
+    const botPressureSensor: PressureSensor = botSensors.getPressureSensor();
+    const botTemperatureSensor: TemperatureSensor = botSensors.getTemperatureSensor();
+    const botConductivitySenstor: ConductivitySensor = botSensors.getCoductivitySensor();
+
+    const statusAge = Math.max(0.0, bot.getStatusAge() / 1e6);
     let statusAgeClassName: string;
 
     if (statusAge > 30) {
@@ -309,18 +354,20 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         statusAgeClassName = "healthDegraded";
     }
 
+    // TODO will  need to add repeat_index to MissionStatus
     // Active Goal
     var repeatNumberString = "N/A";
-    if (bot.repeat_index != null) {
-        repeatNumberString = `${bot.repeat_index + 1}`;
+    if (botFromProps.repeat_index != null) {
+        repeatNumberString = `${botFromProps.repeat_index + 1}`;
 
-        if (bot.active_mission_plan?.repeats != null) {
-            repeatNumberString = repeatNumberString + ` of ${bot.active_mission_plan?.repeats}`;
+        if (botFromProps.active_mission_plan?.repeats != null) {
+            repeatNumberString =
+                repeatNumberString + ` of ${botFromProps.active_mission_plan?.repeats}`;
         }
     }
 
-    let activeGoal = bot.active_goal ?? "N/A";
-    let distToGoal = bot.distance_to_active_goal ?? "N/A";
+    let activeGoal = missionStatus.activeGoal ?? "N/A";
+    let distToGoal = missionStatus.distanceToActiveGoal ?? "N/A";
 
     if (activeGoal !== "N/A" && distToGoal === "N/A") {
         distToGoal = "Distance To Goal > 1000";
@@ -333,20 +380,20 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
     // Distance from hub
     let distToHub = "N/A";
-    if (bot?.location && hub?.location) {
-        const botloc = turf.point([bot.location.lon, bot.location.lat]);
-        const hubloc = turf.point([hub.location.lon, hub.location.lat]);
+    if (botGPS && hubGPS) {
+        const botloc = turf.point([botGPS.getLat(), botGPS.getLon()]);
+        const hubloc = turf.point([hubGPS.getLat(), hubGPS.getLon()]);
         const options = { units: "meters" as turf.Units };
         distToHub = turf.rhumbDistance(botloc, hubloc, options).toFixed(1);
     }
 
-    const missionState = bot.mission_state;
+    const missionState = missionStatus.missionState;
     takeControlFunction = takeControl;
 
     let linkQualityPercentage = 0;
 
-    if (bot?.wifi_link_quality_percentage != undefined) {
-        linkQualityPercentage = bot?.wifi_link_quality_percentage;
+    if (bot.getWifiLinkQuality() != undefined) {
+        linkQualityPercentage = bot.getWifiLinkQuality();
     }
 
     let dataOffloadButton = (
@@ -370,7 +417,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                         " cannot be sent because the bot is not connected to Wifi (Check Link Quality in Quick Look)";
                 }
 
-                props.downloadIndividualBot(bot, disableMessage);
+                //TODO Investigate what this does and refactor
+                props.downloadIndividualBot(botID, disableMessage);
             }}
         >
             <Icon path={mdiDownload} title="Data Offload" />
@@ -398,8 +446,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             botCommands.retryDataOffload.commandType +
                             " cannot be sent because the bot is not connected to Wifi (Check Link Quality in Quick Look)";
                     }
-
-                    props.downloadIndividualBot(bot, disableMessage);
+                    props.downloadIndividualBot(botID, disableMessage);
                 }}
             >
                 <Icon path={mdiDownload} title="Retry Data Offload" />
@@ -409,28 +456,32 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
     let botOffloadPercentage = "";
 
-    if (bot.bot_id === hub?.bot_offload?.bot_id) {
-        botOffloadPercentage = " " + hub.bot_offload?.data_offload_percentage + "%";
+    if (botID === hub.getBotOffload().bot_id) {
+        botOffloadPercentage = " " + hub.getBotOffload().data_offload_percentage + "%";
     }
 
     // Change message for clicking on map if the bot has a run, but it is not in edit mode
     let clickOnMap = <h3 className="name">Click on the map to create waypoints</h3>;
-    const botRun = getBotRun(bot.bot_id, mission.runs) ?? false;
+
+    // TODO ** replace this with data from Context **
+    // Runs are no longer a concept in JCC
+    const botRun = getBotRun(botID, missionFromProps.runs) ?? false;
 
     if (
-        !disableClearRunButton(bot, mission).isDisabled &&
+        // TODO Investigage and refactor as needed
+        !disableClearRunButton(botID, missionFromProps).isDisabled &&
         botRun &&
-        botRun.id !== mission.runIdInEditMode
+        botRun.id !== missionFromProps.runIdInEditMode
     ) {
         clickOnMap = <h3 className="name">Click edit toggle to create waypoints</h3>;
     }
 
     function getBotString() {
-        return `Bot ${bot.bot_id}`;
+        return `Bot ${botID}`;
     }
 
     function getRunString() {
-        const run = getBotRun(bot.bot_id, mission.runs);
+        const run = getBotRun(botID, missionFromProps.runs);
         return run?.name ?? "No Run";
     }
 
@@ -472,7 +523,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             }
                             onClick={() => {
                                 issueCommand(
-                                    bot.bot_id,
+                                    botID,
                                     botCommands.stop,
                                     disableButton(botCommands.stop, missionState).disableMessage,
                                     props.setRcMode,
@@ -484,8 +535,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                         <Button
                             className={
                                 disablePlayButton(
-                                    bot,
-                                    mission,
+                                    botID,
+                                    missionFromProps,
                                     botCommands.play,
                                     missionState,
                                     props.downloadQueue,
@@ -495,9 +546,11 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             }
                             onClick={async () => {
                                 if (
-                                    bot.health_state === "HEALTH__FAILED" &&
-                                    bot.mission_state !== MissionState.PRE_DEPLOYMENT__IDLE &&
-                                    bot.mission_state !== MissionState.PRE_DEPLOYMENT__FAILED
+                                    bot.getHealthState() === "HEALTH__FAILED" &&
+                                    missionStatus.missionState !==
+                                        MissionState.PRE_DEPLOYMENT__IDLE &&
+                                    missionStatus.missionState !==
+                                        MissionState.PRE_DEPLOYMENT__FAILED
                                 ) {
                                     (await CustomAlert.confirmAsync(
                                         "Running the command may have severe consequences because the bot is in a failed health state.\n",
@@ -505,12 +558,12 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         "Warning",
                                     ))
                                         ? issueRunCommand(
-                                              bot,
-                                              runMission(bot.bot_id, mission),
+                                              botID,
+                                              runMission(botID, missionFromProps),
                                               props.setRcMode,
                                               disablePlayButton(
-                                                  bot,
-                                                  mission,
+                                                  botID,
+                                                  missionFromProps,
                                                   botCommands.play,
                                                   missionState,
                                                   props.downloadQueue,
@@ -519,12 +572,12 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         : false;
                                 } else {
                                     issueRunCommand(
-                                        bot,
-                                        runMission(bot.bot_id, mission),
+                                        botID,
+                                        runMission(botID, missionFromProps),
                                         props.setRcMode,
                                         disablePlayButton(
-                                            bot,
-                                            mission,
+                                            botID,
+                                            missionFromProps,
                                             botCommands.play,
                                             missionState,
                                             props.downloadQueue,
@@ -537,14 +590,14 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                         </Button>
                         <Button
                             className={
-                                disableClearRunButton(bot, mission).isDisabled
+                                disableClearRunButton(botID, missionFromProps).isDisabled
                                     ? "inactive button-jcc"
                                     : "button-jcc"
                             }
                             onClick={() => {
                                 deleteSingleMission(
                                     props.run?.id,
-                                    disableClearRunButton(bot, mission).disableMessage,
+                                    disableClearRunButton(botID, missionFromProps).disableMessage,
                                 );
                             }}
                         >
@@ -556,7 +609,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             onClick={() => props.toggleEditMode(props.run)}
                             label="Edit"
                             title="ToggleEditMode"
-                            disabled={() => (getBotRun(bot.bot_id, mission.runs) ? false : true)}
+                            disabled={() =>
+                                getBotRun(botID, missionFromProps.runs) ? false : true
+                            }
                         />
                     </div>
                 </div>
@@ -586,13 +641,15 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         <tr>
                                             <td>Mission State</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {bot.mission_state?.replaceAll("__", "\n") +
-                                                    botOffloadPercentage}
+                                                {missionStatus.missionState?.replaceAll(
+                                                    "__",
+                                                    "\n",
+                                                ) + botOffloadPercentage}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Battery Percentage</td>
-                                            <td>{bot.battery_percent?.toFixed(prec)} %</td>
+                                            <td>{bot.getBatteryPercent()?.toFixed(prec)} %</td>
                                         </tr>
                                         <tr>
                                             <td>Repeat Number</td>
@@ -650,7 +707,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                     }
                                     onClick={() => {
                                         issueCommand(
-                                            bot.bot_id,
+                                            botID,
                                             botCommands.active,
                                             disableButton(botCommands.active, missionState)
                                                 .disableMessage,
@@ -665,19 +722,19 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                                 <Button
                                     className={`
-                                        ${disableButton(botCommands.rcMode, missionState, bot, props.downloadQueue).isDisabled ? "inactive button-jcc" : "button-jcc"} 
-                                        ${props.isRCModeActive(bot?.bot_id) ? "rc-active" : "rc-inactive"}
+                                        ${disableButton(botCommands.rcMode, missionState, botID, props.downloadQueue).isDisabled ? "inactive button-jcc" : "button-jcc"} 
+                                        ${props.isRCModeActive(botID) ? "rc-active" : "rc-inactive"}
                                         `}
                                     onClick={async () => {
                                         issueRCCommand(
-                                            bot,
-                                            await runRCMode(bot),
+                                            botID,
+                                            await runRCMode(botID),
                                             props.isRCModeActive,
                                             props.setRcMode,
                                             disableButton(
                                                 botCommands.rcMode,
                                                 missionState,
-                                                bot,
+                                                botID,
                                                 props.downloadQueue,
                                             ).disableMessage,
                                         );
@@ -694,7 +751,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                     }
                                     onClick={() => {
                                         issueCommand(
-                                            bot.bot_id,
+                                            botID,
                                             botCommands.nextTask,
                                             disableButton(botCommands.nextTask, missionState)
                                                 .disableMessage,
@@ -727,7 +784,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                 disableButton(
                                                     botCommands.shutdown,
                                                     missionState,
-                                                    bot,
+                                                    botID,
                                                     props.downloadQueue,
                                                 ).isDisabled
                                                     ? "inactive button-jcc"
@@ -735,32 +792,32 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                             }
                                             onClick={async () => {
                                                 if (
-                                                    bot.mission_state ==
+                                                    missionStatus.missionState ==
                                                     "IN_MISSION__UNDERWAY__RECOVERY__STOPPED"
                                                 ) {
                                                     (await CustomAlert.confirmAsync(
-                                                        `Are you sure you'd like to shutdown bot: ${bot.bot_id} without doing a data offload?`,
+                                                        `Are you sure you'd like to shutdown bot: ${botID} without doing a data offload?`,
                                                         "Shutdown Bot",
                                                     ))
                                                         ? issueCommand(
-                                                              bot.bot_id,
+                                                              botID,
                                                               botCommands.shutdown,
                                                               disableButton(
                                                                   botCommands.shutdown,
                                                                   missionState,
-                                                                  bot,
+                                                                  botID,
                                                                   props.downloadQueue,
                                                               ).disableMessage,
                                                           )
                                                         : false;
                                                 } else {
                                                     issueCommand(
-                                                        bot.bot_id,
+                                                        botID,
                                                         botCommands.shutdown,
                                                         disableButton(
                                                             botCommands.shutdown,
                                                             missionState,
-                                                            bot,
+                                                            botID,
                                                             props.downloadQueue,
                                                         ).disableMessage,
                                                     );
@@ -774,7 +831,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                 disableButton(
                                                     botCommands.reboot,
                                                     missionState,
-                                                    bot,
+                                                    botID,
                                                     props.downloadQueue,
                                                 ).isDisabled
                                                     ? "inactive button-jcc"
@@ -782,32 +839,32 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                             }
                                             onClick={async () => {
                                                 if (
-                                                    bot.mission_state ==
+                                                    missionStatus.missionState ==
                                                     "IN_MISSION__UNDERWAY__RECOVERY__STOPPED"
                                                 ) {
                                                     (await CustomAlert.confirmAsync(
-                                                        `Are you sure you'd like to reboot bot: ${bot.bot_id} without doing a data offload?`,
+                                                        `Are you sure you'd like to reboot bot: ${botID} without doing a data offload?`,
                                                         "Reboot Bot",
                                                     ))
                                                         ? issueCommand(
-                                                              bot.bot_id,
+                                                              botID,
                                                               botCommands.reboot,
                                                               disableButton(
                                                                   botCommands.reboot,
                                                                   missionState,
-                                                                  bot,
+                                                                  botID,
                                                                   props.downloadQueue,
                                                               ).disableMessage,
                                                           )
                                                         : false;
                                                 } else {
                                                     issueCommand(
-                                                        bot.bot_id,
+                                                        botID,
                                                         botCommands.reboot,
                                                         disableButton(
                                                             botCommands.reboot,
                                                             missionState,
-                                                            bot,
+                                                            botID,
                                                             props.downloadQueue,
                                                         ).disableMessage,
                                                     );
@@ -821,7 +878,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                 disableButton(
                                                     botCommands.restartServices,
                                                     missionState,
-                                                    bot,
+                                                    botID,
                                                     props.downloadQueue,
                                                 ).isDisabled
                                                     ? "inactive button-jcc"
@@ -829,32 +886,32 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                             }
                                             onClick={async () => {
                                                 if (
-                                                    bot.mission_state ==
+                                                    missionStatus.missionState ==
                                                     "IN_MISSION__UNDERWAY__RECOVERY__STOPPED"
                                                 ) {
                                                     (await CustomAlert.confirmAsync(
-                                                        `Are you sure you'd like to restart bot: ${bot.bot_id} without doing a data offload?`,
+                                                        `Are you sure you'd like to restart bot: ${botID} without doing a data offload?`,
                                                         "Restart Bot",
                                                     ))
                                                         ? issueCommand(
-                                                              bot.bot_id,
+                                                              botID,
                                                               botCommands.restartServices,
                                                               disableButton(
                                                                   botCommands.restartServices,
                                                                   missionState,
-                                                                  bot,
+                                                                  botID,
                                                                   props.downloadQueue,
                                                               ).disableMessage,
                                                           )
                                                         : false;
                                                 } else {
                                                     issueCommand(
-                                                        bot.bot_id,
+                                                        botID,
                                                         botCommands.restartServices,
                                                         disableButton(
                                                             botCommands.restartServices,
                                                             missionState,
-                                                            bot,
+                                                            botID,
                                                             props.downloadQueue,
                                                         ).disableMessage,
                                                     );
@@ -886,7 +943,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             </AccordionSummary>
                             <AccordionDetails>
                                 <table>
-                                    <tbody>{healthRow(bot, true)}</tbody>
+                                    {/* TODO Refactor fucntion as needed*/}
+                                    <tbody>{healthRow(botFromProps, true)}</tbody>
                                 </table>
                             </AccordionDetails>
                         </Accordion>
@@ -929,35 +987,35 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                 <tbody>
                                                     <tr>
                                                         <td>Latitude</td>
-                                                        <td>{formatLatitude(bot.location?.lat)}</td>
+                                                        <td>{formatLatitude(botGPS.getLat())}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Longitude</td>
-                                                        <td>
-                                                            {formatLongitude(bot.location?.lon)}
-                                                        </td>
+                                                        <td>{formatLongitude(botGPS.getLon())}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>HDOP</td>
-                                                        <td>{bot.hdop?.toFixed(prec)}</td>
+                                                        <td>{botGPS.getHDOP().toFixed(prec)}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>PDOP</td>
-                                                        <td>{bot.pdop?.toFixed(prec)}</td>
+                                                        <td>{botGPS.getPDOP().toFixed(prec)}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Ground Speed</td>
                                                         <td>
-                                                            {bot.speed?.over_ground?.toFixed(prec)}{" "}
+                                                            {botGPS
+                                                                .getSpeedOverGround()
+                                                                .toFixed(prec)}{" "}
                                                             m/s
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td>Course Over Ground</td>
                                                         <td>
-                                                            {bot.attitude?.course_over_ground?.toFixed(
-                                                                prec,
-                                                            )}
+                                                            {botGPS
+                                                                .getCourseOverGround()
+                                                                .toFixed(prec)}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -988,21 +1046,19 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         <td>Heading</td>
                                                         <td>
                                                             {formatAttitudeAngle(
-                                                                bot.attitude?.heading,
+                                                                botIMU.getHeading(),
                                                             )}
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td>Pitch</td>
                                                         <td>
-                                                            {formatAttitudeAngle(
-                                                                bot.attitude?.pitch,
-                                                            )}
+                                                            {formatAttitudeAngle(botIMU.getPitch())}
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td>IMU Cal</td>
-                                                        <td>{bot?.calibration_status}</td>
+                                                        <td>{botIMU.getCalibrationStatus()}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -1030,11 +1086,21 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                 <tbody>
                                                     <tr>
                                                         <td>Temperature</td>
-                                                        <td>{bot.temperature?.toFixed(prec)} °C</td>
+                                                        <td>
+                                                            {botTemperatureSensor
+                                                                .getTemperature()
+                                                                .toFixed(prec)}{" "}
+                                                            °C
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td>Depth</td>
-                                                        <td>{bot.depth?.toFixed(prec)} m</td>
+                                                        <td>
+                                                            {botPressureSensor
+                                                                .getDepth()
+                                                                .toFixed(prec)}{" "}
+                                                            m
+                                                        </td>
                                                     </tr>
                                                     {/* <tr>
                                                         <td>Salinity</td>
