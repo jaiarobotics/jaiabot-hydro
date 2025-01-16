@@ -53,8 +53,7 @@ message FleetTool
         validate = 2 [(goby.ev).cfg = {
             short_help_msg: "Validate a new fleet config",
         }];
-        flash = 3 [(goby.ev).cfg = {
-            short_help_msg: "Writes first boot and related files to boot partition",
+        generate = 3 [(goby.ev).cfg = {
             external_command: "jaia-generate-first-boot.py",
             external_help_param: "--help"
         }];

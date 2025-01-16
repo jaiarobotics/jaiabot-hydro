@@ -87,6 +87,7 @@ def main():
     parser.add_argument('--bootdir', type=str, help="Path to boot directory (optional, if omitted the path to a mounted LABEL=boot partition will be used if found)")
     parser.add_argument('--binary', type=str, help="Name of binary")
     parser.add_argument('--debug',  help="Output debugging information", action="store_true")
+    parser.add_argument('--mode', default="runtime", choices=["runtime", "simulation"], help="Whether this is a real (runtime) or virtual (simulation) system")
     parser.add_argument('type', choices=["bot", "hub"], help="Type of system to generate for")
     parser.add_argument('id', type=int, help="ID of bot or hub") 
     args = parser.parse_args()
@@ -95,6 +96,7 @@ def main():
     fleet_cfg_json['this'] = dict();
     fleet_cfg_json['this']['type'] = args.type
     fleet_cfg_json['this']['id'] = args.id
+    fleet_cfg_json['this']['mode'] = args.mode
     
     # make sure the bot/hub ID is actually defined in this fleet
     if args.id not in fleet_cfg_json[args.type + 's']:
