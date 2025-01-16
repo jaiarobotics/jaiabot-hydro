@@ -42,17 +42,25 @@ message FleetTool
     {
         help = 0 [(goby.ev).cfg = {
             short_help_msg: "Print usage information",
-            full_help_msg: "Usage: \"jaia admin ssh help [action]\""
+            full_help_msg: "Usage: \"jaia admin fleet help [action]\""
         }];
         create = 1 [(goby.ev).cfg = {
             short_help_msg: "Create a new fleet config",
             external_command: "jaia-create-fleet-config.sh",
-            full_help_msg: "Interactive tool to create a new fleet configuration"
+            full_help_msg: "Interactive tool to create a new fleet configuration.\n"
+            "Usage: \"jaia admin fleet create [fleet.cfg]\""
         }];
         validate = 2 [(goby.ev).cfg = {
             short_help_msg: "Validate a new fleet config",
         }];
+        flash = 3 [(goby.ev).cfg = {
+            short_help_msg: "Writes first boot and related files to boot partition",
+            external_command: "jaia-generate-first-boot.py",
+            external_help_param: "--help"
+        }];
+
     }
+    
     optional Action action = 2 [
         default = help,
         (goby.field) = {

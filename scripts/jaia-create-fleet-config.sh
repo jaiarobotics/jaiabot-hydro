@@ -213,7 +213,7 @@ echo "service_vpn_enabled: $vpn_enabled" >> $out
 jaiabot_root=$(realpath "${script_dir}/../..")
 
 echo "######################################################"
-echo "## Choose jaiabot-embedded settings                 ##"
+echo "## Choose COMMON jaiabot-embedded settings          ##"
 echo "## (may take a bit to prepare)                      ##"
 echo "######################################################"
 
@@ -285,7 +285,7 @@ cp /tmp/jaia-fleet-selections.txt /tmp/jaia-common-fleet-selections.txt
 
 
 echo "######################################################"
-echo "## Set any overrides                                ##"
+echo "## Set any OVERRIDES (different than COMMON)        ##"
 echo "######################################################"
 
 while : ; do

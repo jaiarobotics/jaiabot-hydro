@@ -2,12 +2,31 @@
 
 import sys
 import os
+
+# A bit hacky, but we need to do this until we properly install pyjaiaprotobu
+def set_pythonpath():
+    script_path = os.path.abspath(__file__)
+    script_dir = os.path.dirname(script_path)
+    python_path = os.path.join(script_dir, "../share/jaiabot/python/pyjaiaprotobuf")
+
+    # Resolve to an absolute path and add to sys.path if valid
+    if python_path:
+        python_path = os.path.abspath(python_path)
+        if os.path.exists(python_path):
+            sys.path.insert(0, python_path)
+        else:
+            print(f"Warning: {python_path} does not exist")
+            sys.exit(1)
+
+set_pythonpath()
+
 import jinja2
 import json
 from google.protobuf import text_format, json_format
 from jaiabot.messages.fleet_config_pb2 import FleetConfig
 import argparse
 import subprocess
+
 
 def read_fleet_from_textproto(file_path):
     fleet_cfg = FleetConfig()
@@ -65,24 +84,28 @@ def find_bootdir():
 def main():
     parser = argparse.ArgumentParser(description="Jaiabot First Boot cloud-init user-data generator.")
     parser.add_argument('fleetcfg',  help="Path to fleet configuration file (protobuf TextFormat version of FleetConfig)")
-    parser.add_argument('--bootdir', type=str, help="Path to boot directory (Will read template and write outputs)")
+    parser.add_argument('--bootdir', type=str, help="Path to boot directory (optional, if omitted the path to a mounted LABEL=boot partition will be used if found)")
     parser.add_argument('--binary', type=str, help="Name of binary")
     parser.add_argument('--debug',  help="Output debugging information", action="store_true")
     parser.add_argument('type', choices=["bot", "hub"], help="Type of system to generate for")
     parser.add_argument('id', type=int, help="ID of bot or hub") 
     args = parser.parse_args()
 
-    bootdir = args.bootdir
-    if bootdir is None:
-        bootdir = find_bootdir()
-        print(f"Using {bootdir} for --bootdir based on mount point of LABEL=boot")
-
-        
     fleet_cfg_json = read_fleet_from_textproto(args.fleetcfg)
     fleet_cfg_json['this'] = dict();
     fleet_cfg_json['this']['type'] = args.type
     fleet_cfg_json['this']['id'] = args.id
-
+    
+    # make sure the bot/hub ID is actually defined in this fleet
+    if args.id not in fleet_cfg_json[args.type + 's']:
+        print(f"{args.type} {args.id} not included in {args.fleetcfg}")
+        sys.exit(1)
+        
+    bootdir = args.bootdir
+    if bootdir is None:
+        bootdir = find_bootdir()
+        print(f"Using {bootdir} for --bootdir based on mount point of LABEL=boot")
+    
     # set overrides
     if 'debconfOverride' in fleet_cfg_json:
         for override in fleet_cfg_json['debconfOverride']:
@@ -92,8 +115,8 @@ def main():
     # generate first-boot.preseed.yml
     template_file=bootdir + '/jaiabot/init/first-boot.preseed.yml.j2'
     rendered_output = render_template(template_file, fleet_cfg_json)
-    output_file=bootdir + '/jaiabot/init/first-boot.preseed.yml'    
-    with open(output_file, "w") as f:
+    preseed_yml=bootdir + '/jaiabot/init/first-boot.preseed.yml'    
+    with open(preseed_yml, "w") as f:
         f.write(rendered_output)
 
     # generate vpn key pair
@@ -126,6 +149,8 @@ def main():
 
     if args.debug:
         print(f"Rendered FleetConfig as JSON: {json.dumps(fleet_cfg_json, indent=2)}")
+
+    print(f'Wrote cloud-init file: {preseed_yml}')
         
 if __name__ == "__main__":
     main()
