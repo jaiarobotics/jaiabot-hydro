@@ -11,7 +11,7 @@ import JaiaAbout from "../JaiaAbout/JaiaAbout";
 import { layers } from "../../openlayers/map/layers/layers";
 import { jaiaAPI, BotPaths } from "../../utils/jaia-api";
 import { Missions } from "../../missions/missions";
-import { TaskData, taskData } from "../../data/task_packets/task-packets";
+import { taskData } from "../../data/task_packets/task-packets";
 import { HubOrBot } from "../../types/hub-or-bot";
 import { createMap } from "../../openlayers/map/map";
 import { BotLayers } from "../../openlayers/map/layers/bot-layers";
@@ -36,11 +36,7 @@ import { MissionLibraryLocalStorage } from "../../utils/mission-library";
 import { playDisconnectReconnectSounds } from "../../style/audio/disconnect-sounds";
 import { error, success, warning, info } from "../../notifications/notifications";
 import { CustomAlert, CustomAlertProps } from "../../shared/CustomAlert";
-import {
-    MissionSettingsPanel,
-    MissionSettings,
-    MissionParams,
-} from "../MissionSettingsPanel/MissionSettingsPanel";
+import { MissionSettingsPanel, MissionParams } from "../MissionSettingsPanel/MissionSettingsPanel";
 import { PodStatus, PortalBotStatus, PortalHubStatus, Metadata } from "../../shared/PortalStatus";
 import { divePacketIconStyle, driftPacketIconStyle, getRallyStyle } from "../../shared/Styles";
 import { createBotCourseOverGroundFeature, createBotHeadingFeature } from "../../shared/BotFeature";
@@ -76,7 +72,6 @@ import {
 import {
     getGeographicCoordinate,
     deepcopy,
-    equalValues,
     getMapCoordinate,
     getHTMLDateString,
     getHTMLTimeString,
