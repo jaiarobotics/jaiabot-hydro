@@ -5,9 +5,10 @@
 #include <sstream>
 #include <string>
 
+#include "jaiabot/messages/fleet_config.pb.h"
+
 #include "../../common.h"
 #include "config.pb.h"
-
 #include "validate.h"
 
 #include <boost/filesystem.hpp>
@@ -26,7 +27,7 @@ jaiabot::apps::admin::fleet::ValidateTool::ValidateTool()
 
 int jaiabot::apps::admin::fleet::ValidateTool::validate()
 {
-    jaiabot::config::admin::Fleet fleet_cfg; // Replace with your actual message type
+    jaiabot::protobuf::FleetConfig fleet_cfg;
 
     std::ifstream file(app_cfg().fleet_cfg());
     if (!file.is_open())

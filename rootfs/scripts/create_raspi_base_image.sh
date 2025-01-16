@@ -343,7 +343,7 @@ cp "${ROOTFS_TARBALL}" "${OUTPUT_ROOTFS_TARBALL}"
 
 # Copy the cloud init info to the boot partition where it is more easily modified on a Windows machine
 sudo mkdir -p "$BOOT_PARTITION"/jaiabot/init
-sudo cp "$ROOTFS_PARTITION"/etc/jaiabot/init/first-boot.preseed.yml.ex "$BOOT_PARTITION"/jaiabot/init
+sudo cp "$ROOTFS_PARTITION"/etc/jaiabot/init/first-boot.preseed.yml.j2 "$BOOT_PARTITION"/jaiabot/init
 
 # Write metadata
 echo "export JAIABOT_ROOTFS_GEN_TAG='$ROOTFS_BUILD_TAG'" > ${OUTPUT_METADATA}
