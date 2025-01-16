@@ -123,6 +123,8 @@ run_wt_checklist "Fleet Configuration" "Which hubs are in the fleet?" "${HUBS[@]
 [ $? -eq 0 ] || exit 1
 HUB_IDS="$WT_CHOICE"
 
+
+
 echo "######################################################"
 echo "## Choose Bots                                      ##"
 echo "######################################################"
@@ -171,7 +173,25 @@ PUBKEY_CONTENTS="\"$(cat ${PUBKEY})\""
 echo "  vpn_tmp { private_key: ${PRIVKEY_CONTENTS} public_key: ${PUBKEY_CONTENTS} }" >> $out
 rm $PRIVKEY $PUBKEY
 
-echo "}" >> $out
+
+echo "######################################################"
+echo "## Set permanent SSH keys                           ##"
+echo "## (for /home/jaia/.ssh/authorized_keys)            ##"
+echo "######################################################"
+
+while : ; do
+run_wt_inputbox "Fleet Configuration" "Enter permanent SSH public key (for /home/jaia/.ssh/authorized_keys). Leave blank to continue"
+PERM_PUBKEY=$WT_TEXT
+
+if [ ! "${PERM_PUBKEY}" = "" ]; then
+    echo "  permanent_authorized_keys: \"${PERM_PUBKEY}\"" >> $out
+else
+    break
+fi
+
+done
+
+echo "}" >> $out # ssh {
 
 
 echo "######################################################"
@@ -194,18 +214,29 @@ jaiabot_root=$(realpath "${script_dir}/../..")
 
 echo "######################################################"
 echo "## Choose jaiabot-embedded settings                 ##"
-echo "## (make take a bit to prepare)                     ##"
+echo "## (may take a bit to prepare)                      ##"
 echo "######################################################"
 
-docker run -v /tmp:/tmp -it ubuntu:jammy /bin/bash -c '
-#!/bin/bash
+debconf_image_name=jaia_fleet_debconf
+if [ "$(docker image ls ${debconf_image_name} --format='true')" != "true" ];
+then
+    echo "Building the docker ${debconf_image_name} image"
+    docker build --no-cache -t ${debconf_image_name} -f - . <<EOF
+FROM ubuntu:jammy
+RUN apt-get update && apt-get install -y debconf-utils whiptail git
+RUN cd / && git clone https://github.com/jaiarobotics/jaiabot.git
+EOF
+fi
 
-apt-get update && apt-get install -y debconf-utils whiptail git
+
+function run_debconf() {
+    docker run -v /tmp:/tmp -it ${debconf_image_name} /bin/bash -c '
+#!/bin/bash    
+
 export DEBIAN_PRIORITY=low
 
-cd /
-git clone https://github.com/jaiarobotics/jaiabot.git
-
+cd /jaiabot
+git pull
 
 cat <<EOM | debconf-set-selections
 unknown jaiabot-embedded/type select hub
@@ -224,8 +255,12 @@ EOM
 /jaiabot/debian/jaiabot-embedded.config
 
 debconf-get-selections | grep jaiabot-embedded | sed "s/^unknown/jaiabot-embedded/" > /tmp/jaia-fleet-selections.txt'
+}
 
-awk '
+function parse_debconf() {
+    local input=$1
+    local spaces=$2
+    awk '
 BEGIN {
     # Print opening of the debconf entries
     printf ""
@@ -240,13 +275,66 @@ BEGIN {
     printf "  type: %s\n", toupper($3);
     printf "  value: \"%s\"\n", $4;
     printf "}\n";
-}' /tmp/jaia-fleet-selections.txt >> $out
+}' $input | sed "s/^/${spaces}/" >> $out
+}
 
-sudo rm -f /tmp/jaia-fleet-selections.txt
+run_debconf 
+parse_debconf /tmp/jaia-fleet-selections.txt ""
 
+cp /tmp/jaia-fleet-selections.txt /tmp/jaia-common-fleet-selections.txt
+
+
+echo "######################################################"
+echo "## Set any overrides                                ##"
+echo "######################################################"
+
+while : ; do
+    run_wt_yesno "Fleet Configuration" "Do you have any additional bot/hub specific debconf overrides to specify?" || break
+
+
+    run_wt_checklist "Fleet Configuration" "Which hubs are in this override set?" $(echo ${HUB_IDS[@]} | sed 's/"//g')
+    [ $? -eq 0 ] || exit 1
+    OVERRIDE_HUB_IDS="$WT_CHOICE"
+
+    run_wt_checklist "Fleet Configuration" "Which bots are in this override set?" $(echo ${BOT_IDS[@]} | sed 's/"//g')
+    [ $? -eq 0 ] || exit 1
+    OVERRIDE_BOT_IDS="$WT_CHOICE"
+    
+    run_debconf
+
+    # keep only lines that changed to reduce clutter in output
+    comm -13 <(sort /tmp/jaia-common-fleet-selections.txt) <(sort /tmp/jaia-fleet-selections.txt) > /tmp/jaia-diff-fleet-selections.txt
+
+    for HUB_ID_QUOTED in ${OVERRIDE_HUB_IDS}
+    do
+        HUB_ID=$(eval echo ${HUB_ID_QUOTED})
+        echo "debconf_override {" >> $out
+        echo "  type: HUB" >> $out
+        echo "  id: ${HUB_ID}" >> $out
+        parse_debconf /tmp/jaia-diff-fleet-selections.txt "  "
+        echo "}" >> $out
+    done
+
+    for BOT_ID_QUOTED in ${OVERRIDE_BOT_IDS}
+    do
+        BOT_ID=$(eval echo ${BOT_ID_QUOTED})
+        echo "debconf_override {" >> $out
+        echo "  type: BOT" >> $out
+        echo "  id: ${BOT_ID}" >> $out
+        parse_debconf /tmp/jaia-diff-fleet-selections.txt "  "
+        echo "}" >> $out
+    done
+
+done
 
 echo "######################################################"
 echo "## Validate fleet configuration                     ##"
 echo "######################################################"
 
 jaia admin fleet validate -v $out
+
+echo "######################################################"
+echo "## Success                                          ##"
+echo "######################################################"
+
+echo "Output written to $out"
