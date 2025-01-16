@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import { BotDetailsComponent, BotDetailsProps } from "../BotDetails";
 
-import { mockProps } from "./BotDetailsMockProps.";
+import { mockProps } from "./BotDetailsMockProps";
 
 describe("BotDetailsComponent", () => {
     test("BotDetails Render", async () => {
