@@ -5,9 +5,8 @@ import App from "./App";
 import { bots } from "../data/bots/bots";
 import { hubs } from "../data/hubs/hubs";
 import { PortalBotStatus, PortalHubStatus } from "../shared/PortalStatus";
-
-import { updateBotLayer } from "../openlayers/layers/bot-layer";
-import { updateHubLayer } from "../openlayers/layers/hub-layer";
+import { botLayer } from "../openlayers/layers/bot-layer";
+import { hubLayer } from "../openlayers/layers/hub-layer";
 
 // Sample status messages twice as fast as produced by Bots and Hubs to reduce potential data age issues
 const statusIntervalTimeout = 500; // ms
@@ -52,8 +51,8 @@ function updateHubs(hubStatuses: { [hubId: string]: PortalHubStatus }) {
 }
 
 function updateOpenLayers() {
-    updateBotLayer();
-    updateHubLayer();
+    botLayer.updateFeatures();
+    hubLayer.updateFeatures();
 }
 
 let element = document.getElementById("root");

@@ -8,6 +8,7 @@ import { Coordinate } from "ol/coordinate";
 // Jaia
 import { hubs } from "../../data/hubs/hubs";
 import { view } from "../views/view";
+import { MapFeatureTypes } from "../../types/openlayers-types";
 
 // Style
 const hubIcon = require("../../style/icons/hub.svg");
@@ -26,11 +27,11 @@ export function generateHubFeature(hubID: number) {
     }
 
     const coordinate: Coordinate = [hub.getLocation().lon, hub.getLocation().lat];
-
     const feature = new Feature({
-        name: `HUB-${hubID}`,
         geometry: new Point(fromLonLat(coordinate, view.getProjection())),
     });
+    feature.set("type", MapFeatureTypes.HUB);
+    feature.set("id", hubID);
     feature.setStyle(generateHubStyle());
     return feature;
 }

@@ -1,6 +1,6 @@
 import { hubs } from "../../../data/hubs/hubs";
 import { PortalHubStatus } from "../../../shared/PortalStatus";
-import { hubLayer, updateHubLayer } from "../hub-layer";
+import { hubLayer } from "../hub-layer";
 
 const hubStatusMock1: PortalHubStatus = {
     hub_id: 1,
@@ -14,23 +14,29 @@ const hubStatusMock2: PortalHubStatus = {
     portalStatusAge: 0,
 };
 
-afterEach(() => {
-    hubs.getHubs().clear();
-    hubLayer.getSource().clear();
-});
+describe("Add Hub to hub-layer", () => {
+    // Running various additions in single test because jest runs multiple tests in parallel
+    test("Add Hub to hub-layer", () => {
+        // Add one Hub to hub-layer
+        hubs.addHub(hubStatusMock1);
+        expect(hubLayer.getVectorLayer().getSource().getFeatures().length).toBe(0);
+        hubLayer.updateFeatures();
+        expect(hubLayer.getVectorLayer().getSource().getFeatures().length).toBe(1);
+        expect(hubLayer.getVectorLayer().getSource().getFeatures()[0].get("id")).toBe(1);
 
-test("Add Hub to hub-layer", () => {
-    hubs.addHub(hubStatusMock1);
-    expect(hubLayer.getSource().getFeatures().length).toBe(0);
-    updateHubLayer();
-    expect(hubLayer.getSource().getFeatures().length).toBe(1);
-    expect(hubLayer.getSource().getFeatures()[0].get("name")).toBe("HUB-1");
-});
+        // Reset
+        hubs.getHubs().clear();
+        hubLayer.getVectorLayer().getSource().clear();
 
-test("Add Hub to hub-layer without location", () => {
-    hubs.addHub(hubStatusMock2);
-    expect(hubLayer.getSource().getFeatures().length).toBe(0);
-    updateHubLayer();
-    expect(hubLayer.getSource().getFeatures().length).toBe(1);
-    expect(hubLayer.getSource().getFeatures()[0].get("name")).toBeUndefined();
+        // Add Hub to hub-layer without location
+        hubs.addHub(hubStatusMock2);
+        expect(hubLayer.getVectorLayer().getSource().getFeatures().length).toBe(0);
+        hubLayer.updateFeatures();
+        expect(hubLayer.getVectorLayer().getSource().getFeatures().length).toBe(1);
+        expect(hubLayer.getVectorLayer().getSource().getFeatures()[0].get("id")).toBeUndefined();
+
+        // Reset
+        hubs.getHubs().clear();
+        hubLayer.getVectorLayer().getSource().clear();
+    });
 });

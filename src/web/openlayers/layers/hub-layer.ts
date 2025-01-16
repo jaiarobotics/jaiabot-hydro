@@ -1,21 +1,21 @@
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-
+import JaiaVectorLayer from "./jaia-vector-layer";
 import { hubs } from "../../data/hubs/hubs";
+import { LayerTitles } from "../../types/openlayers-types";
 import { generateHubFeature } from "../features/hub-feature";
 
-export const hubLayer = new VectorLayer({
-    properties: {
-        title: "hub-layer",
-    },
-    source: new VectorSource({ wrapX: false }),
-});
+class HubLayer extends JaiaVectorLayer {
+    constructor() {
+        super(LayerTitles.HUB_LAYER);
+    }
 
-export function updateHubLayer() {
-    let source = hubLayer.getSource();
-    source.clear();
-    for (let [hubID, hub] of hubs.getHubs()) {
-        const hubFeature = generateHubFeature(hubID);
-        source.addFeature(hubFeature);
+    override updateFeatures() {
+        let source = this.getVectorLayer().getSource();
+        source.clear();
+        for (let [hubID, hub] of hubs.getHubs()) {
+            const hubFeature = generateHubFeature(hubID);
+            source.addFeature(hubFeature);
+        }
     }
 }
+
+export const hubLayer = new HubLayer();

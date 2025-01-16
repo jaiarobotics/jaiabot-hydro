@@ -1,6 +1,6 @@
 import { bots } from "../../../data/bots/bots";
 import { PortalBotStatus } from "../../../shared/PortalStatus";
-import { botLayer, updateBotLayer } from "../bot-layer";
+import { botLayer } from "../bot-layer";
 
 const botStatusMock1: PortalBotStatus = {
     bot_id: 1,
@@ -19,31 +19,45 @@ const botStatusMock3: PortalBotStatus = {
 
 afterEach(() => {
     bots.getBots().clear();
-    botLayer.getSource().clear();
+    botLayer.getVectorLayer().getSource().clear();
 });
 
-test("Add one Bot to bot-layer", () => {
-    bots.addBot(botStatusMock1);
-    expect(botLayer.getSource().getFeatures().length).toBe(0);
-    updateBotLayer();
-    expect(botLayer.getSource().getFeatures().length).toBe(1);
-    expect(botLayer.getSource().getFeatures()[0].get("name")).toBe("BOT-1");
-});
+// Running various additions in single test because jest runs multiple tests in parallel
+describe("Add Bots to bot-layer", () => {
+    test("Add Bots to bot-layer", () => {
+        // Add one Bot to bot-layer
+        bots.addBot(botStatusMock1);
+        expect(botLayer.getVectorLayer().getSource().getFeatures().length).toBe(0);
+        botLayer.updateFeatures();
+        expect(botLayer.getVectorLayer().getSource().getFeatures().length).toBe(1);
+        expect(botLayer.getVectorLayer().getSource().getFeatures()[0].get("id")).toBe(1);
 
-test("Add two Bots to bot-layer", () => {
-    bots.addBot(botStatusMock1);
-    bots.addBot(botStatusMock2);
-    expect(botLayer.getSource().getFeatures().length).toBe(0);
-    updateBotLayer();
-    expect(botLayer.getSource().getFeatures().length).toBe(2);
-    expect(botLayer.getSource().getFeatures()[0].get("name")).toBe("BOT-1");
-    expect(botLayer.getSource().getFeatures()[1].get("name")).toBe("BOT-2");
-});
+        // Reset
+        bots.getBots().clear();
+        botLayer.getVectorLayer().getSource().clear();
 
-test("Add Bot to bot-layer without location", () => {
-    bots.addBot(botStatusMock3);
-    expect(botLayer.getSource().getFeatures().length).toBe(0);
-    updateBotLayer();
-    expect(botLayer.getSource().getFeatures().length).toBe(1);
-    expect(botLayer.getSource().getFeatures()[0].get("name")).toBeUndefined();
+        // Add two Bots to bot-layer
+        bots.addBot(botStatusMock1);
+        bots.addBot(botStatusMock2);
+        expect(botLayer.getVectorLayer().getSource().getFeatures().length).toBe(0);
+        botLayer.updateFeatures();
+        expect(botLayer.getVectorLayer().getSource().getFeatures().length).toBe(2);
+        expect(botLayer.getVectorLayer().getSource().getFeatures()[0].get("id")).toBe(1);
+        expect(botLayer.getVectorLayer().getSource().getFeatures()[1].get("id")).toBe(2);
+
+        // Reset
+        bots.getBots().clear();
+        botLayer.getVectorLayer().getSource().clear();
+
+        // Add Bot to bot-layer without location
+        bots.addBot(botStatusMock3);
+        expect(botLayer.getVectorLayer().getSource().getFeatures().length).toBe(0);
+        botLayer.updateFeatures();
+        expect(botLayer.getVectorLayer().getSource().getFeatures().length).toBe(1);
+        expect(botLayer.getVectorLayer().getSource().getFeatures()[0].get("id")).toBeUndefined();
+
+        // Reset
+        bots.getBots().clear();
+        botLayer.getVectorLayer().getSource().clear();
+    });
 });

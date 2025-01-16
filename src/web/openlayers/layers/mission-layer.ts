@@ -1,9 +1,10 @@
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
+import JaiaVectorLayer from "./jaia-vector-layer";
+import { LayerTitles } from "../../types/openlayers-types";
 
-export const missionLayer = new VectorLayer({
-    properties: {
-        title: "mission-layer",
-    },
-    source: new VectorSource({ wrapX: false }),
-});
+class MissionLayer extends JaiaVectorLayer {
+    constructor() {
+        super(LayerTitles.MISSION_LAYER);
+    }
+}
+
+export const missionLayer = new MissionLayer();

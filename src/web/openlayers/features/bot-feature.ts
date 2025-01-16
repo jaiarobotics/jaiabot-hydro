@@ -6,14 +6,21 @@ import { fromLonLat } from "ol/proj";
 import { Coordinate } from "ol/coordinate";
 
 // Jaia
+import Bot from "../../data/bots/bot";
 import { bots } from "../../data/bots/bots";
 import { view } from "../views/view";
+import { MapFeatureTypes } from "../../types/openlayers-types";
 
 // Util
 import { angleToXY } from "../../utils/style";
 
 // Style
 const botIcon = require("../../style/icons/bot.svg");
+
+enum BotIconColors {
+    SELECTED = "turquoise",
+    DEFAULT = "white",
+}
 
 const TEXT_OFFSET_RADIUS = 11;
 
@@ -29,26 +36,28 @@ export function generateBotFeature(botID: number) {
     }
 
     const coordinate: Coordinate = [bot.getLocation().lon, bot.getLocation().lat];
-    const heading = bot.getBotSensors().getIMU().getHeading() ?? 0;
-
     const feature = new Feature({
-        name: `BOT-${botID}`,
         geometry: new Point(fromLonLat(coordinate, view.getProjection())),
     });
-    feature.setStyle(generateBotStyle(botID, heading));
+    feature.set("type", MapFeatureTypes.BOT);
+    feature.set("id", botID);
+    feature.setStyle(generateBotStyle(bot));
     return feature;
 }
 
-function generateBotStyle(botID: number, heading: number) {
+function generateBotStyle(bot: Bot) {
+    const heading = bot.getBotSensors().getIMU().getHeading() ?? 0;
+
     return new Style({
         image: new Icon({
             src: botIcon,
+            color: getBotIconColor(bot),
             anchor: [0.5, 0.5],
             rotation: heading,
             rotateWithView: true,
         }),
         text: new Text({
-            text: botID.toString(),
+            text: bot.getBotID().toString(),
             font: "bold 11pt sans-serif",
             fill: new Fill({
                 color: "black",
@@ -58,4 +67,12 @@ function generateBotStyle(botID: number, heading: number) {
             offsetY: -TEXT_OFFSET_RADIUS * angleToXY(heading).y,
         }),
     });
+}
+
+function getBotIconColor(bot: Bot) {
+    if (bot.getIsSelected()) {
+        return BotIconColors.SELECTED;
+    } else {
+        return BotIconColors.DEFAULT;
+    }
 }
