@@ -196,6 +196,7 @@ set(scripts_to_install
   jaia-ip.py
   jaia-doc.py
   jaia-vpn-gen.sh
+  jaia-create-fleet-config.sh
 )
 
 # Iterate over each script to install and copy
