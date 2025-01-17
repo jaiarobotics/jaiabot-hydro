@@ -282,7 +282,7 @@ export interface BotDetailsProps {
     mission: MissionInterface;
     run: RunInterface;
     isExpanded: DetailsExpandedState;
-    downloadQueue: PortalBotStatus[];
+    downloadQueue: number[];
     closeWindow: () => void;
     takeControl: (onSuccess: () => void) => void;
     deleteSingleMission: (runId: string, disableMessage?: string) => void;

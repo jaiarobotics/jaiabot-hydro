@@ -159,7 +159,7 @@ let isExpanded: DetailsExpandedState = {
     power: false,
     links: false,
 };
-let mockDownloadQueue: PortalBotStatus[] = [];
+let mockDownloadQueue: number[] = [];
 
 let mockCloseWindow = jest.fn();
 let mockTakeControl = jest.fn();

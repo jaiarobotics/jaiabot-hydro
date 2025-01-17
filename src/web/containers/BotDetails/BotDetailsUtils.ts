@@ -35,7 +35,7 @@ export function disableButton(
     command: CommandInfo,
     missionState: MissionState,
     botID?: number,
-    downloadQueue?: PortalBotStatus[],
+    downloadQueue?: number[],
 ) {
     let disableInfo: DisableInfo;
 
@@ -79,9 +79,8 @@ export function disableButton(
         disableInfo.disableMessage += disableState;
     }
 
-    // TODO Download queue needs rework
     if (botID && downloadQueue) {
-        const downloadQueueBotIds = downloadQueue.map((bot) => botID);
+        const downloadQueueBotIds = downloadQueue;
         if (downloadQueueBotIds.includes(botID)) {
             disableInfo.isDisabled = true;
             disableInfo.disableMessage +=
@@ -121,7 +120,7 @@ export function disablePlayButton(
     mission: MissionInterface,
     command: CommandInfo,
     missionState: MissionState,
-    downloadQueue: PortalBotStatus[],
+    downloadQueue: number[],
 ) {
     let disableInfo: DisableInfo;
 
@@ -143,8 +142,7 @@ export function disablePlayButton(
         disableInfo.isDisabled = true;
     }
 
-    // TODO Need to rework this queue in CommandControl may not need map
-    const downloadQueueBotIds = downloadQueue.map((bot) => botID);
+    const downloadQueueBotIds = downloadQueue;
     if (downloadQueueBotIds.includes(botID)) {
         disableInfo.disableMessage +=
             "The command: " +
@@ -156,7 +154,6 @@ export function disablePlayButton(
     return disableInfo;
 }
 
-// Should probably break up BotDetailsComponent so this can be isolated from React
 export function getBotRun(botId: number, runs: { [key: string]: RunInterface }) {
     try {
         for (const runId of Object.keys(runs)) {
