@@ -443,7 +443,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
     let botOffloadPercentage = "";
 
-    if (botID === hub.getBotOffload().bot_id) {
+    if (botID === hub.getBotOffload()?.bot_id) {
         botOffloadPercentage = " " + hub.getBotOffload().data_offload_percentage + "%";
     }
 
@@ -972,26 +972,26 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                 <tbody>
                                                     <tr>
                                                         <td>Latitude</td>
-                                                        <td>{formatLatitude(botGPS.getLat())}</td>
+                                                        <td>{formatLatitude(botGPS?.getLat())}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Longitude</td>
-                                                        <td>{formatLongitude(botGPS.getLon())}</td>
+                                                        <td>{formatLongitude(botGPS?.getLon())}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>HDOP</td>
-                                                        <td>{botGPS.getHDOP().toFixed(prec)}</td>
+                                                        <td>{botGPS?.getHDOP()?.toFixed(prec)}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>PDOP</td>
-                                                        <td>{botGPS.getPDOP().toFixed(prec)}</td>
+                                                        <td>{botGPS?.getPDOP()?.toFixed(prec)}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Ground Speed</td>
                                                         <td>
                                                             {botGPS
-                                                                .getSpeedOverGround()
-                                                                .toFixed(prec)}{" "}
+                                                                ?.getSpeedOverGround()
+                                                                ?.toFixed(prec)}{" "}
                                                             m/s
                                                         </td>
                                                     </tr>
@@ -999,8 +999,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         <td>Course Over Ground</td>
                                                         <td>
                                                             {botGPS
-                                                                .getCourseOverGround()
-                                                                .toFixed(prec)}
+                                                                ?.getCourseOverGround()
+                                                                ?.toFixed(prec)}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -1031,19 +1031,21 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         <td>Heading</td>
                                                         <td>
                                                             {formatAttitudeAngle(
-                                                                botIMU.getHeading(),
+                                                                botIMU?.getHeading(),
                                                             )}
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td>Pitch</td>
                                                         <td>
-                                                            {formatAttitudeAngle(botIMU.getPitch())}
+                                                            {formatAttitudeAngle(
+                                                                botIMU?.getPitch(),
+                                                            )}
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td>IMU Cal</td>
-                                                        <td>{botIMU.getCalibrationStatus()}</td>
+                                                        <td>{botIMU?.getCalibrationStatus()}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -1073,8 +1075,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         <td>Temperature</td>
                                                         <td>
                                                             {botTemperatureSensor
-                                                                .getTemperature()
-                                                                .toFixed(prec)}{" "}
+                                                                ?.getTemperature()
+                                                                ?.toFixed(prec)}{" "}
                                                             °C
                                                         </td>
                                                     </tr>
@@ -1082,8 +1084,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                         <td>Depth</td>
                                                         <td>
                                                             {botPressureSensor
-                                                                .getDepth()
-                                                                .toFixed(prec)}{" "}
+                                                                ?.getDepth()
+                                                                ?.toFixed(prec)}{" "}
                                                             m
                                                         </td>
                                                     </tr>
