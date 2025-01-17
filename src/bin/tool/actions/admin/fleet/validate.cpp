@@ -5,9 +5,8 @@
 #include <sstream>
 #include <string>
 
-#include "jaiabot/messages/fleet_config.pb.h"
-
 #include "../../common.h"
+#include "common.h"
 #include "config.pb.h"
 #include "validate.h"
 
@@ -27,26 +26,7 @@ jaiabot::apps::admin::fleet::ValidateTool::ValidateTool()
 
 int jaiabot::apps::admin::fleet::ValidateTool::validate()
 {
-    jaiabot::protobuf::FleetConfig fleet_cfg;
-
-    std::ifstream file(app_cfg().fleet_cfg());
-    if (!file.is_open())
-    {
-        glog.is_die() && glog << "Failed to open file: " << app_cfg().fleet_cfg() << std::endl;
-        return 1;
-    }
-
-    // Read the entire file into a string
-    std::string file_content((std::istreambuf_iterator<char>(file)),
-                             std::istreambuf_iterator<char>());
-
-    // Parse the text format protobuf
-    if (!google::protobuf::TextFormat::ParseFromString(file_content, &fleet_cfg))
-    {
-        glog.is_die() && glog << "Failed to parse protobuf text format from file: "
-                              << app_cfg().fleet_cfg() << std::endl;
-        return 1;
-    }
+    auto fleet_cfg = jaiabot::apps::tool::parse_fleet_config_from_file(app_cfg().fleet_cfg());
 
     // Check if the message is fully initialized
     if (!fleet_cfg.IsInitialized())

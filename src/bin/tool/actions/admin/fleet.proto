@@ -58,6 +58,9 @@ message FleetTool
             external_command: "jaia-generate-first-boot.py",
             external_help_param: "--help"
         }];
+        vpn_authorize = 4 [(goby.ev).cfg = {
+            short_help_msg: "Push temporary key to vpn.jaia.tech to allow a fleet to configure itself"
+        }];
     }
 
     optional Action action = 2 [
