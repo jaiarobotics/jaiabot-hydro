@@ -14,6 +14,7 @@ import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
 import { Missions } from "../../missions/missions";
 import { MissionStatus } from "../../types/jaia-system-types";
 import BotSensors from "../../data/bots/bot-sensors";
+import Bot from "../../data/bots/bot";
 import GPS from "../../data/sensors/gps";
 import IMU from "../../data/sensors/imu";
 import PressureSensor from "../../data/sensors/pressure";
@@ -24,7 +25,7 @@ import { GlobalSettings } from "../../missions/settings";
 import { warning, info } from "../../notifications/notifications";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
 import Mission from "../../data/missions/mission";
-import { PortalHubStatus, PortalBotStatus } from "../../shared/PortalStatus";
+import { PortalBotStatus } from "../../shared/PortalStatus";
 import { Command, BotStatus, MissionState, GeographicCoordinate } from "../../utils/protobuf-types";
 
 import {
@@ -227,17 +228,17 @@ async function runRCMode(botID: number) {
 
 // Get the table row for the health of the vehicle
 // TODO Only used in this file, see if we can separate the React code from the non-React
-function healthRow(bot: BotStatus, allInfo: boolean) {
+function healthRow(bot: Bot, allInfo: boolean) {
     let healthClassName =
         {
             HEALTH__OK: "healthOK",
             HEALTH__DEGRADED: "healthDegraded",
             HEALTH__FAILED: "healthFailed",
-        }[bot.health_state] ?? "healthOK";
+        }[bot.getHealthState()] ?? "healthOK";
 
-    let healthStateElement = <div className={healthClassName}>{bot.health_state}</div>;
+    let healthStateElement = <div className={healthClassName}>{bot.getHealthState()}</div>;
 
-    let errors = bot.error ?? [];
+    let errors = bot.getErrors() ?? [];
     let errorElements = errors.map((error) => {
         return (
             <div key={error} className="healthFailed">
@@ -246,7 +247,7 @@ function healthRow(bot: BotStatus, allInfo: boolean) {
         );
     });
 
-    let warnings = bot.warning ?? [];
+    let warnings = bot.getWarnings() ?? [];
     let warningElements = warnings.map((warning) => {
         return (
             <div key={warning} className="healthDegraded">
@@ -278,7 +279,6 @@ function healthRow(bot: BotStatus, allInfo: boolean) {
 
 export interface BotDetailsProps {
     bot: PortalBotStatus;
-    hub: PortalHubStatus;
     mission: MissionInterface;
     run: RunInterface;
     isExpanded: DetailsExpandedState;
@@ -298,7 +298,6 @@ export interface BotDetailsProps {
 export function BotDetailsComponent(props: BotDetailsProps) {
     // TODO We will replace all uses of theses objects from Props with ones from context
     const botFromProps = props.bot;
-    const hubFromProps = props.hub;
     const missionFromProps = props.mission;
 
     const closeWindow = props.closeWindow;
@@ -944,7 +943,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             <AccordionDetails>
                                 <table>
                                     {/* TODO Refactor fucntion as needed*/}
-                                    <tbody>{healthRow(botFromProps, true)}</tbody>
+                                    <tbody>{healthRow(bot, true)}</tbody>
                                 </table>
                             </AccordionDetails>
                         </Accordion>
