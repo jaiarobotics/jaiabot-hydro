@@ -48,18 +48,18 @@ message FleetTool
             short_help_msg: "Create a new fleet config",
             external_command: "jaia-create-fleet-config.sh",
             full_help_msg: "Interactive tool to create a new fleet configuration.\n"
-            "Usage: \"jaia admin fleet create [fleet.cfg]\""
+                           "Usage: \"jaia admin fleet create [fleet.cfg]\""
         }];
         validate = 2 [(goby.ev).cfg = {
             short_help_msg: "Validate a new fleet config",
         }];
         generate = 3 [(goby.ev).cfg = {
+            short_help_msg: "Generate first boot configuration and write to disk",
             external_command: "jaia-generate-first-boot.py",
             external_help_param: "--help"
         }];
-
     }
-    
+
     optional Action action = 2 [
         default = help,
         (goby.field) = {
@@ -68,4 +68,3 @@ message FleetTool
         }
     ];
 }
-

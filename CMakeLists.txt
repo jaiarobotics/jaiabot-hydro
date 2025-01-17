@@ -197,8 +197,8 @@ set(scripts_to_install
   jaia-doc.py
   jaia-vpn-gen.sh
   # Fleet config
-  jaia-create-fleet-config.sh
-  jaia-generate-first-boot.py
+  fleet/jaia-create-fleet-config.sh
+  fleet/jaia-generate-first-boot.py
 )
 
 # Iterate over each script to install and copy
