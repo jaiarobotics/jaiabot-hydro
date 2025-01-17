@@ -195,16 +195,16 @@ function issueRCCommand(
     });
 }
 
-// TODO only used in this file, used by React Element
-async function runRCMode(botID: number) {
-    if (!botID) {
+async function runRCMode(bot: Bot) {
+    if (!bot) {
         warning("No bots selected");
         return null;
     }
 
-    // TODO Rework this
-    /*
-    let datumLocation = bot?.location;
+    const botLat = bot.getBotSensors()?.getGPS()?.getLat();
+    const botLon = bot.getBotSensors()?.getGPS()?.getLon();
+
+    let datumLocation: GeographicCoordinate = { lat: botLat, lon: botLon };
 
     if (!datumLocation) {
         const warningString =
@@ -216,15 +216,11 @@ async function runRCMode(botID: number) {
 
         datumLocation = { lat: 0, lon: 0 };
     }
-        */
 
-    // TODO temp hack
-    let datumLocation: GeographicCoordinate = { lat: 0, lon: 0 };
-    return Missions.RCMode(botID, datumLocation);
+    return Missions.RCMode(bot.getBotID(), datumLocation);
 }
 
 // Get the table row for the health of the vehicle
-// TODO Only used in this file, see if we can separate the React code from the non-React
 function healthRow(bot: Bot, allInfo: boolean) {
     let healthClassName =
         {
@@ -724,7 +720,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                     onClick={async () => {
                                         issueRCCommand(
                                             bot,
-                                            await runRCMode(botID),
+                                            await runRCMode(bot),
                                             props.isRCModeActive,
                                             props.setRcMode,
                                             disableButton(
