@@ -7,6 +7,7 @@
 
 #include "../../common.h"
 #include "../ssh/add.h"
+#include "../ssh/rm.h"
 #include "common.h"
 #include "config.pb.h"
 #include "vpn_authorize.h"
@@ -32,13 +33,19 @@ jaiabot::apps::admin::fleet::VPNAuthorizeTool::VPNAuthorizeTool()
 
     subtool_cfg.add_extra_cli_param("vpn.jaia.tech");
     subtool_cfg.add_extra_cli_param(pubkey);
-    subtool_cfg.add_extra_cli_param("1d");
+
+    if (!app_cfg().rm())
+        subtool_cfg.add_extra_cli_param("1d");
 
     goby::middleware::ToolHelper tool_helper(app_cfg().app().binary(), subtool_cfg,
                                              jaiabot::config::Tool::Action_descriptor());
 
-    tool_helper.run_subtool<jaiabot::apps::admin::ssh::AddTool,
-                            jaiabot::apps::admin::ssh::AddToolConfigurator>();
+    if (!app_cfg().rm())
+        tool_helper.run_subtool<jaiabot::apps::admin::ssh::AddTool,
+                                jaiabot::apps::admin::ssh::AddToolConfigurator>();
+    else
+        tool_helper.run_subtool<jaiabot::apps::admin::ssh::RemoveTool,
+                                jaiabot::apps::admin::ssh::RemoveToolConfigurator>();
 
     quit(0);
 }

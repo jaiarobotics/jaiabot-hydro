@@ -27,7 +27,6 @@ import "actions/admin/fleet.proto";
 
 package jaiabot.config.admin.fleet;
 
-
 message VPNAuthorizeTool
 {
     option (goby.msg).cfg.tool = {
@@ -44,4 +43,10 @@ message VPNAuthorizeTool
         cfg { position { enable: true } }
     }];
 
+    optional bool rm = 3 [
+        default = false,
+        (goby.field) = {
+            description: "If true, remove the key rather than add it (the default)"
+        }
+    ];
 }

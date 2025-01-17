@@ -7,7 +7,6 @@ Directory structure:
   - auto: Live build scripts
   - customization: Live build configuration overrides
   - scripts: Scripts for creating/managing filesystem images
-  - nocloud-init: `cloud-init` configuration for first boot on NoCloud images (i.e., Raspberry Pi)
   - cloud: Scripts for configuration on various cloud providers (currently AWS)
   - virtualbox: Live build configuration overrides for VirtualBox VMs.
 
