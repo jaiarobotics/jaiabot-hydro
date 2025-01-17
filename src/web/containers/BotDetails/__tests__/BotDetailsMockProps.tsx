@@ -172,7 +172,6 @@ let mockDownloadIndividualBot = jest.fn();
 
 export let mockProps: BotDetailsProps = {
     bot: bot,
-    hub: hub,
     mission: mission,
     run: run,
     isExpanded: isExpanded,
