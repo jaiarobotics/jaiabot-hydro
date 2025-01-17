@@ -2,7 +2,57 @@
 
 JaiaBot uses the Raspberry Pi (RP) Compute Module 4 (CM4) as the embedded Linux computer. For R&D purposes, it has also been necessary to run the jaiabot software on a Raspberry Pi 3 although this is not ideal due to the port mappings being different from the RP4.
 
+## Quick start
+
+Download the appropriate `.img.gz` from AWS S3 (produced by CircleCI): https://us-east-1.console.aws.amazon.com/s3/buckets/jaia-disk-images?region=us-east-1&bucketType=general&prefix=release/1.y/rpi/&showversions=false
+
+Flash this to as many SD cards as you have bots plus hubs:
+```
+# assuming USB thumb drive is on /dev/sdd
+gunzip -c jaiabot__rootfs-jammy-v1.16.0__code-v1.16.0.img.gz | sudo dd of=/dev/sdd bs=1M status=progress
+```
+
+Create a fleet, authorize the fleet to self-configure the service VPN (vpn.jaia.tech), generate first-boot configurations, and boot:
+
+```
+# Create the Fleet
+jaia admin fleet create private_jaia/fleet_config/fleet5.cfg
+
+# Authorize temporary key on vpn.jaia.tech
+jaia admin fleet vpn_authorize private_jaia/fleet_config/fleet5.cfg
+
+# insert flashed SD card for Hub 1
+jaia admin fleet generate private_jaia/fleet_config/fleet5.cfg hub 1
+# unmount & remove Hub 1 card, insert flashed SD card for Hub 2
+jaia admin fleet generate private_jaia/fleet_config/fleet5.cfg hub 2
+# unmount & remove Hub 2 card, insert flashed SD card for Bot 1
+jaia admin fleet generate private_jaia/fleet_config/fleet5.cfg bot 1
+# unmount & remove Bot 1 card, insert flashed SD card for Bot 2
+jaia admin fleet generate private_jaia/fleet_config/fleet5.cfg bot 2
+
+# Insert all the SD cards and boot all the bots and hubs and allow to fully first boot configure
+
+# Optionally deauthorize temp VPN key
+jaia admin fleet vpn_authorize private_jaia/fleet_config/fleet5.cfg --rm
+```
+
+
 ## Setup steps (new RP CM4)
+
+### Create a Fleet Config (do once for all bots/hubs in a fleet)
+
+This new bot or hub must belong to a configured fleet. Fleets are configured using a Fleet Config file which is a Protobuf TextFormat version of the jaiabot.message.FleetConfig message (`jaiabot/src/lib/message/fleet_config.proto`).
+
+The simplest way to create a new fleet is to use the `jaia` tool (e.g. for fleet5):
+```
+jaia admin fleet create fleet5.cfg
+```
+
+This will prompt you using a whiptail UI to set the various fleet related settings, and write the contents to `fleet5.cfg`.
+
+This tool will also create the hub keys, VPN temporary keys as necessary and include those in the fleet configuration file.
+
+Once you have a fleet, you can begin flashing the bots/hubs. 
 
 ### Flashing the bootloader configuration
 
@@ -22,6 +72,8 @@ The RP bootloader on older CM4 boards does not boot from all the USB ports autom
 
 *Note: this step should only need to be done once per change to jaiabot/rootfs files (and then reused for any number of USB thumb drives).*
 
+Normally you will just download the appropriate image from CircleCI or AWS S3.
+
 The jaiabot/rootfs folder is designed to generate a complete filesystem suitable to boot the RP off a USB thumb drive or other USB disk.
 
 To generate the image, follow the steps in https://github.com/jaiarobotics/jaiabot/blob/1.y/rootfs/README.md.
@@ -38,6 +90,8 @@ The result will be something like `jaiabot_img-1.0.0~alpha1+5+g90e72a3.img`.
 ### Set initial first boot configuration
 
 The newly created image needs certain configuration to run properly: is this a bot or a hub, what ID is it, what fleet does it belong to, etc.?
+
+Typically this is automatically provided from the Fleet Config by using `jaia admin fleet generate` which writes the required `first-boot.preseed.yml` and SSH keys mentioned, below.
 
 This information is provided via a `first-boot.preseed.yml` YAML configuration file, conforming to the standards of the `cloud-init` project's [user-data file format](https://cloudinit.readthedocs.io/en/latest/reference/modules.html#modules).
 
@@ -57,7 +111,7 @@ jaia admin ssh add --user=ubuntu vpn.jaia.tech "$(cat id_vpn_tmp.pub)" 1d
 ```
 
 
-An example of this text file is provided on the image as `/boot/firmware/jaiabot/init/first-boot.preseed.yml.ex`. Simply copy this file to `/boot/firmware/jaiabot/init/first-boot.preseed.yml` and edit the answers as desired.
+The template of the text file `first-boot.preseed.yml` is provided on the image as `/boot/firmware/jaiabot/init/first-boot.preseed.yml.j2` (This is a jinja2 template file used by `jaia fleet admin generate`).
 
 Configuration will happen automatically without user intervention or the requirement for connecting a monitor or DHCP based SSH session.
 
@@ -72,10 +126,6 @@ First boot configuration is now handled by `cloud-init` using the `NoCloud` data
 - `first-boot.preseed.yml`: The previously discussed preseed file specific to the bot or hub being configured.
 
 These files are separated to reduce clutter in the first-boot.preseed.yml file. The source for both of these files is in `jaiabot/rootfs/customization/includes.chroot/etc/jaiabot/init`. 
-
-### Fleet configuration
-
-- Add the bot or hub to the appropriate fleet VPN on vpn.jaia.tech (using the public key in `/etc/wireguard/publickey`). See the [VPN documentation](page55_vpn.md) for more details.
 
 ## Systemd
 

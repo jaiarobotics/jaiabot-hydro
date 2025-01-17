@@ -5,7 +5,7 @@ set -e -u
 # --binary=jaia admin fleet create
 binary="$1"
 
-if [ ! $# -eq 2 ]; then
+if [[ ! "$#" = "2" || "$2" = "--help" || "$2" = "-h"  ]]; then
    echo "Usage: ${1#*=} fleet.cfg"
    exit 1;
 fi

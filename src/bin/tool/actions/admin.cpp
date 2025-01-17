@@ -28,6 +28,12 @@ jaiabot::apps::AdminTool::AdminTool()
                                 action_for_help);
                             break;
 
+                        case jaiabot::config::AdminTool::fleet:
+                            tool_helper.help<jaiabot::apps::admin::FleetTool,
+                                             jaiabot::apps::admin::FleetToolConfigurator>(
+                                action_for_help);
+                            break;
+
                         default:
                             throw(goby::Exception(
                                 "Help was expected to be handled by external tool"));
