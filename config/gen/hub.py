@@ -199,7 +199,7 @@ elif common.app == 'jaiabot_hub_manager':
                                      app_block=app_common,
                                      interprocess_block = interprocess_common,
                                      hub_id=hub_index,
-                                     xbee_config=common.comms.xbee_config(),
+                                     expected_bots=common.hub.expected_bots_from_inventory(),
                                      fleet_id=fleet_index,
                                      bot_log_staging_dir=common.bot_log_staging_dir,
                                      hub_log_offload_dir=common.hub_log_offload_dir,
