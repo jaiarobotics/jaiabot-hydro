@@ -148,7 +148,7 @@ function issueRunCommand(
 }
 
 function issueRCCommand(
-    botID: number,
+    bot: Bot,
     botMission: Command,
     isRCModeActive: (botId: number) => boolean,
     setRcMode: (botId: number, rcMode: boolean) => void,
@@ -160,28 +160,25 @@ function issueRCCommand(
             CustomAlert.alert(disableMessage);
             return;
         }
-
+        const botID = bot.getBotID();
         const isRCActive = isRCModeActive(botID);
 
         if (!isRCActive) {
             let isCriticallyLowBattery = "";
-
-            // TODO this needs rework
-            /*
-            if (Array.isArray(bot?.error)) {
-                for (let e of bot?.error) {
+            const botErrors = bot.getErrors();
+            if (Array.isArray(botErrors)) {
+                for (let e of botErrors) {
                     if (e === "ERROR__VEHICLE__CRITICALLY_LOW_BATTERY") {
                         isCriticallyLowBattery =
                             "***Critically Low Battery in RC Mode could jeopardize your recovery!***\n";
                     }
                 }
             }
-            */
 
             CustomAlert.confirm(
                 isCriticallyLowBattery +
                     "Are you sure you'd like to use remote control mode for Bot: " +
-                    botID +
+                    bot +
                     "?",
                 "Use Remote Control Mode",
                 () => {
@@ -726,7 +723,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         `}
                                     onClick={async () => {
                                         issueRCCommand(
-                                            botID,
+                                            bot,
                                             await runRCMode(botID),
                                             props.isRCModeActive,
                                             props.setRcMode,
