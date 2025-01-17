@@ -348,12 +348,11 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     // TODO will  need to add repeat_index to MissionStatus
     // Active Goal
     var repeatNumberString = "N/A";
-    if (botFromProps.repeat_index != null) {
-        repeatNumberString = `${botFromProps.repeat_index + 1}`;
+    if (missionStatus.repeat_index != null) {
+        repeatNumberString = `${missionStatus.repeat_index + 1}`;
 
-        if (botFromProps.active_mission_plan?.repeats != null) {
-            repeatNumberString =
-                repeatNumberString + ` of ${botFromProps.active_mission_plan?.repeats}`;
+        if (mission?.getRepeats() != null) {
+            repeatNumberString = repeatNumberString + ` of ${mission?.getRepeats()}`;
         }
     }
 
