@@ -2981,7 +2981,6 @@ export default class CommandControl extends React.Component {
                         }
                     }
 
-                    //TODO Investigate how queue is used and refactor as necessary
                     const updatedQueue = queue.concat(botID);
                     info(`Queued Bot ${botID} for data download`);
                     this.setState({ botDownloadQueue: updatedQueue }, () =>

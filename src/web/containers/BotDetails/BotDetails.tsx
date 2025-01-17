@@ -84,7 +84,7 @@ export interface DetailsExpandedState {
     links: boolean;
 }
 
-// TODO The Take Control and RC Control logic needs a complete refactor
+// TODO The Take Control needs a complete refactor
 // This will probably go away and all of the uses of takeControlFunction
 // will need rework
 // Once those are reworked we can probably move more of the non-React logic
@@ -318,9 +318,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     }, []);
 
     // Pull Data from the Data Model Context
-    // TODO maybe use DEFAULT_HUB_ID = 1;
-    // This fails [TypeError: Cannot read properties of null (reading 'hubs')]
-    const hub = hubContext.hubs.get(1);
+    const DEFAULT_HUB_ID = 1;
+    const hub = hubContext.hubs.get(DEFAULT_HUB_ID);
     const hubGPS: GPS = hub.getHubSensors().getGPS();
 
     // TODO need to get the right Bot ID May need to add it as a Prop
@@ -409,7 +408,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                         " cannot be sent because the bot is not connected to Wifi (Check Link Quality in Quick Look)";
                 }
 
-                //TODO Investigate what this does and refactor
                 props.downloadIndividualBot(botID, disableMessage);
             }}
         >
@@ -460,7 +458,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     const botRun = getBotRun(botID, missionFromProps.runs) ?? false;
 
     if (
-        // TODO Investigage and refactor as needed
         !disableClearRunButton(botID, missionFromProps).isDisabled &&
         botRun &&
         botRun.id !== missionFromProps.runIdInEditMode
@@ -935,7 +932,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             </AccordionSummary>
                             <AccordionDetails>
                                 <table>
-                                    {/* TODO Refactor fucntion as needed*/}
                                     <tbody>{healthRow(bot, true)}</tbody>
                                 </table>
                             </AccordionDetails>
