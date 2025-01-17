@@ -271,7 +271,7 @@ function healthRow(bot: Bot, allInfo: boolean) {
 }
 
 export interface BotDetailsProps {
-    bot: PortalBotStatus;
+    botID: number;
     mission: MissionInterface;
     run: RunInterface;
     isExpanded: DetailsExpandedState;
@@ -290,7 +290,6 @@ export interface BotDetailsProps {
 // to separate the logic from display code
 export function BotDetailsComponent(props: BotDetailsProps) {
     // TODO We will replace all uses of theses objects from Props with ones from context
-    const botFromProps = props.bot;
     const missionFromProps = props.mission;
 
     const closeWindow = props.closeWindow;
@@ -322,9 +321,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     const hub = hubContext.hubs.get(DEFAULT_HUB_ID);
     const hubGPS: GPS = hub.getHubSensors().getGPS();
 
-    // TODO need to get the right Bot ID May need to add it as a Prop
-    const bot = botContext.bots.get(1);
-    const botID = bot.getBotID();
+    const botID = props.botID;
+    const bot = botContext.bots.get(botID);
 
     const mission: Mission = bot.getMission();
     const missionStatus: MissionStatus = bot.getMissionStatus();

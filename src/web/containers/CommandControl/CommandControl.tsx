@@ -3975,7 +3975,7 @@ export default class CommandControl extends React.Component {
         switch (detailsBoxItem?.type) {
             case "bot":
                 const botDetailsProps: BotDetailsProps = {
-                    bot: bots?.[this.selectedBotId()],
+                    botID: this.selectedBotId(),
                     mission: this.getRunList(),
                     run: this.getRun(this.selectedBotId()),
                     isExpanded: this.state.detailsExpanded,

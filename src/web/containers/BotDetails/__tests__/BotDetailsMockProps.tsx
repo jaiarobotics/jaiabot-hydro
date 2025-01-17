@@ -171,7 +171,7 @@ let mockToggleEditMode = jest.fn();
 let mockDownloadIndividualBot = jest.fn();
 
 export let mockProps: BotDetailsProps = {
-    bot: bot,
+    botID: 1,
     mission: mission,
     run: run,
     isExpanded: isExpanded,
