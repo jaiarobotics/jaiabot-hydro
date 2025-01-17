@@ -120,7 +120,6 @@ import "./CommandControl.less";
 // Utility
 import cloneDeep from "lodash.clonedeep";
 import { HelpWindow } from "../HelpWindow/HelpWindow";
-import { PlotNumber } from "plotly.js";
 
 const rallyIcon = require("../../shared/rally.svg") as string;
 
