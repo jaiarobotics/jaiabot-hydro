@@ -36,7 +36,7 @@
 
 ## Introduction
 
-The Jaia web applications (JCC, JED, JDV) are all React Applications written in Typescript and Javascript. To test these applications we are using Jest as the foundation testing framework with React Testing Library providing ways to interact with React Components. These tools can be used to create unit tests, integration tests, and functional tests.
+Jaia Command and Control (JCC) and Jaia Data Vision (JDV) are React Applications written in Typescript and Javascript. To test these applications we are using Jest as the foundation testing framework with React Testing Library providing ways to interact with React Components. These tools can be used to create unit tests, integration tests, and functional tests.
 
 This document is meant to serve as a starting point for people new to Jest and React Testing Library (RTL). We are still learning the ins and outs of using these tools so our approach and techniques will evolve as we learn. Please update this page with additional information if you learn a new way to do things or exercise more aspects of our applications.
 
@@ -60,7 +60,7 @@ Integration testing is similar to unit testing but focuses on the interaction of
 
 ### Functional Testing
 
-Functional testing focuses on exercising a particular function of the application. Functional tests typically exercise multiple containers and componetns to achieve a certain goal condition. Think "what are the steps involved in achieving this result?"
+Functional testing focuses on exercising a particular function of the application. Functional tests typically exercise multiple containers and components to achieve a certain goal condition. Think "what are the steps involved in achieving this result?"
 
 ## Test File Stucture
 
@@ -261,7 +261,7 @@ rerender(<TaskSettingsPanel {...mockProps} />);
 
 ### Accessing React Elements
 
-RTL provides many different ways to query the rendered component to get access to a specific element. [About Queries](https://testing-library.com/docs/queries/about)
+RTL provides many different ways to query the rendered component to get access to a specific element. See [About Queries](https://testing-library.com/docs/queries/about).
 
 The object `screen` represents the rendered object being tested. The most common queries are listed below. In general, these use attributes of the element already existing in the code.
 
