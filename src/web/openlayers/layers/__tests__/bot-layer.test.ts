@@ -1,6 +1,6 @@
 import { bots } from "../../../data/bots/bots";
 import { PortalBotStatus } from "../../../shared/PortalStatus";
-import { botLayer } from "../bot-layer";
+import { botLayer } from "../vector/bot-layer";
 
 const botStatusMock1: PortalBotStatus = {
     bot_id: 1,

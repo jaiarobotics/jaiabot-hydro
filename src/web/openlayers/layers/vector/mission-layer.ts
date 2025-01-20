@@ -1,5 +1,5 @@
 import JaiaVectorLayer from "./jaia-vector-layer";
-import { LayerTitles } from "../../types/openlayers-types";
+import { LayerTitles } from "../../../types/openlayers-types";
 
 class MissionLayer extends JaiaVectorLayer {
     constructor() {

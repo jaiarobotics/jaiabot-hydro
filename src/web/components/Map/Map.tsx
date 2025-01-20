@@ -8,8 +8,8 @@ import { Geometry } from "ol/geom";
 import { map } from "../../openlayers/maps/map";
 import { bots } from "../../data/bots/bots";
 import { hubs } from "../../data/hubs/hubs";
-import { hubLayer } from "../../openlayers/layers/hub-layer";
-import { botLayer } from "../../openlayers/layers/bot-layer";
+import { hubLayer } from "../../openlayers/layers/vector/hub-layer";
+import { botLayer } from "../../openlayers/layers/vector/bot-layer";
 import { MapFeatureTypes } from "../../types/openlayers-types";
 
 import "./Map.less";

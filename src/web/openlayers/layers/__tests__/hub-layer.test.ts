@@ -1,6 +1,6 @@
 import { hubs } from "../../../data/hubs/hubs";
 import { PortalHubStatus } from "../../../shared/PortalStatus";
-import { hubLayer } from "../hub-layer";
+import { hubLayer } from "../vector/hub-layer";
 
 const hubStatusMock1: PortalHubStatus = {
     hub_id: 1,

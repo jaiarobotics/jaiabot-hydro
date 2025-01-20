@@ -7,7 +7,7 @@ import { controls } from "../controls/controls";
 import { view } from "../views/view";
 
 export const map = new Map({
-    layers: Array.from(layers.values()),
+    layers: Array.from(layers.getLayers().values()),
     controls: controls,
     view: view,
     maxTilesLoading: 64,
