@@ -4,9 +4,11 @@ import Bot from "./bot";
 
 class Bots {
     private bots: Map<number, Bot>;
+    private selectedBotID: number;
 
     constructor() {
         this.bots = new Map<number, Bot>();
+        this.selectedBotID = null;
     }
 
     getBots() {
@@ -15,6 +17,14 @@ class Bots {
 
     getBot(botID: number) {
         return this.getBots().get(botID);
+    }
+
+    getSelectedBotID() {
+        return this.selectedBotID;
+    }
+
+    setSelectedBotID(selectedBotID: number) {
+        this.selectedBotID = selectedBotID;
     }
 
     addBot(botStatus: PortalBotStatus) {

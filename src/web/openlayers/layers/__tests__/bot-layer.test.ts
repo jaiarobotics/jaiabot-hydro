@@ -17,11 +17,6 @@ const botStatusMock3: PortalBotStatus = {
     bot_id: 3,
 };
 
-afterEach(() => {
-    bots.getBots().clear();
-    botLayer.getVectorLayer().getSource().clear();
-});
-
 // Running various additions in single test because jest runs multiple tests in parallel
 describe("Add Bots to bot-layer", () => {
     test("Add Bots to bot-layer", () => {

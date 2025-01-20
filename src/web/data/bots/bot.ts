@@ -24,7 +24,6 @@ export default class Bot {
     private batteryPercent: number;
     private wifiLinkQuality: number;
     private statusAge: number;
-    private isSelected: boolean;
 
     constructor() {
         // Init base sensors
@@ -132,14 +131,6 @@ export default class Bot {
 
     addTaskPacket(taskPacket: TaskPacket) {
         this.taskPackets.push(taskPacket);
-    }
-
-    getIsSelected() {
-        return this.isSelected;
-    }
-
-    setIsSelected(isSelected: boolean) {
-        this.isSelected = isSelected;
     }
 
     private initializeSensors() {

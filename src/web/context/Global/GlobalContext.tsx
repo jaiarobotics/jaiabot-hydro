@@ -9,7 +9,7 @@ export interface GlobalContextType {
     clientID: string;
     controllingClientID: string;
     selectedPodElement: SelectedPodElement;
-    showHubDetails: boolean;
+    showDetails: boolean;
     hubAccordionStates: HubAccordionStates;
     isRCMode: boolean;
 }
@@ -29,6 +29,7 @@ export interface GlobalAction {
     type: string;
     clientID?: string;
     hubID?: number;
+    botID?: number;
     hubAccordionName?: string;
 }
 
@@ -51,7 +52,7 @@ export const globalDefaultContext: GlobalContextType = {
     clientID: "",
     controllingClientID: "",
     selectedPodElement: null,
-    showHubDetails: false,
+    showDetails: false,
     hubAccordionStates: defaultHubAccordionStates,
     isRCMode: false,
 };
@@ -91,7 +92,7 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
             return handleClickedHubMapIcon(mutableState, action.hubID);
 
         case GlobalActions.CLICKED_BOT_MAP_ICON:
-            return handleClickedBotMapIcon(mutableState);
+            return handleClickedBotMapIcon(mutableState, action.botID);
 
         case GlobalActions.CLICKED_HUB_ACCORDION:
             return handleClickedHubAccordion(mutableState, action.hubAccordionName);
@@ -144,7 +145,7 @@ function handleExitedRCMode(mutableState: GlobalContextType) {
  * @returns {GlobalContextType} Updated mutable state object
  */
 function handleClosedHubDetails(mutableState: GlobalContextType) {
-    mutableState.showHubDetails = false;
+    mutableState.showDetails = false;
     return mutableState;
 }
 
@@ -162,12 +163,12 @@ function handleClickedHubTab(mutableState: GlobalContextType, hubID: number) {
         mutableState.selectedPodElement.type === PodElement.HUB;
 
     if (isHubSelected) {
-        mutableState.showHubDetails = false;
+        mutableState.showDetails = false;
     } else {
-        mutableState.showHubDetails = true;
+        mutableState.showDetails = true;
     }
 
-    if (mutableState.showHubDetails) {
+    if (mutableState.showDetails) {
         mutableState.selectedPodElement = { type: PodElement.HUB, id: hubID };
     } else {
         mutableState.selectedPodElement = null;
@@ -192,7 +193,7 @@ function handleClickedBotTab(mutableState: GlobalContextType) {
         mutableState.selectedPodElement.type === PodElement.HUB;
 
     if (isHubSelected) {
-        mutableState.showHubDetails = false;
+        mutableState.showDetails = false;
         // TEMPORARY: Once bot details are integrated into context,
         // selectedPodElement will be assinged to the bot selected by the user
         mutableState.selectedPodElement = null;
@@ -207,18 +208,16 @@ function handleClickedBotTab(mutableState: GlobalContextType) {
  * @returns {GlobalContextType} Updated mutable state object
  */
 function handleClickedHubMapIcon(mutableState: GlobalContextType, hubID: number) {
-    if (isNaN(hubID)) throw new Error("Invalid hubID");
-
     const isHubSelected =
         mutableState.selectedPodElement !== null &&
         mutableState.selectedPodElement.type === PodElement.HUB;
 
     if (isHubSelected) {
         mutableState.selectedPodElement = null;
-        mutableState.showHubDetails = false;
+        mutableState.showDetails = false;
     } else {
         mutableState.selectedPodElement = { type: PodElement.HUB, id: hubID };
-        mutableState.showHubDetails = true;
+        mutableState.showDetails = true;
     }
     return mutableState;
 }
@@ -229,15 +228,18 @@ function handleClickedHubMapIcon(mutableState: GlobalContextType, hubID: number)
  * @param {GlobalContextType} mutableState State object ref for making modifications
  * @returns {GlobalContextType} Updated mutable state object
  */
-function handleClickedBotMapIcon(mutableState: GlobalContextType) {
-    const isHubSelected =
+function handleClickedBotMapIcon(mutableState: GlobalContextType, botID: number) {
+    const isBotSelected =
         mutableState.selectedPodElement !== null &&
-        mutableState.selectedPodElement.type === PodElement.HUB;
+        mutableState.selectedPodElement.type === PodElement.BOT &&
+        mutableState.selectedPodElement.id === botID;
 
-    if (isHubSelected) {
-        // When bot logic is integrated into context, selectedPodElement will be set to the clicked bot
+    if (isBotSelected) {
         mutableState.selectedPodElement = null;
-        mutableState.showHubDetails = false;
+        mutableState.showDetails = false;
+    } else {
+        mutableState.selectedPodElement = { type: PodElement.BOT, id: botID };
+        mutableState.showDetails = true;
     }
 
     return mutableState;

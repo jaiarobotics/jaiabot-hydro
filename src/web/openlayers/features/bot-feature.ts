@@ -70,7 +70,7 @@ function generateBotStyle(bot: Bot) {
 }
 
 function getBotIconColor(bot: Bot) {
-    if (bot.getIsSelected()) {
+    if (bots.getSelectedBotID() === bot.getBotID()) {
         return BotIconColors.SELECTED;
     } else {
         return BotIconColors.DEFAULT;

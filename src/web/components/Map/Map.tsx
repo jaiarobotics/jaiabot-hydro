@@ -1,4 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
+import { GlobalDispatchContext } from "../../context/Global/GlobalContext";
+import { GlobalActions } from "../../context/Global/GlobalActions";
 
 import { Feature, MapBrowserEvent } from "ol";
 import { Geometry } from "ol/geom";
@@ -11,6 +13,8 @@ import { MapFeatureTypes } from "../../types/openlayers-types";
 import "./Map.less";
 
 export default function Map() {
+    const globalDispatch = useContext(GlobalDispatchContext);
+
     useEffect(() => {
         map.setTarget("map");
         map.on("click", (event: MapBrowserEvent<UIEvent>) => {
@@ -40,12 +44,20 @@ export default function Map() {
             return;
         }
 
-        // Update data model and OpenLayers
-        const bot = bots.getBot(feature.get("id"));
-        bot.setIsSelected(!bot.getIsSelected());
-        botLayer.updateFeature(feature);
+        const botID = feature.get("id");
 
-        // Update globalContext
+        // Update data model
+        if (bots.getSelectedBotID() === botID) {
+            bots.setSelectedBotID(null);
+        } else {
+            bots.setSelectedBotID(botID);
+        }
+
+        // Update OpenLayers
+        botLayer.updateFeatures();
+
+        // Update React Context
+        globalDispatch({ type: GlobalActions.CLICKED_BOT_MAP_ICON, botID: botID });
     };
 
     const handleHubClick = (feature: Feature<Geometry>) => {};
