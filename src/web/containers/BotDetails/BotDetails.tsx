@@ -70,7 +70,7 @@ const rcMode = require("../../style/icons/controller.svg");
 
 let prec = 2;
 
-/// TODO This is also used in CommandControl
+/// TODO This is also used in CommandControl, look for ways to simplify
 export interface DetailsExpandedState {
     quickLook: boolean;
     commands: boolean;
@@ -343,7 +343,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         statusAgeClassName = "healthDegraded";
     }
 
-    // TODO will  need to add repeat_index to MissionStatus
     // Active Goal
     var repeatNumberString = "N/A";
     if (missionStatus.repeat_index != null) {
