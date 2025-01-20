@@ -10,13 +10,6 @@ class BotLayer extends JaiaVectorLayer {
         super(LayerTitles.BOT_LAYER);
     }
 
-    override updateFeature(feature: Feature) {
-        let source = this.getVectorLayer().getSource();
-        source.removeFeature(feature);
-        const botFeature = generateBotFeature(feature.get("id"));
-        source.addFeature(botFeature);
-    }
-
     override updateFeatures() {
         let source = this.getVectorLayer().getSource();
         source.clear();

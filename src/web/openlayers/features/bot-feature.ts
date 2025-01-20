@@ -9,6 +9,7 @@ import { Coordinate } from "ol/coordinate";
 import Bot from "../../data/bots/bot";
 import { bots } from "../../data/bots/bots";
 import { view } from "../views/view";
+import { MapIconColors } from "../../utils/style";
 import { MapFeatureTypes } from "../../types/openlayers-types";
 
 // Util
@@ -16,11 +17,6 @@ import { angleToXY } from "../../utils/style";
 
 // Style
 const botIcon = require("../../style/icons/bot.svg");
-
-enum BotIconColors {
-    SELECTED = "turquoise",
-    DEFAULT = "white",
-}
 
 const TEXT_OFFSET_RADIUS = 11;
 
@@ -71,8 +67,8 @@ function generateBotStyle(bot: Bot) {
 
 function getBotIconColor(bot: Bot) {
     if (bots.getSelectedBotID() === bot.getBotID()) {
-        return BotIconColors.SELECTED;
+        return MapIconColors.SELECTED;
     } else {
-        return BotIconColors.DEFAULT;
+        return MapIconColors.DEFAULT;
     }
 }

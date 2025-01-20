@@ -7,6 +7,8 @@ import { Geometry } from "ol/geom";
 
 import { map } from "../../openlayers/maps/map";
 import { bots } from "../../data/bots/bots";
+import { hubs } from "../../data/hubs/hubs";
+import { hubLayer } from "../../openlayers/layers/hub-layer";
 import { botLayer } from "../../openlayers/layers/bot-layer";
 import { MapFeatureTypes } from "../../types/openlayers-types";
 
@@ -60,7 +62,26 @@ export default function Map() {
         globalDispatch({ type: GlobalActions.CLICKED_BOT_MAP_ICON, botID: botID });
     };
 
-    const handleHubClick = (feature: Feature<Geometry>) => {};
+    const handleHubClick = (feature: Feature<Geometry>) => {
+        if (!hubs.getHub(feature.get("id"))) {
+            return;
+        }
+
+        const hubID = feature.get("id");
+
+        // Update data model
+        if (hubs.getSelectedHubID() === hubID) {
+            hubs.setSelectedHubID(null);
+        } else {
+            hubs.setSelectedHubID(hubID);
+        }
+
+        // Update OpenLayers
+        hubLayer.updateFeatures();
+
+        // Update React Context
+        globalDispatch({ type: GlobalActions.CLICKED_HUB_MAP_ICON, hubID: hubID });
+    };
 
     return <div id="map" data-testid="map"></div>;
 }

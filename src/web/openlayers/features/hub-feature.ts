@@ -6,8 +6,10 @@ import { fromLonLat } from "ol/proj";
 import { Coordinate } from "ol/coordinate";
 
 // Jaia
+import Hub from "../../data/hubs/hub";
 import { hubs } from "../../data/hubs/hubs";
 import { view } from "../views/view";
+import { MapIconColors } from "../../utils/style";
 import { MapFeatureTypes } from "../../types/openlayers-types";
 
 // Style
@@ -32,14 +34,15 @@ export function generateHubFeature(hubID: number) {
     });
     feature.set("type", MapFeatureTypes.HUB);
     feature.set("id", hubID);
-    feature.setStyle(generateHubStyle());
+    feature.setStyle(generateHubStyle(hub));
     return feature;
 }
 
-function generateHubStyle() {
+function generateHubStyle(hub: Hub) {
     return new Style({
         image: new Icon({
             src: hubIcon,
+            color: getHubIconColor(hub),
             anchor: [0.5, 0.5],
             rotateWithView: true,
         }),
@@ -53,4 +56,12 @@ function generateHubStyle() {
             offsetY: TEXT_OFFSET_RADIUS,
         }),
     });
+}
+
+function getHubIconColor(hub: Hub) {
+    if (hubs.getSelectedHubID() === hub.getHubID()) {
+        return MapIconColors.SELECTED;
+    } else {
+        return MapIconColors.DEFAULT;
+    }
 }
