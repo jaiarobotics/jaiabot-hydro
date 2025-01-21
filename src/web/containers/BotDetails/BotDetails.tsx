@@ -25,7 +25,7 @@ import { GlobalSettings } from "../../missions/settings";
 import { warning, info } from "../../notifications/notifications";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
 import Mission from "../../data/missions/mission";
-import { Command, BotStatus, MissionState, GeographicCoordinate } from "../../utils/protobuf-types";
+import { Command, MissionState, GeographicCoordinate } from "../../utils/protobuf-types";
 
 import {
     formatLatitude,
@@ -33,7 +33,11 @@ import {
     formatAttitudeAngle,
     addDropdownListener,
 } from "../../shared/Utilities";
-import { GlobalContext, GlobalDispatchContext } from "../../context/Global/GlobalContext";
+import {
+    GlobalContext,
+    GlobalDispatchContext,
+    BotAccordionNames,
+} from "../../context/Global/GlobalContext";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 import { HubContext } from "../../context/Hub/HubContext";
 
@@ -68,20 +72,6 @@ import { BotContext } from "../../context/Bot/BotContext";
 const rcMode = require("../../style/icons/controller.svg");
 
 let prec = 2;
-
-/// TODO This is also used in CommandControl, look for ways to simplify
-export interface DetailsExpandedState {
-    quickLook: boolean;
-    commands: boolean;
-    advancedCommands: boolean;
-    health: boolean;
-    data: boolean;
-    gps: boolean;
-    imu: boolean;
-    sensor: boolean;
-    power: boolean;
-    links: boolean;
-}
 
 // TODO The Take Control needs a complete refactor
 // This will probably go away and all of the uses of takeControlFunction
@@ -279,9 +269,6 @@ export interface BotDetailsProps {
     // Need to incorporate some of the data in RunInterface into the data model
     // before refactoring this out
     run: RunInterface;
-    // TODO This is only used in BotDetails but is managed in CommandControl
-    // Can this state be held in BotDetails and eliminate the prop?
-    isExpanded: DetailsExpandedState;
     // TODO download queue may be refactored, leave for now
     downloadQueue: number[];
     closeWindow: () => void;
@@ -291,8 +278,6 @@ export interface BotDetailsProps {
     // Currently using runList in CommandControl to manage, need to refactor mission or
     // other to elminate need for data in runList
     deleteSingleMission: (runId: string, disableMessage?: string) => void;
-    // TODO See above, can probably be managed locally
-    setDetailsExpanded: (section: keyof DetailsExpandedState, expanded: boolean) => void;
     // TODO RC Mode state is managed in CommandControl, not sure if used in any other panels.
     // CommandControl uses rcModeStatus state but also adds rcMode to the botFeature
     isRCModeActive: (botId: number) => boolean;
@@ -309,9 +294,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
     const closeWindow = props.closeWindow;
     const takeControl = props.takeControl;
-    const isExpanded = props.isExpanded;
     const deleteSingleMission = props.deleteSingleMission;
-    const setDetailsExpanded = props.setDetailsExpanded;
 
     const globalContext = useContext(GlobalContext);
     const globalDispatch = useContext(GlobalDispatchContext);
@@ -607,10 +590,13 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                 <div id="botDetailsAccordionContainer">
                     <ThemeProvider theme={accordionTheme}>
                         <Accordion
-                            expanded={isExpanded.quickLook}
-                            onChange={(event, expanded) => {
-                                setDetailsExpanded("quickLook", expanded);
-                            }}
+                            expanded={globalContext.botAccordionStates.quickLook}
+                            onChange={() =>
+                                globalDispatch({
+                                    type: GlobalActions.CLICKED_BOT_ACCORDION,
+                                    botAccordionName: BotAccordionNames.QUICKLOOK,
+                                })
+                            }
                             className="accordionContainer"
                         >
                             <AccordionSummary
@@ -674,10 +660,13 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                     <ThemeProvider theme={accordionTheme}>
                         <Accordion
-                            expanded={isExpanded.commands}
-                            onChange={(event, expanded) => {
-                                setDetailsExpanded("commands", expanded);
-                            }}
+                            expanded={globalContext.botAccordionStates.commands}
+                            onChange={() =>
+                                globalDispatch({
+                                    type: GlobalActions.CLICKED_BOT_ACCORDION,
+                                    botAccordionName: BotAccordionNames.COMMANDS,
+                                })
+                            }
                             className="accordionContainer"
                         >
                             <AccordionSummary
@@ -753,10 +742,13 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                 {dataOffloadButton}
 
                                 <Accordion
-                                    expanded={isExpanded.advancedCommands}
-                                    onChange={(event, expanded) => {
-                                        setDetailsExpanded("advancedCommands", expanded);
-                                    }}
+                                    expanded={globalContext.botAccordionStates.advancedCommands}
+                                    onChange={() =>
+                                        globalDispatch({
+                                            type: GlobalActions.CLICKED_BOT_ACCORDION,
+                                            botAccordionName: BotAccordionNames.ADVANCEDCOMMANDS,
+                                        })
+                                    }
                                     className="accordionContainer"
                                 >
                                     <AccordionSummary
@@ -917,10 +909,13 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                     <ThemeProvider theme={accordionTheme}>
                         <Accordion
-                            expanded={isExpanded.health}
-                            onChange={(event, expanded) => {
-                                setDetailsExpanded("health", expanded);
-                            }}
+                            expanded={globalContext.botAccordionStates.health}
+                            onChange={() =>
+                                globalDispatch({
+                                    type: GlobalActions.CLICKED_BOT_ACCORDION,
+                                    botAccordionName: BotAccordionNames.HEALTH,
+                                })
+                            }
                             className="accordionContainer"
                         >
                             <AccordionSummary
@@ -940,10 +935,13 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                     <ThemeProvider theme={accordionTheme}>
                         <Accordion
-                            expanded={isExpanded.data}
-                            onChange={(event, expanded) => {
-                                setDetailsExpanded("data", expanded);
-                            }}
+                            expanded={globalContext.botAccordionStates.data}
+                            onChange={() =>
+                                globalDispatch({
+                                    type: GlobalActions.CLICKED_BOT_ACCORDION,
+                                    botAccordionName: BotAccordionNames.DATA,
+                                })
+                            }
                             className="accordionContainer"
                         >
                             <AccordionSummary
@@ -957,10 +955,13 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             <AccordionDetails>
                                 <ThemeProvider theme={accordionTheme}>
                                     <Accordion
-                                        expanded={isExpanded.gps}
-                                        onChange={(event, expanded) => {
-                                            setDetailsExpanded("gps", expanded);
-                                        }}
+                                        expanded={globalContext.botAccordionStates.GPS}
+                                        onChange={() =>
+                                            globalDispatch({
+                                                type: GlobalActions.CLICKED_BOT_ACCORDION,
+                                                botAccordionName: BotAccordionNames.GPS,
+                                            })
+                                        }
                                         className="nestedAccordionContainer"
                                     >
                                         <AccordionSummary
@@ -1014,10 +1015,13 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                                 <ThemeProvider theme={accordionTheme}>
                                     <Accordion
-                                        expanded={isExpanded.imu}
-                                        onChange={(event, expanded) => {
-                                            setDetailsExpanded("imu", expanded);
-                                        }}
+                                        expanded={globalContext.botAccordionStates.imu}
+                                        onChange={() =>
+                                            globalDispatch({
+                                                type: GlobalActions.CLICKED_BOT_ACCORDION,
+                                                botAccordionName: BotAccordionNames.IMU,
+                                            })
+                                        }
                                         className="nestedAccordionContainer"
                                     >
                                         <AccordionSummary
@@ -1058,10 +1062,13 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                                 <ThemeProvider theme={accordionTheme}>
                                     <Accordion
-                                        expanded={isExpanded.sensor}
-                                        onChange={(event, expanded) => {
-                                            setDetailsExpanded("sensor", expanded);
-                                        }}
+                                        expanded={globalContext.botAccordionStates.sensor}
+                                        onChange={() =>
+                                            globalDispatch({
+                                                type: GlobalActions.CLICKED_BOT_ACCORDION,
+                                                botAccordionName: BotAccordionNames.SENSOR,
+                                            })
+                                        }
                                         className="nestedAccordionContainer"
                                     >
                                         <AccordionSummary

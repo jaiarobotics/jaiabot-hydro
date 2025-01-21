@@ -1,6 +1,10 @@
 // React -- Jaia
 import { useContext, useEffect, useState } from "react";
-import { GlobalContext, GlobalDispatchContext } from "../../context/Global/GlobalContext";
+import {
+    GlobalContext,
+    GlobalDispatchContext,
+    HubAccordionNames,
+} from "../../context/Global/GlobalContext";
 import { HealthStatusLine } from "../../components/HealthStatusLine/HealthStatusLine";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 import { HubContext } from "../../context/Hub/HubContext";
@@ -187,7 +191,7 @@ export function HubDetails() {
                         onChange={() =>
                             globalDispatch({
                                 type: GlobalActions.CLICKED_HUB_ACCORDION,
-                                hubAccordionName: "quickLook",
+                                hubAccordionName: HubAccordionNames.QUICKLOOK,
                             })
                         }
                         className="accordionContainer"
@@ -257,7 +261,7 @@ export function HubDetails() {
                         onChange={() =>
                             globalDispatch({
                                 type: GlobalActions.CLICKED_HUB_ACCORDION,
-                                hubAccordionName: "commands",
+                                hubAccordionName: HubAccordionNames.COMMANDS,
                             })
                         }
                         className="accordionContainer"
@@ -304,7 +308,7 @@ export function HubDetails() {
                         onChange={() =>
                             globalDispatch({
                                 type: GlobalActions.CLICKED_HUB_ACCORDION,
-                                hubAccordionName: "links",
+                                hubAccordionName: HubAccordionNames.LINKS,
                             })
                         }
                         className="accordionContainer"

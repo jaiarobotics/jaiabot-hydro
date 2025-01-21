@@ -5,6 +5,7 @@ import {
     SelectedPodElement,
     PodElement,
     HubAccordionStates,
+    BotAccordionStates,
 } from "../../../context/Global/GlobalContext";
 
 const mockSelectedPodElement1: SelectedPodElement = {
@@ -18,12 +19,24 @@ const mockHubAccordionStates1: HubAccordionStates = {
     links: false,
 };
 
+const mockBotAccordionStates: BotAccordionStates = {
+    quickLook: false,
+    commands: false,
+    advancedCommands: false,
+    health: false,
+    data: false,
+    gps: false,
+    imu: false,
+    sensor: false,
+};
+
 const mockGlobalContext1: GlobalContextType = {
     clientID: "",
     controllingClientID: "",
     selectedPodElement: mockSelectedPodElement1,
     showHubDetails: false,
     hubAccordionStates: mockHubAccordionStates1,
+    botAccordionStates: mockBotAccordionStates,
     isRCMode: false,
 };
 

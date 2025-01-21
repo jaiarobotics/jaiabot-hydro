@@ -11,6 +11,7 @@ export interface GlobalContextType {
     selectedPodElement: SelectedPodElement;
     showHubDetails: boolean;
     hubAccordionStates: HubAccordionStates;
+    botAccordionStates: BotAccordionStates;
     isRCMode: boolean;
 }
 
@@ -19,17 +20,63 @@ export interface SelectedPodElement {
     id: number;
 }
 
+export const enum HubAccordionNames {
+    QUICKLOOK = "quickLook",
+    COMMANDS = "commands",
+    LINKS = "links",
+}
+
 export interface HubAccordionStates {
     quickLook: boolean;
     commands: boolean;
     links: boolean;
 }
 
+const defaultHubAccordionStates = {
+    quickLook: false,
+    commands: false,
+    links: false,
+};
+
+export const enum BotAccordionNames {
+    QUICKLOOK = "quickLook",
+    COMMANDS = "commands",
+    ADVANCEDCOMMANDS = "advancedCommands",
+    HEALTH = "health",
+    DATA = "data",
+    GPS = "gps",
+    IMU = "imu",
+    SENSOR = "sensor",
+}
+
+export interface BotAccordionStates {
+    quickLook: boolean;
+    commands: boolean;
+    advancedCommands: boolean;
+    health: boolean;
+    data: boolean;
+    gps: boolean;
+    imu: boolean;
+    sensor: boolean;
+}
+
+const defaultBotAccordionStates = {
+    quickLook: false,
+    commands: false,
+    advancedCommands: false,
+    health: false,
+    data: false,
+    gps: false,
+    imu: false,
+    sensor: false,
+};
+
 export interface GlobalAction {
     type: GlobalActions;
     clientID?: string;
     hubID?: number;
     hubAccordionName?: string;
+    botAccordionName?: string;
 }
 
 interface GlobalContextProviderProps {
@@ -41,18 +88,13 @@ export enum PodElement {
     "HUB" = 2,
 }
 
-const defaultHubAccordionStates = {
-    quickLook: false,
-    commands: false,
-    links: false,
-};
-
 export const globalDefaultContext: GlobalContextType = {
     clientID: "",
     controllingClientID: "",
     selectedPodElement: null,
     showHubDetails: false,
     hubAccordionStates: defaultHubAccordionStates,
+    botAccordionStates: defaultBotAccordionStates,
     isRCMode: false,
 };
 
@@ -95,6 +137,9 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
 
         case GlobalActions.CLICKED_HUB_ACCORDION:
             return handleClickedHubAccordion(mutableState, action.hubAccordionName);
+
+        case GlobalActions.CLICKED_BOT_ACCORDION:
+            return handleClickedBotAccordion(mutableState, action.botAccordionName);
 
         default:
             return state;
@@ -255,15 +300,54 @@ function handleClickedHubAccordion(mutableState: GlobalContextType, accordionNam
 
     let hubAccordionStates = mutableState.hubAccordionStates;
     switch (accordionName) {
-        case "quickLook":
+        case HubAccordionNames.QUICKLOOK:
             hubAccordionStates.quickLook = !hubAccordionStates.quickLook;
             break;
-        case "commands":
+        case HubAccordionNames.COMMANDS:
             hubAccordionStates.commands = !hubAccordionStates.commands;
             break;
-        case "links":
+        case HubAccordionNames.LINKS:
             hubAccordionStates.links = !hubAccordionStates.links;
             break;
+    }
+    return mutableState;
+}
+
+/**
+ * Opens and closes the BotDetails accordion tabs
+ *
+ * @param {GlobalContextType} mutableState State object ref for making modifications
+ * @param {string} accordionName Which accordion to open or close
+ * @returns {GlobalContextType} Updated mutable state object
+ */
+function handleClickedBotAccordion(mutableState: GlobalContextType, accordionName: string) {
+    if (!accordionName) throw new Error("Invalid accordionName");
+
+    let botAccordionStates = mutableState.botAccordionStates;
+    switch (accordionName) {
+        case BotAccordionNames.QUICKLOOK:
+            botAccordionStates.quickLook = !botAccordionStates.quickLook;
+            break;
+        case BotAccordionNames.COMMANDS:
+            botAccordionStates.commands = !botAccordionStates.commands;
+            break;
+        case BotAccordionNames.ADVANCEDCOMMANDS:
+            botAccordionStates.advancedCommands = !botAccordionStates.advancedCommands;
+            break;
+        case BotAccordionNames.HEALTH:
+            botAccordionStates.health = !botAccordionStates.health;
+            break;
+        case BotAccordionNames.DATA:
+            botAccordionStates.data = !botAccordionStates.data;
+            break;
+        case BotAccordionNames.GPS:
+            botAccordionStates.gps = !botAccordionStates.gps;
+            break;
+        case BotAccordionNames.IMU:
+            botAccordionStates.imu = !botAccordionStates.imu;
+            break;
+        case BotAccordionNames.SENSOR:
+            botAccordionStates.sensor = !botAccordionStates.sensor;
     }
     return mutableState;
 }

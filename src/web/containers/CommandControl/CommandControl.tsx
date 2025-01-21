@@ -51,11 +51,7 @@ import {
     GlobalContextType,
     GlobalAction,
 } from "../../context/Global/GlobalContext";
-import {
-    BotDetailsComponent,
-    DetailsExpandedState,
-    BotDetailsProps,
-} from "../BotDetails/BotDetails";
+import { BotDetailsComponent, BotDetailsProps } from "../BotDetails/BotDetails";
 import {
     Goal,
     TaskType,
@@ -226,7 +222,6 @@ interface State {
 
     visiblePanel: PanelType;
     detailsBoxItem?: HubOrBot;
-    detailsExpanded: DetailsExpandedState;
     botDownloadQueue: number[];
     loadMissionPanel?: ReactElement;
     saveMissionPanel?: ReactElement;
@@ -374,18 +369,6 @@ export default class CommandControl extends React.Component {
 
             visiblePanel: PanelType.NONE,
             detailsBoxItem: null,
-            detailsExpanded: {
-                quickLook: true,
-                commands: false,
-                advancedCommands: false,
-                health: false,
-                data: false,
-                gps: false,
-                imu: false,
-                sensor: false,
-                power: false,
-                links: false,
-            },
             botDownloadQueue: [],
 
             surveyExclusionCoords: null,
@@ -3782,12 +3765,6 @@ export default class CommandControl extends React.Component {
         this.detectTaskChange();
     }
 
-    setDetailsExpanded(accordian: keyof DetailsExpandedState, isExpanded: boolean) {
-        let detailsExpanded = this.state.detailsExpanded;
-        detailsExpanded[accordian] = isExpanded;
-        this.setState({ detailsExpanded });
-    }
-
     disconnectionPanel() {
         let msg = this.state.disconnectionMessage;
         if (!msg) {
@@ -3978,12 +3955,10 @@ export default class CommandControl extends React.Component {
                     botID: this.selectedBotId(),
                     mission: this.getRunList(),
                     run: this.getRun(this.selectedBotId()),
-                    isExpanded: this.state.detailsExpanded,
                     downloadQueue: this.state.botDownloadQueue,
                     closeWindow: closeDetails.bind(this),
                     takeControl: this.takeControl.bind(this),
                     deleteSingleMission: this.deleteSingleRun.bind(this),
-                    setDetailsExpanded: this.setDetailsExpanded.bind(this),
                     isRCModeActive: this.isRCModeActive.bind(this),
                     setRcMode: this.setRcMode.bind(this),
                     downloadIndividualBot: this.processDownloadSingleBot.bind(this),
