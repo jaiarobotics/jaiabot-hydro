@@ -66,19 +66,12 @@ EOF
 
 systemctl enable wg-quick@wg_cloudhub
 
-## Restore network interfaces file
-mv /etc/network/vmimport.interfaces /etc/network/interfaces
-
-# overwrite eth0 and wlan0 settings
-cat <<EOF > /etc/network/interfaces.d/eth0
+## Set network interfaces file
+cat <<EOF > /etc/network/interfaces
+auto lo
+iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
-EOF
-cat <<EOF > /etc/network/interfaces.d/wlan0
-#auto wlan0
-#iface wlan0 inet dhcp
-#    wpa-essid JAIA-HUB-WIFI-{{FLEET_ID}}
-#    wpa-psk _JAIA_WPA_PSK_
 EOF
 
 ## Restore default hostname

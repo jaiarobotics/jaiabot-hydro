@@ -23,7 +23,6 @@ function write_preseed()
     mkdir -p "${VBOX_MOUNT_PATH}"
     vboximg-mount -i "${DISKUUID}" --rw --root "${VBOX_MOUNT_PATH}"
     sudo mount "${VBOX_MOUNT_PATH}/vol0" /mnt
-
  
     tmp_boot="/tmp/import_vms"
     mkdir -p ${tmp_boot}/jaiabot/init
@@ -32,6 +31,16 @@ function write_preseed()
     sudo cp ${tmp_boot}/jaiabot/init/* /mnt/jaiabot/init/
     
     sudo umount /mnt
+
+    ## ROOTFS
+    # set up grub to use nocloud and preseed
+    sudo mount "${VBOX_MOUNT_PATH}/vol1" /mnt
+    sudo chroot /mnt sed -i 's|\(GRUB_CMDLINE_LINUX_DEFAULT=".*\)"|\1 ds=nocloud\\;s=file:///etc/jaiabot/init/ network-config=disabled"|' /etc/default/grub
+    sudo mount -o bind /dev /mnt/dev
+    sudo chroot /mnt update-grub
+    sudo umount /mnt/dev
+    sudo umount /mnt    
+    
     sudo umount -l "${VBOX_MOUNT_PATH}"
 }
 
