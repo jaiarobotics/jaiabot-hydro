@@ -3986,7 +3986,6 @@ export default class CommandControl extends React.Component {
                     setDetailsExpanded: this.setDetailsExpanded.bind(this),
                     isRCModeActive: this.isRCModeActive.bind(this),
                     setRcMode: this.setRcMode.bind(this),
-                    toggleEditMode: this.toggleEditMode.bind(this),
                     downloadIndividualBot: this.processDownloadSingleBot.bind(this),
                 };
                 detailsBox = <BotDetailsComponent {...botDetailsProps} />;

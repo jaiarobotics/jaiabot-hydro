@@ -3,6 +3,7 @@ import { CommandInfo } from "../../types/commands";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
 import { MissionState } from "../../utils/protobuf-types";
 import Mission from "../../data/missions/mission";
+import Waypoint from "../../data/waypoints/waypoint";
 
 interface DisableInfo {
     isDisabled: boolean;
@@ -152,4 +153,18 @@ export function disablePlayButton(
     }
 
     return disableInfo;
+}
+// TODO function will not work until Mission Management is refactored
+// missions are not being added to bots in the data model yet
+export function toggleEditMode(mission: Mission) {
+    if (!mission) return;
+    const canEdit = mission.getCanEdit();
+    if (canEdit) {
+        // if toggling off reset all waypoint move status
+        const waypoints: Waypoint[] = mission.getWaypoints();
+        waypoints.forEach((element) => {
+            element.setCanMoveOnMap(false);
+        });
+    }
+    mission.setCanEdit(!canEdit);
 }

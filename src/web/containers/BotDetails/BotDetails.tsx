@@ -7,6 +7,7 @@ import {
     disableClearRunButton,
     disablePlayButton,
     runMission,
+    toggleEditMode,
 } from "./BotDetailsUtils";
 import { sendBotCommand, sendBotRunCommand, sendBotRCCommand } from "../../utils/command";
 import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
@@ -296,10 +297,6 @@ export interface BotDetailsProps {
     // CommandControl uses rcModeStatus state but also adds rcMode to the botFeature
     isRCModeActive: (botId: number) => boolean;
     setRcMode: (botId: number, rcMode: boolean) => void;
-    // TODO This should be able to handle locally by setting it in data model
-    // Currently not in defined in model, probably can be added to bot.ts
-    // Not sure if it will work in GoalSettings or other panels if changed
-    toggleEditMode: (run: RunInterface) => void;
     // TODO download queue may be refactored, leave for now
     downloadIndividualBot: (botID: Number, disableMessage: string) => void;
 }
@@ -600,7 +597,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
                         <JaiaToggle
                             checked={() => mission?.getCanEdit()}
-                            onClick={() => props.toggleEditMode(props.run)}
+                            onClick={() => toggleEditMode(mission)}
                             label="Edit"
                             title="ToggleEditMode"
                             disabled={() => (!mission ? true : false)}

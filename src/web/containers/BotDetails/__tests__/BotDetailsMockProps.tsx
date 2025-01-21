@@ -167,7 +167,6 @@ let mockDeleteSingleMission = jest.fn();
 let mockSetDetailsExpanded = jest.fn();
 let mockIsRCModeActive = jest.fn();
 let mockSetRcMode = jest.fn();
-let mockToggleEditMode = jest.fn();
 let mockDownloadIndividualBot = jest.fn();
 
 export let mockProps: BotDetailsProps = {
@@ -182,6 +181,5 @@ export let mockProps: BotDetailsProps = {
     setDetailsExpanded: mockSetDetailsExpanded,
     isRCModeActive: mockIsRCModeActive,
     setRcMode: mockSetRcMode,
-    toggleEditMode: mockToggleEditMode,
     downloadIndividualBot: mockDownloadIndividualBot,
 };
