@@ -2,7 +2,7 @@
 import { CommandInfo } from "../../types/commands";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
 import { MissionState } from "../../utils/protobuf-types";
-import { PortalBotStatus } from "../../shared/PortalStatus";
+import Mission from "../../data/missions/mission";
 
 interface DisableInfo {
     isDisabled: boolean;
@@ -99,7 +99,7 @@ export function disableButton(
  */
 
 // TODO Rework, Runs are no longer defined in JCC
-export function disableClearRunButton(botID: number, mission: MissionInterface) {
+export function disableClearRunButton(mission: Mission) {
     let disableInfo: DisableInfo;
 
     disableInfo = {
@@ -107,7 +107,7 @@ export function disableClearRunButton(botID: number, mission: MissionInterface) 
         disableMessage: "",
     };
 
-    if (!mission?.botsAssignedToRuns[botID]) {
+    if (!mission) {
         disableInfo.disableMessage = "Cannot perform this action because there is no run to delete";
         disableInfo.isDisabled = true;
     }
@@ -117,7 +117,7 @@ export function disableClearRunButton(botID: number, mission: MissionInterface) 
 
 export function disablePlayButton(
     botID: number,
-    mission: MissionInterface,
+    mission: Mission,
     command: CommandInfo,
     missionState: MissionState,
     downloadQueue: number[],
@@ -129,7 +129,7 @@ export function disablePlayButton(
         disableMessage: "",
     };
 
-    if (!mission.botsAssignedToRuns[botID]) {
+    if (!mission) {
         disableInfo.disableMessage +=
             "The command: " +
             command.commandType +

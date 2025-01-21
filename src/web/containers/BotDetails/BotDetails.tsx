@@ -118,6 +118,8 @@ function issueCommand(
 }
 
 // TODO look into simplifying the parameter of this
+// Need to wait until we can eliminate need for the
+// mission and run props
 function issueRunCommand(
     botID: number,
     botRun: Command,
@@ -272,21 +274,39 @@ function healthRow(bot: Bot, allInfo: boolean) {
 
 export interface BotDetailsProps {
     botID: number;
+    // TODO once all uses of missionFromProps below has been replaced this prop can be deleted
     mission: MissionInterface;
+    // TODO this should not be needed, most uses refactored but not all
+    // Need to incorporate some of the data in RunInterface into the data model
+    // before refactoring this out
     run: RunInterface;
+    // TODO This is only used in BotDetails but is managed in CommandControl
+    // Can this state be held in BotDetails and eliminate the prop?
     isExpanded: DetailsExpandedState;
+    // TODO download queue may be refactored, leave for now
     downloadQueue: number[];
     closeWindow: () => void;
+    // TODO Think the takeControl functionality needs rework, leave for now
     takeControl: (onSuccess: () => void) => void;
+    // TODO Should be able to change the data model locally, look to eliminated this prop
+    // Currently using runList in CommandControl to manage, need to refactor mission or
+    // other to elminate need for data in runList
     deleteSingleMission: (runId: string, disableMessage?: string) => void;
+    // TODO See above, can probably be managed locally
     setDetailsExpanded: (section: keyof DetailsExpandedState, expanded: boolean) => void;
+    // TODO RC Mode state is managed in CommandControl, not sure if used in any other panels.
+    // CommandControl uses rcModeStatus state but also adds rcMode to the botFeature
     isRCModeActive: (botId: number) => boolean;
     setRcMode: (botId: number, rcMode: boolean) => void;
+    // TODO This should be able to handle locally by setting it in data model
+    // Currently not in defined in model, probably can be added to bot.ts
+    // Not sure if it will work in GoalSettings or other panels if changed
     toggleEditMode: (run: RunInterface) => void;
+    // TODO download queue may be refactored, leave for now
     downloadIndividualBot: (botID: Number, disableMessage: string) => void;
 }
 
-// This has a lot of business logic mixed with React, try
+// TODO This has a lot of business logic mixed with React, try
 // to separate the logic from display code
 export function BotDetailsComponent(props: BotDetailsProps) {
     // TODO We will replace all uses of theses objects from Props with ones from context
@@ -449,15 +469,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     // Change message for clicking on map if the bot has a run, but it is not in edit mode
     let clickOnMap = <h3 className="name">Click on the map to create waypoints</h3>;
 
-    // TODO ** replace this with data from Context **
-    // Runs are no longer a concept in JCC
-    const botRun = getBotRun(botID, missionFromProps.runs) ?? false;
-
-    if (
-        !disableClearRunButton(botID, missionFromProps).isDisabled &&
-        botRun &&
-        botRun.id !== missionFromProps.runIdInEditMode
-    ) {
+    if (!mission?.getCanEdit()) {
         clickOnMap = <h3 className="name">Click edit toggle to create waypoints</h3>;
     }
 
@@ -466,8 +478,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     }
 
     function getRunString() {
-        const run = getBotRun(botID, missionFromProps.runs);
-        return run?.name ?? "No Run";
+        return mission?.getMissionID() ?? "No Run";
     }
 
     /**
@@ -521,7 +532,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             className={
                                 disablePlayButton(
                                     botID,
-                                    missionFromProps,
+                                    mission,
                                     botCommands.play,
                                     missionState,
                                     props.downloadQueue,
@@ -548,7 +559,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                               props.setRcMode,
                                               disablePlayButton(
                                                   botID,
-                                                  missionFromProps,
+                                                  mission,
                                                   botCommands.play,
                                                   missionState,
                                                   props.downloadQueue,
@@ -562,7 +573,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         props.setRcMode,
                                         disablePlayButton(
                                             botID,
-                                            missionFromProps,
+                                            mission,
                                             botCommands.play,
                                             missionState,
                                             props.downloadQueue,
@@ -575,14 +586,14 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                         </Button>
                         <Button
                             className={
-                                disableClearRunButton(botID, missionFromProps).isDisabled
+                                disableClearRunButton(mission).isDisabled
                                     ? "inactive button-jcc"
                                     : "button-jcc"
                             }
                             onClick={() => {
                                 deleteSingleMission(
                                     props.run?.id,
-                                    disableClearRunButton(botID, missionFromProps).disableMessage,
+                                    disableClearRunButton(mission).disableMessage,
                                 );
                             }}
                         >
@@ -590,13 +601,11 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                         </Button>
 
                         <JaiaToggle
-                            checked={() => props.mission.runIdInEditMode === props.run?.id}
+                            checked={() => mission?.getCanEdit()}
                             onClick={() => props.toggleEditMode(props.run)}
                             label="Edit"
                             title="ToggleEditMode"
-                            disabled={() =>
-                                getBotRun(botID, missionFromProps.runs) ? false : true
-                            }
+                            disabled={() => (!mission ? true : false)}
                         />
                     </div>
                 </div>
