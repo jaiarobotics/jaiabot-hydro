@@ -353,8 +353,8 @@ echo "export GOBY_VERSION='$GOBY_VERSION'" >> ${OUTPUT_METADATA}
 if [ ! -z "$VIRTUALBOX" ]; then
     sudo chroot rootfs apt-get -y install linux-image-virtual
     
-    # ensure VM uses eth0, etc. naming like Raspi and that cloud-init runs
-    sudo chroot rootfs sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0 ds=nocloud\\;s=file:///etc/jaiabot/init/ network-config=disabled"|' /etc/default/grub
+    # ensure VM uses eth0, etc. naming like Raspi
+    sudo chroot rootfs sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"|' /etc/default/grub
 
     # reduce grub timeout
     sudo chroot rootfs sed -i 's/GRUB_TIMEOUT_STYLE=\(.*\)/#GRUB_TIMEOUT_STYLE=\1/' /etc/default/grub
