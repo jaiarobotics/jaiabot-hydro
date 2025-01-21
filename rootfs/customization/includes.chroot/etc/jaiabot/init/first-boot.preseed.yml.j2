@@ -56,7 +56,6 @@ write_files:
       #   gateway 10.23.XXX.1
 
 runcmd:
-  # Generate inventory
-  - /etc/jaiabot/init/create-ansible-inventory.sh -b "{{ bots | join(",") }}" -h "{{ hubs | join(",") }}" > /etc/jaiabot/inventory.yml
+  - if [ ! -e /etc/jaiabot/inventory.yml ]; then /etc/jaiabot/init/create-ansible-inventory.sh -b "{{ bots | join(",") }}" -h "{{ hubs | join(",") }}" > /etc/jaiabot/inventory.yml; fi
   # Enable or disable service VPN 
   - sudo systemctl {{ "enable" if serviceVpnEnabled else "disable" }} wg-quick@wg_jaia
