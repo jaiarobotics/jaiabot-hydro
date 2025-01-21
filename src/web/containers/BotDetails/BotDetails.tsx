@@ -348,11 +348,11 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     const missionStatus: MissionStatus = bot.getMissionStatus();
 
     const botSensors: BotSensors = bot.getBotSensors();
-    const botGPS: GPS = botSensors.getGPS();
-    const botIMU: IMU = botSensors.getIMU();
-    const botPressureSensor: PressureSensor = botSensors.getPressureSensor();
-    const botTemperatureSensor: TemperatureSensor = botSensors.getTemperatureSensor();
-    const botConductivitySenstor: ConductivitySensor = botSensors.getCoductivitySensor();
+    const botGPS: GPS = botSensors?.getGPS();
+    const botIMU: IMU = botSensors?.getIMU();
+    const botPressureSensor: PressureSensor = botSensors?.getPressureSensor();
+    const botTemperatureSensor: TemperatureSensor = botSensors?.getTemperatureSensor();
+    const botConductivitySenstor: ConductivitySensor = botSensors?.getCoductivitySensor();
 
     const statusAge = Math.max(0.0, bot.getStatusAge() / 1e6);
     let statusAgeClassName: string;
@@ -365,7 +365,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
     // Active Goal
     var repeatNumberString = "N/A";
-    if (missionStatus.repeat_index != null) {
+    if (missionStatus?.repeat_index != null) {
         repeatNumberString = `${missionStatus.repeat_index + 1}`;
 
         if (mission?.getRepeats() != null) {
@@ -373,8 +373,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         }
     }
 
-    let activeGoal = missionStatus.activeGoal ?? "N/A";
-    let distToGoal = missionStatus.distanceToActiveGoal ?? "N/A";
+    let activeGoal = missionStatus?.activeGoal ?? "N/A";
+    let distToGoal = missionStatus?.distanceToActiveGoal ?? "N/A";
 
     if (activeGoal !== "N/A" && distToGoal === "N/A") {
         distToGoal = "Distance To Goal > 1000";
@@ -394,7 +394,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         distToHub = turf.rhumbDistance(botloc, hubloc, options).toFixed(1);
     }
 
-    const missionState = missionStatus.missionState;
+    const missionState = missionStatus?.missionState;
     takeControlFunction = takeControl;
 
     let linkQualityPercentage = 0;
@@ -543,9 +543,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             onClick={async () => {
                                 if (
                                     bot.getHealthState() === "HEALTH__FAILED" &&
-                                    missionStatus.missionState !==
+                                    missionStatus?.missionState !==
                                         MissionState.PRE_DEPLOYMENT__IDLE &&
-                                    missionStatus.missionState !==
+                                    missionStatus?.missionState !==
                                         MissionState.PRE_DEPLOYMENT__FAILED
                                 ) {
                                     (await CustomAlert.confirmAsync(
@@ -635,7 +635,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         <tr>
                                             <td>Mission State</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {missionStatus.missionState?.replaceAll(
+                                                {missionStatus?.missionState?.replaceAll(
                                                     "__",
                                                     "\n",
                                                 ) + botOffloadPercentage}
@@ -786,7 +786,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                             }
                                             onClick={async () => {
                                                 if (
-                                                    missionStatus.missionState ==
+                                                    missionStatus?.missionState ==
                                                     "IN_MISSION__UNDERWAY__RECOVERY__STOPPED"
                                                 ) {
                                                     (await CustomAlert.confirmAsync(
@@ -833,7 +833,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                             }
                                             onClick={async () => {
                                                 if (
-                                                    missionStatus.missionState ==
+                                                    missionStatus?.missionState ==
                                                     "IN_MISSION__UNDERWAY__RECOVERY__STOPPED"
                                                 ) {
                                                     (await CustomAlert.confirmAsync(
@@ -880,7 +880,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                             }
                                             onClick={async () => {
                                                 if (
-                                                    missionStatus.missionState ==
+                                                    missionStatus?.missionState ==
                                                     "IN_MISSION__UNDERWAY__RECOVERY__STOPPED"
                                                 ) {
                                                     (await CustomAlert.confirmAsync(
