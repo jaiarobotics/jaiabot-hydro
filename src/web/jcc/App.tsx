@@ -5,6 +5,7 @@ import React from "react";
 import { GlobalContextProvider } from "../context/Global/GlobalContext";
 import { HubContextProvider } from "../context/Hub/HubContext";
 import { BotContextProvider } from "../context/Bot/BotContext";
+import { MissionContextProvider } from "../context/Mission/MissionContext";
 import { CommandControlWrapper } from "../containers/CommandControl/CommandControl";
 import Map from "../components/Map/Map";
 
@@ -17,8 +18,10 @@ export default function App() {
             <GlobalContextProvider>
                 <HubContextProvider>
                     <BotContextProvider>
-                        {/* <CommandControlWrapper /> */}
-                        <Map />
+                        <MissionContextProvider>
+                            {/* <CommandControlWrapper /> */}
+                            <Map />
+                        </MissionContextProvider>
                     </BotContextProvider>
                 </HubContextProvider>
             </GlobalContextProvider>
