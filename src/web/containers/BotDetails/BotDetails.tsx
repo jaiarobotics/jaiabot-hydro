@@ -7,7 +7,6 @@ import {
     disableClearRunButton,
     disablePlayButton,
     runMission,
-    getBotRun,
 } from "./BotDetailsUtils";
 import { sendBotCommand, sendBotRunCommand, sendBotRCCommand } from "../../utils/command";
 import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
@@ -25,7 +24,6 @@ import { GlobalSettings } from "../../missions/settings";
 import { warning, info } from "../../notifications/notifications";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
 import Mission from "../../data/missions/mission";
-import { PortalBotStatus } from "../../shared/PortalStatus";
 import { Command, BotStatus, MissionState, GeographicCoordinate } from "../../utils/protobuf-types";
 
 import {

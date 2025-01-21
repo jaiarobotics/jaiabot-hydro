@@ -153,17 +153,3 @@ export function disablePlayButton(
 
     return disableInfo;
 }
-
-export function getBotRun(botId: number, runs: { [key: string]: RunInterface }) {
-    try {
-        for (const runId of Object.keys(runs)) {
-            if (runs[runId].assigned === botId) {
-                return runs[runId];
-            }
-        }
-    } catch (error) {
-        console.error("Cannot getBotRun:\n", error);
-        console.log("Cannot getBotRun:\n", error);
-    }
-    return null;
-}
