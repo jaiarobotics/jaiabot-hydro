@@ -215,6 +215,7 @@ filter-template-aws-rootfs-builds: &filter-template-aws-rootfs-builds
     branches:
       only:
         - "1.y"
+        - "task/rework-first-boot-as-cloud-init/jaia-1806"
 
 # which branches to build Docker simulator
 filter-template-docker-sim-builds: &filter-template-docker-sim-builds
