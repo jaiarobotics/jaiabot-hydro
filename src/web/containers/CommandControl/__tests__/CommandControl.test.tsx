@@ -22,7 +22,7 @@ const mockGlobalContext1: GlobalContextType = {
     clientID: "",
     controllingClientID: "",
     selectedPodElement: mockSelectedPodElement1,
-    showHubDetails: false,
+    showDetails: false,
     hubAccordionStates: mockHubAccordionStates1,
     isRCMode: false,
 };
