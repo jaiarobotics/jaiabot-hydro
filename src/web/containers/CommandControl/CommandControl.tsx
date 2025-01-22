@@ -50,6 +50,7 @@ import {
     GlobalDispatchContext,
     GlobalContextType,
     GlobalAction,
+    PodElement,
 } from "../../context/Global/GlobalContext";
 import { BotDetailsComponent, BotDetailsProps } from "../BotDetails/BotDetails";
 import {
@@ -2152,7 +2153,11 @@ export default class CommandControl extends React.Component {
             // Clicked on bot
             const botStatus = feature.get("bot") as PortalBotStatus;
             if (botStatus) {
-                this.props.globalDispatch({ type: GlobalActions.CLICKED_BOT_MAP_ICON });
+                this.props.globalDispatch({
+                    type: GlobalActions.CLICKED_HUB_OR_BOT,
+                    elementType: PodElement.BOT,
+                    elementID: botStatus.bot_id,
+                });
                 this.toggleBot(botStatus.bot_id);
                 return false;
             }
@@ -2163,8 +2168,9 @@ export default class CommandControl extends React.Component {
                 const hubKey = Object.keys(this.state.podStatus.hubs)[0];
                 const hubID = this.state.podStatus.hubs[hubKey].hub_id;
                 this.props.globalDispatch({
-                    type: GlobalActions.CLICKED_HUB_MAP_ICON,
-                    hubID: hubID,
+                    type: GlobalActions.CLICKED_HUB_OR_BOT,
+                    elementType: PodElement.HUB,
+                    elementID: hubID,
                 });
                 this.didClickHub(hubID);
                 return false;

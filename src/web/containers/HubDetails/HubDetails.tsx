@@ -4,6 +4,7 @@ import {
     GlobalContext,
     GlobalDispatchContext,
     HubAccordionNames,
+    PodElement,
 } from "../../context/Global/GlobalContext";
 import { HealthStatusLine } from "../../components/HealthStatusLine/HealthStatusLine";
 import { GlobalActions } from "../../context/Global/GlobalActions";
@@ -60,7 +61,7 @@ export function HubDetails() {
         addDropdownListener("accordionContainer", "hubDetailsAccordionContainer", 30);
     }, []);
 
-    if (hubContext === null || !globalContext.showHubDetails) {
+    if (hubContext === null || globalContext.shownDetails != PodElement.HUB) {
         return <div></div>;
     }
 

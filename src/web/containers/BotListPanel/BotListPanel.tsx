@@ -62,7 +62,11 @@ export function BotListPanel(props: Props) {
          * This is an instance where we are beginning to migrate from CommandControl state to context
          */
         const handleClick = () => {
-            globalDispatch({ type: GlobalActions.CLICKED_BOT_TAB });
+            globalDispatch({
+                type: GlobalActions.CLICKED_HUB_OR_BOT,
+                elementType: PodElement.BOT,
+                elementID: bot.bot_id,
+            });
             props.didClickBot(bot.bot_id);
         };
 
@@ -105,7 +109,11 @@ export function BotListPanel(props: Props) {
          */
         const handleClick = () => {
             props.didClickHub(hub.hub_id);
-            globalDispatch({ type: GlobalActions.CLICKED_HUB_TAB, hubID: hub.hub_id });
+            globalDispatch({
+                type: GlobalActions.CLICKED_HUB_OR_BOT,
+                elementType: PodElement.HUB,
+                elementID: hub.hub_id,
+            });
         };
 
         //For now we are naming HUB, HUB with no id

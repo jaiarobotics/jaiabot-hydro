@@ -37,6 +37,7 @@ import {
     GlobalContext,
     GlobalDispatchContext,
     BotAccordionNames,
+    PodElement,
 } from "../../context/Global/GlobalContext";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 import { HubContext } from "../../context/Hub/HubContext";
@@ -312,7 +313,11 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         addDropdownListener("accordionContainer", "botDetailsAccordionContainer", 30);
     }, []);
 
-    if (botContext === null || hubContext === null || !globalContext.showBotDetails) {
+    if (
+        botContext === null ||
+        hubContext === null ||
+        globalContext.shownDetails != PodElement.BOT
+    ) {
         return <div></div>;
     }
 
