@@ -2,9 +2,7 @@
 import React, { useContext } from "react";
 
 import MissionSpeedSettings from "../MissionControllerPanel/MissionSpeedSettings/MissionSpeedSettings";
-import { MissionDispatchContext } from "../../context/Mission/MissionContext";
 import { GlobalDispatchContext } from "../../context/Global/GlobalContext";
-import { MissionActions } from "../../context/Mission/mission-action";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 
 // Data model
@@ -21,7 +19,6 @@ import "../../style/stylesheets/util.less";
 
 export default function MissionsPanel() {
     const globalDispatch = useContext(GlobalDispatchContext);
-    const missionDispatch = useContext(MissionDispatchContext);
 
     const handleAddMissionClick = () => {
         globalDispatch({ type: GlobalActions.DESELECT_POD_ELEMENT });
@@ -30,7 +27,6 @@ export default function MissionsPanel() {
         missions.addMission(new Mission());
 
         // Update MissionContext
-        missionDispatch({ type: MissionActions.SYNC });
 
         autoScrollMissions();
     };
