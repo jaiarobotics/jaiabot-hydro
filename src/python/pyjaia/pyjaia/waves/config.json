@@ -9,7 +9,7 @@
         "maxZeroPeriod": 25.0
     },
     "analysis": {
-        "type": "welch",
+        "type": "periodogram",
         "segmentLength": 256
     }
 }

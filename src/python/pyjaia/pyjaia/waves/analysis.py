@@ -57,26 +57,21 @@ def powerSpectrumFFT(acceleration: List[float], sampleFrequency: float):
     return S
 
 
-def powerSpectrumPeriodogram(acceleration: List[float], sampleFrequency: float):
+def powerSpectrumPeriodogram(elevation: List[float], config: DriftAnalysisConfig):
     from scipy.signal import periodogram
-    N = len(acceleration)
-
-    height = heightFromAcceleration(acceleration, sampleFrequency)
-
-    frequencies, power_spectrum = periodogram(height, fs=sampleFrequency)
+    frequencies, power_spectrum = periodogram(elevation, fs=config.sampleFreq)
     return power_spectrum
 
 
-def powerSpectrumWelch(acceleration: List[float], config: DriftAnalysisConfig):
+def powerSpectrumWelch(elevation: List[float], config: DriftAnalysisConfig):
     from scipy.signal import welch
 
     frequencies, power_spectrum = welch(
-        acceleration,  # Input signal
+        elevation,  # Input signal
         fs=config.sampleFreq,    # Sampling frequency (Hz)
         nperseg=config.analysis.segmentLength, # Length of each segment
         scaling='density'        # Power spectral density scaling
     )
-    print(len(frequencies), len(power_spectrum))
     return power_spectrum
 
 
@@ -92,6 +87,8 @@ def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
         drift = doFFT(drift, config)
     elif config.analysis.type == 'welch':
         drift = doWelch(drift, config)
+    elif config.analysis.type == 'periodogram':
+        drift = doPeriodogram(drift, config)
     else:
         print(f'Unknown analysis type: {config.analysis.type}')
         exit(1)
@@ -120,6 +117,14 @@ def doFFT(drift: Drift, config: DriftAnalysisConfig):
 
 def doWelch(drift: Drift, config: DriftAnalysisConfig):
     drift.powerDensitySpectrum = powerSpectrumWelch(drift.elevation.y_values, config)
+    drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, config.sampleFreq)
+    drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
+    
+    return drift
+
+
+def doPeriodogram(drift: Drift, config: DriftAnalysisConfig):
+    drift.powerDensitySpectrum = powerSpectrumPeriodogram(drift.elevation.y_values, config)
     drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, config.sampleFreq)
     drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
     
