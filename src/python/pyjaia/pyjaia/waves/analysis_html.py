@@ -5,6 +5,8 @@ from math import *
 import numpy
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from dataclasses import asdict
+from pprint import pformat
 
 from .types import Drift
 from .processing import *
@@ -54,7 +56,10 @@ def htmlForFilterGraph(filterFunc: Callable[[float], float]):
         legend_title="Legend"
     )
 
-    return '<h1>Band pass filter</h1>' + fig.to_html(full_html=False, include_plotlyjs='cdn', default_width='50%', default_height='50%')
+    htmlString = '<h1>Band pass filter</h1>'
+    htmlString += fig.to_html(full_html=False, include_plotlyjs='cdn', default_width='50%', default_height='50%')
+
+    return htmlString
 
 
 def htmlForChart(charts: List[Series]) -> str:
@@ -79,7 +84,6 @@ def htmlForChart(charts: List[Series]) -> str:
 
 def htmlForSummaryTable(drifts: List[Drift], config: DriftAnalysisConfig):
     html = '<h1>Summary</h1>'
-    html += f'<p>Methodology: {config.analysis.type}'
     html += '<table><tr><td>Drift #</td><td>Duration</td><td>Significant Wave Height (m)</td><td>Maximum Wave Height (m)</td><td>Peak Period (s)</td></tr>'
 
     swhSum = 0.0
@@ -182,3 +186,10 @@ def htmlForPowerDensitySpectrum(spectrum: List[float], sampleFrequency: float) -
     htmlString += fig.to_html(full_html=False, include_plotlyjs='cdn', default_width='80%', default_height='60%')
 
     return htmlString
+
+
+def htmlForDriftAnalysisConfig(config: DriftAnalysisConfig):
+    htmlString = '<h2>Configuration</h2>'
+    htmlString += f'<pre>{pformat(asdict(config))}</pre>'
+    return htmlString
+

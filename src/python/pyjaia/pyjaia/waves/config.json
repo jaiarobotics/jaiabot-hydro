@@ -9,7 +9,7 @@
         "maxZeroPeriod": 25.0
     },
     "analysis": {
-        "type": "burg",
+        "type": "welch",
         "segmentLength": 256
     }
 }
