@@ -96,6 +96,9 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
         case GlobalActions.CLICKED_HUB_ACCORDION:
             return handleClickedHubAccordion(mutableState, action.hubAccordionName);
 
+        case GlobalActions.DESELECT_POD_ELEMENT:
+            return handleDeselectPodElement(mutableState);
+
         default:
             return state;
     }
@@ -265,6 +268,11 @@ function handleClickedHubAccordion(mutableState: GlobalContextType, accordionNam
             hubAccordionStates.links = !hubAccordionStates.links;
             break;
     }
+    return mutableState;
+}
+
+function handleDeselectPodElement(mutableState: GlobalContextType) {
+    mutableState.selectedPodElement = null;
     return mutableState;
 }
 

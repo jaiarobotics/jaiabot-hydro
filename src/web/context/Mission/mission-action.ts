@@ -1,1 +1,3 @@
-export enum MissionActions {}
+export enum MissionActions {
+    SYNC = "SYNC",
+}
