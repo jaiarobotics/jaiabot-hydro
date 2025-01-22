@@ -122,10 +122,7 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
         case GlobalActions.EXITED_RC_MODE:
             return handleExitedRCMode(mutableState);
 
-        case GlobalActions.CLOSED_HUB_DETAILS:
-            return handleClosedDetails(mutableState);
-
-        case GlobalActions.CLOSED_BOT_DETAILS:
+        case GlobalActions.CLOSED_DETAILS:
             return handleClosedDetails(mutableState);
 
         case GlobalActions.CLICKED_HUB_OR_BOT:
@@ -190,7 +187,7 @@ function handleClosedDetails(mutableState: GlobalContextType) {
 }
 
 /**
- * Handles click events for the hub icon located on map
+ * Handles click events for the hub and bot icons on the map and in bots drawer
  *
  * @param {GlobalContextType} mutableState State object ref for making modifications
  * @param {PodElement} type What type of elemetnt was clicked (HUB or BOT)
@@ -202,7 +199,7 @@ function handleClickedHobOrBot(mutableState: GlobalContextType, type: PodElement
 
     // Clicked currently selected element
     if (mutableState.selectedPodElement.type == type && mutableState.selectedPodElement.id == id) {
-        // close Detailsthem and deselect
+        // Close deselect and close details
         mutableState.shownDetails = PodElement.NONE;
         mutableState.selectedPodElement.type = PodElement.NONE;
     } else {

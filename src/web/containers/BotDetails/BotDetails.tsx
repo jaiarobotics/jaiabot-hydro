@@ -492,7 +492,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
      * @returns {void}
      */
     function handleClosePanel() {
-        globalDispatch({ type: GlobalActions.CLOSED_BOT_DETAILS });
+        globalDispatch({ type: GlobalActions.CLOSED_DETAILS });
     }
 
     return (

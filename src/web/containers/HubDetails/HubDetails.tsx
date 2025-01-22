@@ -77,7 +77,7 @@ export function HubDetails() {
      * @returns {void}
      */
     function handleClosePanel() {
-        globalDispatch({ type: GlobalActions.CLOSED_HUB_DETAILS });
+        globalDispatch({ type: GlobalActions.CLOSED_DETAILS });
     }
 
     /**
