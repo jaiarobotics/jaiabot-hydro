@@ -3941,36 +3941,6 @@ export default class CommandControl extends React.Component {
             );
         }
 
-        // Details box
-        let detailsBoxItem = this.state.detailsBoxItem;
-        let detailsBox;
-
-        function closeDetails() {
-            self.setState({ detailsBoxItem: null });
-        }
-
-        switch (detailsBoxItem?.type) {
-            case "bot":
-                const botDetailsProps: BotDetailsProps = {
-                    botID: this.selectedBotId(),
-                    mission: this.getRunList(),
-                    run: this.getRun(this.selectedBotId()),
-                    downloadQueue: this.state.botDownloadQueue,
-                    closeWindow: closeDetails.bind(this),
-                    takeControl: this.takeControl.bind(this),
-                    deleteSingleMission: this.deleteSingleRun.bind(this),
-                    isRCModeActive: this.isRCModeActive.bind(this),
-                    setRcMode: this.setRcMode.bind(this),
-                    downloadIndividualBot: this.processDownloadSingleBot.bind(this),
-                };
-                detailsBox = <BotDetailsComponent {...botDetailsProps} />;
-                break;
-            default:
-                detailsBox = null;
-                this.clearRemoteControlInterval();
-                break;
-        }
-
         const surveyMissionSettingsButton =
             visiblePanel == PanelType.MISSION_SETTINGS ? (
                 <Button
@@ -4296,7 +4266,17 @@ export default class CommandControl extends React.Component {
                     />
                 </div>
 
-                {detailsBox}
+                <BotDetailsComponent
+                    botID={this.selectedBotId()}
+                    mission={this.getRunList()}
+                    run={this.getRun(this.selectedBotId())}
+                    downloadQueue={this.state.botDownloadQueue}
+                    takeControl={this.takeControl.bind(this)}
+                    deleteSingleMission={this.deleteSingleRun.bind(this)}
+                    isRCModeActive={this.isRCModeActive.bind(this)}
+                    setRcMode={this.setRcMode.bind(this)}
+                    downloadIndividualBot={this.processDownloadSingleBot.bind(this)}
+                />
 
                 <HubDetails />
 

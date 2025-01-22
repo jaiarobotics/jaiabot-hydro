@@ -97,7 +97,6 @@ let run: RunInterface = {
 
 let mockDownloadQueue: number[] = [];
 
-let mockCloseWindow = jest.fn();
 let mockTakeControl = jest.fn();
 let mockDeleteSingleMission = jest.fn();
 let mockIsRCModeActive = jest.fn();
@@ -109,7 +108,6 @@ export let mockProps: BotDetailsProps = {
     mission: mission,
     run: run,
     downloadQueue: mockDownloadQueue,
-    closeWindow: mockCloseWindow,
     takeControl: mockTakeControl,
     deleteSingleMission: mockDeleteSingleMission,
     isRCModeActive: mockIsRCModeActive,

@@ -271,7 +271,6 @@ export interface BotDetailsProps {
     run: RunInterface;
     // TODO download queue may be refactored, leave for now
     downloadQueue: number[];
-    closeWindow: () => void;
     // TODO Think the takeControl functionality needs rework, leave for now
     takeControl: (onSuccess: () => void) => void;
     // TODO Should be able to change the data model locally, look to eliminated this prop
@@ -292,7 +291,6 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     // TODO We will replace all uses of theses objects from Props with ones from context
     const missionFromProps = props.mission;
 
-    const closeWindow = props.closeWindow;
     const takeControl = props.takeControl;
     const deleteSingleMission = props.deleteSingleMission;
 
@@ -314,6 +312,10 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         addDropdownListener("accordionContainer", "botDetailsAccordionContainer", 30);
     }, []);
 
+    if (botContext === null || hubContext === null || !globalContext.showBotDetails) {
+        return <div></div>;
+    }
+
     // Pull Data from the Data Model Context
     const DEFAULT_HUB_ID = 1;
     const hub = hubContext.hubs.get(DEFAULT_HUB_ID);
@@ -321,6 +323,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
 
     const botID = props.botID;
     const bot = botContext.bots.get(botID);
+    if (!bot) {
+        return <div></div>;
+    }
 
     const mission: Mission = bot.getMission();
     const missionStatus: MissionStatus = bot.getMissionStatus();
@@ -476,6 +481,15 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         return botLogging;
     }
 
+    /**
+     * Dispatches an action to close the HubDetails panel
+     *
+     * @returns {void}
+     */
+    function handleClosePanel() {
+        globalDispatch({ type: GlobalActions.CLOSED_BOT_DETAILS });
+    }
+
     return (
         <React.Fragment>
             <div id="botDetailsBox">
@@ -483,7 +497,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                     <div className="titleBar">
                         <h2 className="botName">{getBotString()}</h2>
                         <h4 className="runName">{getRunString()}</h4>
-                        <div onClick={() => closeWindow()} className="closeButton">
+                        <div className="closeButton" onClick={handleClosePanel}>
                             ⨯
                         </div>
                     </div>

@@ -35,6 +35,7 @@ const mockGlobalContext1: GlobalContextType = {
     controllingClientID: "",
     selectedPodElement: mockSelectedPodElement1,
     showHubDetails: false,
+    showBotDetails: false,
     hubAccordionStates: mockHubAccordionStates1,
     botAccordionStates: mockBotAccordionStates,
     isRCMode: false,
