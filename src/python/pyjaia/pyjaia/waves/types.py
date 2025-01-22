@@ -23,9 +23,57 @@ class Drift:
     def __init__(self):
         self.rawVerticalAcceleration = Series('Raw Vertical Acceleration')
         self.filteredVerticalAcceleration = Series('Filtered Vertical Acceleration')
-        self.powerDensitySpectrum = Series('Power Density Spectrum')
+        self.powerDensitySpectrum = []
         self.elevation = Series('Elevation')
         self.waves = []
         self.significantWaveHeight = 0.0
         self.peakWavePeriod = 0.0
-        
+
+
+@dataclass
+class BandPassFilterConfig:
+    type: str
+    minZeroPeriod: float
+    minPeriod: float
+    maxPeriod: float
+    maxZeroPeriod: float
+
+
+    @staticmethod
+    def fromDict(input: Dict):
+        return BandPassFilterConfig(**input)
+
+
+@dataclass
+class AnalysisConfig:
+    type: str
+
+    @staticmethod
+    def fromDict(input: Dict):
+        return AnalysisConfig(**input)
+
+
+@dataclass
+class DriftAnalysisConfig:
+    glitchy: bool = False
+    sampleFreq: float = 4.0
+    bandPassFilter: BandPassFilterConfig = None
+    analysis: AnalysisConfig = None
+
+    @staticmethod
+    def fromDict(input: Dict):
+        config = DriftAnalysisConfig(**input)
+        config.bandPassFilter = BandPassFilterConfig.fromDict(config.bandPassFilter)
+        config.analysis = AnalysisConfig.fromDict(config.analysis)
+        return config
+
+
+    @staticmethod
+    def load(configFilename: str):
+        import json
+
+        if not configFilename.endswith('.json'):
+            configFilename += '.json'
+
+        configDict = json.load(open(configFilename))
+        return DriftAnalysisConfig.fromDict(configDict)

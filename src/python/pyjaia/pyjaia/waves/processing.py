@@ -79,7 +79,19 @@ def trimSeries(series: Series, startGap: float, endGap: float=None):
     return newSeries
 
 
-def filterFrequencies(inputSeries: Series, sampleFreq: float, filterFunc: Callable[[float], float]):
+def getBandPassFilterFunc(bandPassFilterConfig: BandPassFilterConfig):
+    if bandPassFilterConfig.type == 'cos^2':
+        maxFreq = 1.0 / bandPassFilterConfig.minPeriod
+        minFreq = 1.0 / bandPassFilterConfig.maxPeriod
+        maxWindow = 1.0 / bandPassFilterConfig.minZeroPeriod - maxFreq
+        minWindow = minFreq - 1.0 / bandPassFilterConfig.maxZeroPeriod
+        return cos2Filter(minFreq, minWindow, maxFreq, maxWindow)
+    else:
+        print(f'Unknown band pass filter type: {bandPassFilterConfig.type}')
+        exit(1)
+
+
+def filterFrequencies(inputSeries: Series, sampleFreq: float, bandPassFilterConfig: BandPassFilterConfig):
     """Applies a frequency filter to a series.
 
     Args:
@@ -93,6 +105,8 @@ def filterFrequencies(inputSeries: Series, sampleFreq: float, filterFunc: Callab
     if len(inputSeries.utime) < 2:
         return Series()
 
+    bandPassFilterFunc = getBandPassFilterFunc(bandPassFilterConfig)
+
     A = numpy.fft.rfft(inputSeries.y_values)
     n = len(A)
     nyquist = sampleFreq / 2
@@ -104,7 +118,7 @@ def filterFrequencies(inputSeries: Series, sampleFreq: float, filterFunc: Callab
 
     for index in range(len(A)):
         freq = freqCoefficient * index
-        A[index] *= filterFunc(freq)
+        A[index] *= bandPassFilterFunc(freq)
 
     a = numpy.fft.irfft(A)
     series = Series()
@@ -231,7 +245,7 @@ def getSortedWaves(elevationSeries: Series) -> List[Wave]:
     return sortedWaves
 
 
-def significantWaveHeight(waves: List[Wave]):
+def significantWaveHeightFromWaveList(waves: List[Wave]):
     """Returns the significant wave height from an unsorted list of wave heights.
 
     Args:
@@ -250,11 +264,7 @@ def significantWaveHeight(waves: List[Wave]):
     return statistics.mean(significantWaveHeights)
 
 
-BandPassFilterFunc = Callable[[float], float]
-bandPassFilter = cos2Filter(1/20, 1/100, 5, 5)
-
-
-def calculateElevationSeries(accelerationSeries: Series, sampleFreq: float):
+def calculateElevationSeries(accelerationSeries: Series, sampleFreq: float, bandPassFilterConfig: BandPassFilterConfig):
     """Calculates the elevation series from an input acceleration series.
 
     Args:
@@ -263,6 +273,8 @@ def calculateElevationSeries(accelerationSeries: Series, sampleFreq: float):
     Returns:
         Series: The elevation series, calculated by de-meaning, trimming, windowing, FFT, and double integration.
     """
+
+    bandPassFilter = getBandPassFilterFunc(bandPassFilterConfig)
 
     series = accelerationSeries
     series = trimSeries(series, 10e6, 5e6)
@@ -274,7 +286,7 @@ def calculateElevationSeries(accelerationSeries: Series, sampleFreq: float):
     return series
 
 
-def filterAcceleration(accelerationSeries: Series, sampleFreq: float):
+def filterAcceleration(accelerationSeries: Series, sampleFreq: float, bandPassFilterConfig: BandPassFilterConfig):
     """Process and filter an input acceleration series.
 
     Args:
@@ -288,7 +300,7 @@ def filterAcceleration(accelerationSeries: Series, sampleFreq: float):
     series = trimSeries(series, 10e6, 5e6)
     series = applyHannWindow(series, fadePeriod=10e6)
     series = deMean(series)
-    series = filterFrequencies(series, sampleFreq=sampleFreq, filterFunc=bandPassFilter)
+    series = filterFrequencies(series, sampleFreq, bandPassFilterConfig)
     series.name = 'Filtered acceleration (m/s^2)'
 
     return series

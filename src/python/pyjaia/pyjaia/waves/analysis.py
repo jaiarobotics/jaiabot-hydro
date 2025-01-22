@@ -67,14 +67,24 @@ def powerSpectrumPeriodogram(acceleration: List[float], sampleFrequency: float):
     return power_spectrum
 
 
-
-def doAnalysisWaveCounting(verticalAcceleration: Series, sampleFreq: float):
+def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
     drift = Drift()
-    drift.rawVerticalAcceleration = verticalAcceleration.makeUniform(sampleFreq)
-    drift.filteredVerticalAcceleration = filterAcceleration(drift.rawVerticalAcceleration, sampleFreq)
-    drift.elevation = calculateElevationSeries(drift.rawVerticalAcceleration, sampleFreq)
+    drift.rawVerticalAcceleration = verticalAcceleration.makeUniform(config.sampleFreq)
+    drift.filteredVerticalAcceleration = filterAcceleration(drift.rawVerticalAcceleration, config.sampleFreq, config.bandPassFilter)
+    drift.elevation = calculateElevationSeries(drift.rawVerticalAcceleration, config.sampleFreq, config.bandPassFilter)
+
+    if config.analysis.type == 'counting':
+        drift = doWaveCounting(drift, config)
+    else:
+        print(f'Unknown analysis type: {config.analysis.type}')
+        exit(1)
+
+    return drift
+
+
+def doWaveCounting(drift: Drift, config: DriftAnalysisConfig):
     drift.waves = getSortedWaves(drift.elevation)
-    drift.significantWaveHeight = significantWaveHeight(drift.waves)
+    drift.significantWaveHeight = significantWaveHeightFromWaveList(drift.waves)
     
     return drift
 

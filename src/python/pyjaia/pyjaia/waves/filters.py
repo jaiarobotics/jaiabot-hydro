@@ -37,9 +37,9 @@ def cos2Filter(minFreq: float, minWindow: float, maxFreq: float, maxWindow: floa
 
     def filterFunc(freq: float):
         if freq <= min0 or freq >= max1:
-            return 0
+            return 0.0
         if freq >= min1 and freq <= max0:
-            return 1
+            return 1.0
         
         if freq > min0 and freq < min1:
             c = (cos((min1 - freq) * kMin) + 1) / 2
@@ -48,5 +48,7 @@ def cos2Filter(minFreq: float, minWindow: float, maxFreq: float, maxWindow: floa
         if freq > max0 and freq < max1:
             c = (cos((freq - max0) * kMax) + 1) / 2
             return c * c
+        
+        return 0.0
 
     return filterFunc
