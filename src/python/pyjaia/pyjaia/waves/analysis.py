@@ -75,6 +75,13 @@ def powerSpectrumWelch(elevation: List[float], config: DriftAnalysisConfig):
     return power_spectrum
 
 
+def powerSpectrumBurg(elevation: List[float], config: DriftAnalysisConfig):
+    from spectrum import pburg
+    
+    ar_psd = pburg(elevation, order=10)
+    return ar_psd().psd
+
+
 def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
     drift = Drift()
     drift.rawVerticalAcceleration = verticalAcceleration.makeUniform(config.sampleFreq)
@@ -89,6 +96,8 @@ def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
         drift = doWelch(drift, config)
     elif config.analysis.type == 'periodogram':
         drift = doPeriodogram(drift, config)
+    elif config.analysis.type == 'burg':
+        drift = doBurg(drift, config)
     else:
         print(f'Unknown analysis type: {config.analysis.type}')
         exit(1)
@@ -129,3 +138,12 @@ def doPeriodogram(drift: Drift, config: DriftAnalysisConfig):
     drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
     
     return drift
+
+
+def doBurg(drift: Drift, config: DriftAnalysisConfig):
+    drift.powerDensitySpectrum = powerSpectrumBurg(drift.elevation.y_values, config)
+    drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, config.sampleFreq)
+    drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
+    
+    return drift
+

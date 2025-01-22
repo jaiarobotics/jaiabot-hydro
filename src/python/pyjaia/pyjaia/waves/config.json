@@ -9,7 +9,7 @@
         "maxZeroPeriod": 25.0
     },
     "analysis": {
-        "type": "periodogram",
+        "type": "burg",
         "segmentLength": 256
     }
 }
