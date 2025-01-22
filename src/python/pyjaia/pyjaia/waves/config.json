@@ -9,6 +9,6 @@
         "maxZeroPeriod": 25.0
     },
     "analysis": {
-        "type": "fft"
+        "type": "welch"
     }
 }
