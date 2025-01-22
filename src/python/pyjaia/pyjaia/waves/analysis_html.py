@@ -77,8 +77,9 @@ def htmlForChart(charts: List[Series]) -> str:
     return htmlString
 
 
-def htmlForSummaryTable(drifts: List[Drift]):
+def htmlForSummaryTable(drifts: List[Drift], config: DriftAnalysisConfig):
     html = '<h1>Summary</h1>'
+    html += f'<p>Methodology: {config.analysis.type}'
     html += '<table><tr><td>Drift #</td><td>Duration</td><td>Significant Wave Height (m)</td><td>Maximum Wave Height (m)</td><td>Peak Period (s)</td></tr>'
 
     swhSum = 0.0
@@ -88,18 +89,22 @@ def htmlForSummaryTable(drifts: List[Drift]):
         duration = drift.rawVerticalAcceleration.duration()
         durationString = formatTimeDelta(duration)
 
-        if len(drift.waves) == 0:
+        if drift.waves is not None and len(drift.waves) == 0:
             html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td colspan="3">No waves detected</td></tr>'
             continue
 
         swh = drift.significantWaveHeight
         swhSum += (swh * duration.total_seconds())
         durationSum += duration.total_seconds()
-        largestWave = drift.waves[-1]
-        maxWaveHeight = largestWave.height
+
+        if drift.maxWaveHeight is not None:
+            maxWaveHeight = f"{drift.maxWaveHeight:0.2f}"
+        else:
+            maxWaveHeight = "N/A"
+
         peakPeriod = drift.peakWavePeriod
 
-        html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>{swh:0.2f}</td><td>{maxWaveHeight:0.2f}</td><td>{peakPeriod:0.2f}</td></tr>'
+        html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>{swh:0.2f}</td><td>{maxWaveHeight}</td><td>{peakPeriod:0.2f}</td></tr>'
 
     if durationSum > 0:
         meanWaveHeight = swhSum / durationSum
@@ -135,13 +140,13 @@ def htmlForDriftObject(drift: Drift, driftIndex: int=None) -> str:
     durationString = formatTimeDelta(drift.rawVerticalAcceleration.duration())
     htmlString += f'<h3>Drift duration: {durationString}<h3>'
 
-    if len(drift.waves) > 0:
+    if drift.waves is not None and len(drift.waves) > 0:
         waveHeights = [wave.height for wave in drift.waves]
         swh = statistics.mean(waveHeights[floor(len(waveHeights)*2/3):])
         htmlString += f'<h3>Significant Wave Height via wave counting: {swh:0.2f}<h3>'
 
-    # The wave heights
-    htmlString += htmlForWaves(drift.waves)
+        # The wave heights
+        htmlString += htmlForWaves(drift.waves)
 
     htmlString += htmlForChart([drift.rawVerticalAcceleration, drift.filteredVerticalAcceleration, drift.elevation])
     htmlString += htmlForPowerDensitySpectrum(drift.powerDensitySpectrum, drift.filteredVerticalAcceleration.averageSampleFrequency())
@@ -151,6 +156,8 @@ def htmlForDriftObject(drift: Drift, driftIndex: int=None) -> str:
 
 def htmlForPowerDensitySpectrum(spectrum: List[float], sampleFrequency: float) -> str:
     htmlString = ''
+    if spectrum is None:
+        return htmlString
 
     fig = go.Figure()
     

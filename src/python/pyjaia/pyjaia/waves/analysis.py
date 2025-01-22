@@ -75,6 +75,8 @@ def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
 
     if config.analysis.type == 'counting':
         drift = doWaveCounting(drift, config)
+    elif config.analysis.type == 'fft':
+        drift = doFFT(drift, config)
     else:
         print(f'Unknown analysis type: {config.analysis.type}')
         exit(1)
@@ -86,20 +88,16 @@ def doWaveCounting(drift: Drift, config: DriftAnalysisConfig):
     drift.waves = getSortedWaves(drift.elevation)
     drift.significantWaveHeight = significantWaveHeightFromWaveList(drift.waves)
     
+    peakWave = max(drift.waves, key=lambda wave: wave.height)
+    drift.maxWaveHeight = peakWave.height
+    drift.peakWavePeriod = peakWave.period
+    
     return drift
 
 
-def doAnalysisPowerDensitySpectrum(verticalAcceleration: Series, sampleFreq: float):
-    drift = Drift()
-    drift.rawVerticalAcceleration = verticalAcceleration.makeUniform(sampleFreq)
-    drift.filteredVerticalAcceleration = filterAcceleration(drift.rawVerticalAcceleration, sampleFreq)
-
-    sampleFrequency = drift.filteredVerticalAcceleration.averageSampleFrequency()
-
-    drift.powerDensitySpectrum = powerSpectrumFFT(drift.filteredVerticalAcceleration.y_values, sampleFrequency)
-    drift.elevation = calculateElevationSeries(drift.rawVerticalAcceleration, sampleFreq)
-    drift.waves = getSortedWaves(drift.elevation)
-    drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, sampleFrequency)
-    drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, sampleFrequency)
+def doFFT(drift: Drift, config: DriftAnalysisConfig):
+    drift.powerDensitySpectrum = powerSpectrumFFT(drift.filteredVerticalAcceleration.y_values, config.sampleFreq)
+    drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, config.sampleFreq)
+    drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
     
     return drift

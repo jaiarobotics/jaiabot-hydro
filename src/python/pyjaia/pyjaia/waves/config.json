@@ -5,10 +5,10 @@
         "type": "cos^2",
         "minZeroPeriod": 0.25,
         "minPeriod": 0.5,
-        "maxPeriod": 25.0,
-        "maxZeroPeriod": 30.0
+        "maxPeriod": 20.0,
+        "maxZeroPeriod": 25.0
     },
     "analysis": {
-        "type": "counting"
+        "type": "fft"
     }
 }

@@ -18,15 +18,17 @@ class Drift:
 
     waves: List[Wave]
     significantWaveHeight: float
+    maxWaveHeight: float
     peakWavePeriod: float
 
     def __init__(self):
         self.rawVerticalAcceleration = Series('Raw Vertical Acceleration')
         self.filteredVerticalAcceleration = Series('Filtered Vertical Acceleration')
-        self.powerDensitySpectrum = []
+        self.powerDensitySpectrum = None
         self.elevation = Series('Elevation')
-        self.waves = []
+        self.waves = None
         self.significantWaveHeight = 0.0
+        self.maxWaveHeight = None
         self.peakWavePeriod = 0.0
 
 

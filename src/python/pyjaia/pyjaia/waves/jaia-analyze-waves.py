@@ -31,19 +31,19 @@ cssTag = '''<style>
 </style>'''
 
 
-def doPlots(h5FilePath: Path, bandPassFilterConfig: BandPassFilterConfig, drifts: List[Drift]):
+def doPlots(h5FilePath: Path, config: DriftAnalysisConfig, drifts: List[Drift]):
     description = h5FilePath.stem
     htmlFilePath = h5FilePath.parent.joinpath(f'waveAnalysis-{description}-{datetime.now().strftime("%Y%m%dT%H%M%S")}.html')
     htmlFilename = str(htmlFilePath)
 
-    bandPassFilter = getBandPassFilterFunc(bandPassFilterConfig)
+    bandPassFilter = getBandPassFilterFunc(config.bandPassFilter)
 
     with open(htmlFilename, 'w') as f:
         f.write('<html><meta charset="utf-8">\n')
 
         f.write(cssTag)
         f.write(f'<h1>{description}</h1>')
-        f.write(htmlForSummaryTable(drifts))
+        f.write(htmlForSummaryTable(drifts, config))
 
         f.write(htmlForFilterGraph(bandPassFilter))
 
@@ -70,7 +70,7 @@ def analyzeFile(h5File: h5py.File, config: DriftAnalysisConfig):
         drift = doDriftAnalysis(driftSeriesSet.accelerationVertical, config)
         drifts.append(drift)
 
-    doPlots(Path(h5File.filename), config.bandPassFilter, drifts)
+    doPlots(Path(h5File.filename), config, drifts)
 
 
 def main():
