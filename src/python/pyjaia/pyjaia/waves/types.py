@@ -49,6 +49,7 @@ class BandPassFilterConfig:
 @dataclass
 class AnalysisConfig:
     type: str
+    segmentLength: int = None
 
     @staticmethod
     def fromDict(input: Dict):

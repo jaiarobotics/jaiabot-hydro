@@ -67,13 +67,13 @@ def powerSpectrumPeriodogram(acceleration: List[float], sampleFrequency: float):
     return power_spectrum
 
 
-def powerSpectrumWelch(acceleration: List[float], sampleFrequency: float):
+def powerSpectrumWelch(acceleration: List[float], config: DriftAnalysisConfig):
     from scipy.signal import welch
 
     frequencies, power_spectrum = welch(
         acceleration,  # Input signal
-        fs=sampleFrequency,      # Sampling frequency (Hz)
-        nperseg=1024,            # Length of each segment
+        fs=config.sampleFreq,    # Sampling frequency (Hz)
+        nperseg=config.analysis.segmentLength, # Length of each segment
         scaling='density'        # Power spectral density scaling
     )
     print(len(frequencies), len(power_spectrum))
@@ -119,7 +119,7 @@ def doFFT(drift: Drift, config: DriftAnalysisConfig):
 
 
 def doWelch(drift: Drift, config: DriftAnalysisConfig):
-    drift.powerDensitySpectrum = powerSpectrumWelch(drift.elevation.y_values, config.sampleFreq)
+    drift.powerDensitySpectrum = powerSpectrumWelch(drift.elevation.y_values, config)
     drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, config.sampleFreq)
     drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
     
