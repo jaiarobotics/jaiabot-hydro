@@ -1,7 +1,7 @@
 // React
 import React, { createContext, ReactNode, useEffect, useReducer } from "react";
 
-import { PodActions } from "./pod-actions";
+import { OperationActions } from "./operation-actions";
 
 import { bots } from "../../data/bots/bots";
 import { hubs } from "../../data/hubs/hubs";
@@ -10,41 +10,41 @@ import Bot from "../../data/bots/bot";
 import Hub from "../../data/hubs/hub";
 import Mission from "../../data/missions/mission";
 
-interface PodContextType {
+interface OperationContextType {
     bots: Map<number, Bot>;
     hubs: Map<number, Hub>;
     missions: Map<number, Mission>;
 }
 
 interface Action {
-    type: PodActions;
+    type: OperationActions;
     bots?: Map<number, Bot>;
     hubs?: Map<number, Hub>;
     missions?: Map<number, Mission>;
 }
 
-interface PodContextProviderProps {
+interface OperationContextProviderProps {
     children: ReactNode;
 }
 
 const DATA_MODEL_POLL_TIME = 500; // milliseconds
 
-export const PodContext = createContext<PodContextType>(null);
-export const PodDispatchContext = createContext(null);
+export const OperationContext = createContext<OperationContextType>(null);
+export const OperationDispatchContext = createContext(null);
 
 /**
- * Updates PodContext
+ * Updates OperationContext
  *
- * @param {PodContextType} state Holds the most recent reference to state
+ * @param {OperationContextType} state Holds the most recent reference to state
  * @param {Action} action Contains data associated with a state update
- * @returns {PodContextType} The updated state object
+ * @returns {OperationContextType} The updated state object
  */
-function podReducer(state: PodContextType, action: Action) {
+function operationReducer(state: OperationContextType, action: Action) {
     let mutableState = { ...state };
     switch (action.type) {
-        case PodActions.DATA_MODEL_POLLED:
+        case OperationActions.DATA_MODEL_POLLED:
             return handleDataModelPolled(mutableState, action.bots, action.hubs);
-        case PodActions.SYNC_REQUESTED:
+        case OperationActions.SYNC_REQUESTED:
             return handleSyncRequested(mutableState);
         default:
             return state;
@@ -54,13 +54,13 @@ function podReducer(state: PodContextType, action: Action) {
 /**
  * Saves the latest data from incoming Bot and Hub status messages to state
  *
- * @param {PodContextType} mutableState State object ref for making modifications
+ * @param {OperationContextType} mutableState State object ref for making modifications
  * @param {Map<number, Bot>} bots Contains most up to date data on Bots
  * @param {Map<number, Hub>} hubs Contains most up to date data on Hubs
- * @returns {PodContextType} Updated mutable state object
+ * @returns {OperationContextType} Updated mutable state object
  */
 function handleDataModelPolled(
-    mutableState: PodContextType,
+    mutableState: OperationContextType,
     bots: Map<number, Bot>,
     hubs: Map<number, Hub>,
 ) {
@@ -72,18 +72,18 @@ function handleDataModelPolled(
 /**
  * Puts React in sync with the data model
  *
- * @param {PodContextType} mutableState State object ref for making modifications
- * @returns {PodContextType} Updated mutable state object
+ * @param {OperationContextType} mutableState State object ref for making modifications
+ * @returns {OperationContextType} Updated mutable state object
  */
-function handleSyncRequested(mutableState: PodContextType) {
+function handleSyncRequested(mutableState: OperationContextType) {
     mutableState.bots = bots.getBots();
     mutableState.hubs = hubs.getHubs();
     mutableState.missions = missions.getMissions();
     return mutableState;
 }
 
-export function PodContextProvider({ children }: PodContextProviderProps) {
-    const [state, dispatch] = useReducer(podReducer, null);
+export function OperationContextProvider({ children }: OperationContextProviderProps) {
+    const [state, dispatch] = useReducer(operationReducer, null);
 
     /**
      * Starts polling data model when component mounts
@@ -98,9 +98,11 @@ export function PodContextProvider({ children }: PodContextProviderProps) {
     }, []);
 
     return (
-        <PodContext.Provider value={state}>
-            <PodDispatchContext.Provider value={dispatch}>{children}</PodDispatchContext.Provider>
-        </PodContext.Provider>
+        <OperationContext.Provider value={state}>
+            <OperationDispatchContext.Provider value={dispatch}>
+                {children}
+            </OperationDispatchContext.Provider>
+        </OperationContext.Provider>
     );
 }
 
@@ -116,7 +118,7 @@ export function PodContextProvider({ children }: PodContextProviderProps) {
 function pollDataModel(dispatch: React.Dispatch<Action>) {
     return setInterval(() => {
         dispatch({
-            type: PodActions.DATA_MODEL_POLLED,
+            type: OperationActions.DATA_MODEL_POLLED,
             bots: bots.getBots(),
             hubs: hubs.getHubs(),
         });
