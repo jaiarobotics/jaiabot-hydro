@@ -1,9 +1,9 @@
 // React -- Jaia
 import React, { useContext, useEffect, useState } from "react";
 import { GlobalContext, GlobalDispatchContext } from "../../context/Global/GlobalContext";
-import { HealthStatusLine } from "../../components/HealthStatusLine/HealthStatusLine";
 import { GlobalActions } from "../../context/Global/GlobalActions";
-import { PodContext } from "../../context/Pod/PodContext";
+import { OperationContext } from "../../context/Operation/OperationContext";
+import { HealthStatusLine } from "../../components/HealthStatusLine/HealthStatusLine";
 
 // Utilities
 import {
@@ -38,7 +38,7 @@ const DEFAULT_HUB_ID = 1;
 export function HubDetails() {
     const globalContext = useContext(GlobalContext);
     const globalDispatch = useContext(GlobalDispatchContext);
-    const podContext = useContext(PodContext);
+    const operationContext = useContext(OperationContext);
 
     const IPPrefix = getIPPrefix(location.hostname);
 
@@ -54,11 +54,11 @@ export function HubDetails() {
         addDropdownListener("accordionContainer", "hubDetailsAccordionContainer", 30);
     }, []);
 
-    if (podContext === null || !globalContext.showHubDetails) {
+    if (operationContext === null || !globalContext.showHubDetails) {
         return <div></div>;
     }
 
-    const hub = podContext.hubs.get(DEFAULT_HUB_ID);
+    const hub = operationContext.hubs.get(DEFAULT_HUB_ID);
 
     if (!hub) {
         return <div></div>;
