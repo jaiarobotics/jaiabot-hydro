@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { PodContext } from "../../../context/Pod/PodContext";
+import { OperationContext } from "../../../context/Operation/OperationContext";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
@@ -21,9 +21,9 @@ interface MissionAccordionTitleProps {
 const accordionTheme = createTheme({ transitions: { create: () => "none" } });
 
 export default function MissionsList() {
-    const podContext = useContext(PodContext);
+    const operationContext = useContext(OperationContext);
 
-    if (!podContext || !podContext.missions) {
+    if (!operationContext || !operationContext.missions) {
         return <div></div>;
     }
 
@@ -33,7 +33,7 @@ export default function MissionsList() {
 
     return (
         <div className="missions-list">
-            {Array.from(podContext.missions.values()).map((mission) => {
+            {Array.from(operationContext.missions.values()).map((mission) => {
                 return (
                     <ThemeProvider theme={accordionTheme} key={mission.getMissionID()}>
                         <Accordion

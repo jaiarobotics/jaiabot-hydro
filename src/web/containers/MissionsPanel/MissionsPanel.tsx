@@ -4,9 +4,9 @@ import React, { useContext } from "react";
 import MissionSpeedSettings from "../MissionControllerPanel/MissionSpeedSettings/MissionSpeedSettings";
 import MissionsList from "./MissionsList/MissionsList";
 import { GlobalDispatchContext } from "../../context/Global/GlobalContext";
-import { PodDispatchContext } from "../../context/Pod/PodContext";
+import { OperationDispatchContext } from "../../context/Operation/OperationContext";
 import { GlobalActions } from "../../context/Global/GlobalActions";
-import { PodActions } from "../../context/Pod/pod-actions";
+import { OperationActions } from "../../context/Operation/operation-actions";
 
 // Data model
 import Mission from "../../data/missions/mission";
@@ -22,7 +22,7 @@ import "../../style/stylesheets/util.less";
 
 export default function MissionsPanel() {
     const globalDispatch = useContext(GlobalDispatchContext);
-    const podDispatch = useContext(PodDispatchContext);
+    const operationDispatch = useContext(OperationDispatchContext);
 
     const handleAddMissionClick = () => {
         globalDispatch({ type: GlobalActions.DESELECT_POD_ELEMENT });
@@ -30,8 +30,8 @@ export default function MissionsPanel() {
         // Update data model
         missions.addMission(new Mission());
 
-        // Update PodContext
-        podDispatch({ type: PodActions.SYNC_REQUESTED });
+        // Update OperationContext
+        operationDispatch({ type: OperationActions.SYNC_REQUESTED });
 
         // Prevents new missions from not being visible in the viewport
         autoScrollMissions();
@@ -45,8 +45,8 @@ export default function MissionsPanel() {
 
         // Update OpenLayers
 
-        // Update PodContext
-        podDispatch({ type: PodActions.SYNC_REQUESTED });
+        // Update OperationContext
+        operationDispatch({ type: OperationActions.SYNC_REQUESTED });
     };
 
     const handleLoadMissionsClick = () => {};

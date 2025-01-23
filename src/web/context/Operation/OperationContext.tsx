@@ -92,7 +92,7 @@ export function OperationContextProvider({ children }: OperationContextProviderP
      */
     useEffect(() => {
         // Initialize Context
-        dispatch({ type: PodActions.SYNC_REQUESTED });
+        dispatch({ type: OperationActions.SYNC_REQUESTED });
 
         const intervalID = pollDataModel(dispatch);
 
