@@ -50,6 +50,11 @@
       template:
         src: templates/fleet.cfg.j2
         dest: "{{ fleet_cfg_path }}"
+
+    - name: Create VirtualFleet inventory 
+      shell: |
+        /usr/bin/jaia-create-ansible-inventory.sh -b "{{ range(1, n_bots|int + 1) | join(',') }}" -h "1" -f {{ cloud_env_vars.jaia_fleet_index }} -h vfleet_vpn  > /etc/jaiabot/vfleet-inventory.yml
+      become: yes
         
     - name: Create the user data directories
       file:
@@ -148,20 +153,9 @@
 
     - name: Write /etc/hosts
       include_tasks: tasks/write-etc-hosts.yml
-
+      
     - name: Wait for hosts
       include_tasks: tasks/wait-hosts.yml
 
 # TODO
-
-# Add hub key to VirtualHub instance
-
-# Create/Fix VirtualFleet inventory
-#    - name: Copy VirtualFleet inventory (created by fleet-config.sh)
-#      shell: |
-#        cp /tmp/jaiabot-ansible-vfleet-inventory.yml /etc/jaiabot/vfleet-inventory.yml
-#      become: yes
-
 # SPEED up first boot
-
-# REMOVE any unused task files
