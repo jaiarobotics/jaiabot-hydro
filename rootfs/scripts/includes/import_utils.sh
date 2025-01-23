@@ -38,6 +38,10 @@ function write_preseed()
     sudo chroot /mnt sed -i 's|\(GRUB_CMDLINE_LINUX_DEFAULT=".*\)"|\1 ds=nocloud\\;s=file:///etc/jaiabot/init/ network-config=disabled"|' /etc/default/grub
     sudo mount -o bind /dev /mnt/dev
     sudo chroot /mnt update-grub
+
+    # use ipv4 resolv.conf
+    sudo chroot /mnt cp /etc/resolv.conf.ipv4 /etc/resolv.conf   
+    
     sudo umount /mnt/dev
     sudo umount /mnt    
     

@@ -364,6 +364,9 @@ if [ ! -z "$VIRTUALBOX" ]; then
     sudo chroot rootfs update-grub
     sudo chroot rootfs grub-install "$DISK_DEV"
 
+    # use ipv6 resolv.conf for AWS instances
+    sudo chroot rootfs cp /etc/resolv.conf.ipv6 /etc/resolv.conf
+    
     # unmount all the image partitions first
     finish
     
