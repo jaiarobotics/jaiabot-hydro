@@ -2,6 +2,7 @@
 import React, { useContext } from "react";
 
 import MissionSpeedSettings from "../MissionControllerPanel/MissionSpeedSettings/MissionSpeedSettings";
+import MissionsList from "./MissionsList/MissionsList";
 import { GlobalDispatchContext } from "../../context/Global/GlobalContext";
 import { PodDispatchContext } from "../../context/Pod/PodContext";
 import { GlobalActions } from "../../context/Global/GlobalActions";
@@ -56,7 +57,7 @@ export default function MissionsPanel() {
 
     return (
         <div className="jaia-panel missions-panel">
-            <div className="jaia-panel-title">Mission Panel</div>
+            <div className="jaia-panel-title">Mission Set</div>
             <MissionSpeedSettings />
             <div className="jaia-button-row">
                 <Button className="jaia-button" onClick={() => handleAddMissionClick()}>
@@ -75,6 +76,7 @@ export default function MissionsPanel() {
                     <Icon path={mdiAutoFix} title="Auto assign Bots" />
                 </Button>
             </div>
+            <MissionsList />
         </div>
     );
 }

@@ -5,7 +5,7 @@ export default class Mission {
     private waypoints: Waypoint[];
     private repeats: number;
     private canEdit: boolean;
-    private isBotAssigned: boolean;
+    private assignedBotID: number;
 
     constructor() {
         this.waypoints = [];
@@ -44,12 +44,12 @@ export default class Mission {
         this.canEdit = canEdit;
     }
 
-    getIsBotAssigned() {
-        return this.isBotAssigned;
+    getAssignedBotID() {
+        return this.assignedBotID;
     }
 
-    setBotAssigned(isBotAssigned: boolean) {
-        this.isBotAssigned = isBotAssigned;
+    setAssignedBotID(assignedBotID: number) {
+        this.assignedBotID = assignedBotID;
     }
 
     getWaypoint(waypointNum: number) {

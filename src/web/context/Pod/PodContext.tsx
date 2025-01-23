@@ -91,6 +91,9 @@ export function PodContextProvider({ children }: PodContextProviderProps) {
      * @returns {void}
      */
     useEffect(() => {
+        // Initialize Context
+        dispatch({ type: PodActions.SYNC_REQUESTED });
+
         const intervalID = pollDataModel(dispatch);
 
         // Clean up when component dismounts
