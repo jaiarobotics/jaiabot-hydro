@@ -6,8 +6,8 @@
     warp: 5
     instance_type: t3a.small
     volume_size_gb: 16
-    server_ssh_privkey_path: /home/jaia/.ssh/cloudhub
-    server_ssh_pubkey_path: /home/jaia/.ssh/cloudhub.pub
+    server_ssh_privkey_path: /home/jaia/.ssh/id_ed25519
+    server_ssh_pubkey_path: /home/jaia/.ssh/id_ed25519.pub
     virtualhub_ssh_privkey_path: /home/jaia/.ssh/virtualhub
     virtualhub_ssh_pubkey_path: /home/jaia/.ssh/virtualhub.pub
     fleet_cfg_path: /etc/jaiabot/virtualfleet.cfg
