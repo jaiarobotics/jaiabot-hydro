@@ -24,6 +24,7 @@ const mockGlobalContext1: GlobalContextType = {
     selectedPodElement: mockSelectedPodElement1,
     showHubDetails: false,
     hubAccordionStates: mockHubAccordionStates1,
+    missionAccordionStates: {},
     isRCMode: false,
 };
 

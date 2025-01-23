@@ -11,6 +11,7 @@ export interface GlobalContextType {
     selectedPodElement: SelectedPodElement;
     showHubDetails: boolean;
     hubAccordionStates: HubAccordionStates;
+    missionAccordionStates: { [missionID: number]: boolean };
     isRCMode: boolean;
 }
 
@@ -53,6 +54,7 @@ export const globalDefaultContext: GlobalContextType = {
     selectedPodElement: null,
     showHubDetails: false,
     hubAccordionStates: defaultHubAccordionStates,
+    missionAccordionStates: {},
     isRCMode: false,
 };
 

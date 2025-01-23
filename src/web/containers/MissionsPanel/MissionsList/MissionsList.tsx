@@ -1,5 +1,9 @@
 import React, { useContext } from "react";
-import { OperationContext } from "../../../context/Operation/OperationContext";
+import { GlobalContext, GlobalContextType } from "../../../context/Global/GlobalContext";
+import {
+    OperationContext,
+    OperationContextType,
+} from "../../../context/Operation/OperationContext";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
@@ -21,14 +25,19 @@ interface MissionAccordionTitleProps {
 const accordionTheme = createTheme({ transitions: { create: () => "none" } });
 
 export default function MissionsList() {
-    const operationContext = useContext(OperationContext);
+    const globalContext: GlobalContextType = useContext(GlobalContext);
+    const operationContext: OperationContextType = useContext(OperationContext);
 
-    if (!operationContext || !operationContext.missions) {
+    if (!globalContext || !operationContext) {
         return <div></div>;
     }
 
-    const handleAccordionChange = (isExpanded: boolean) => {
-        console.log(isExpanded);
+    const handleAccordionChange = (missionID: number, isExpanded: boolean) => {
+        globalContext.missionAccordionStates[missionID] = isExpanded;
+    };
+
+    const isMissionAccordionExpanded = (missionID: number) => {
+        return globalContext.missionAccordionStates[missionID];
     };
 
     return (
@@ -38,7 +47,10 @@ export default function MissionsList() {
                     <ThemeProvider theme={accordionTheme} key={mission.getMissionID()}>
                         <Accordion
                             className="mission-accordion"
-                            onChange={(event, expanded) => handleAccordionChange(expanded)}
+                            expanded={isMissionAccordionExpanded(mission.getMissionID())}
+                            onChange={(event, expanded) =>
+                                handleAccordionChange(mission.getMissionID(), expanded)
+                            }
                         >
                             <AccordionSummary
                                 className="mission-accordion-summary"
