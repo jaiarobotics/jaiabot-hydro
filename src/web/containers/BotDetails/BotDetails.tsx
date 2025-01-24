@@ -8,7 +8,7 @@ import {
     disablePlayButton,
     runMission,
     toggleEditMode,
-} from "./BotDetailsUtils";
+} from "./bot-details";
 import { sendBotCommand, sendBotRunCommand, sendBotRCCommand } from "../../utils/command";
 import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
 import { Missions } from "../../missions/missions";
@@ -72,198 +72,7 @@ import { BotContext } from "../../context/Bot/BotContext";
 
 const rcMode = require("../../style/icons/controller.svg");
 
-let prec = 2;
-
-// TODO The Take Control needs a complete refactor
-// This will probably go away and all of the uses of takeControlFunction
-// will need rework
-// Once those are reworked we can probably move more of the non-React logic
-// into other files
-var takeControlFunction: (onSuccess: () => void) => void;
-
-function issueCommand(
-    botId: number,
-    command: CommandInfo,
-    disableMessage: string,
-    setRcMode?: (botId: number, rcMode: boolean) => void,
-) {
-    takeControlFunction(() => {
-        // Exit if we have a disableMessage
-        if (disableMessage !== "") {
-            CustomAlert.presentAlert({ text: disableMessage });
-            return;
-        }
-
-        CustomAlert.confirm(
-            `Are you sure you'd like to ${command.description} bot: ${botId}?`,
-            command.confirmationButtonText,
-            () => {
-                sendBotCommand(botId, command);
-                if (setRcMode) {
-                    setRcMode(botId, false);
-                }
-            },
-        );
-    });
-}
-
-// TODO look into simplifying the parameter of this
-// Need to wait until we can eliminate need for the
-// mission and run props
-function issueRunCommand(
-    botID: number,
-    botRun: Command,
-    setRcMode: (botId: number, rcMode: boolean) => void,
-    disableMessage: string,
-) {
-    takeControlFunction(() => {
-        // Exit if we have a disableMessage
-        if (disableMessage !== "") {
-            CustomAlert.alert(disableMessage);
-            return;
-        }
-
-        CustomAlert.confirmAsync(
-            "Are you sure you'd like to play this run for Bot: " + botID + "?",
-            "Play Run",
-        ).then((confirmed) => {
-            if (confirmed) {
-                // Set the speed values
-                botRun.plan.speeds = GlobalSettings.missionPlanSpeeds;
-
-                info("Submitted for Bot: " + botID);
-                sendBotRunCommand(botRun);
-                setRcMode(botID, false);
-            }
-        });
-    });
-}
-
-function issueRCCommand(
-    bot: Bot,
-    botMission: Command,
-    isRCModeActive: (botId: number) => boolean,
-    setRcMode: (botId: number, rcMode: boolean) => void,
-    disableMessage: string,
-) {
-    takeControlFunction(() => {
-        // Exit if we have a disableMessage
-        if (disableMessage !== "") {
-            CustomAlert.alert(disableMessage);
-            return;
-        }
-        const botID = bot.getBotID();
-        const isRCActive = isRCModeActive(botID);
-
-        if (!isRCActive) {
-            let isCriticallyLowBattery = "";
-            const botErrors = bot.getErrors();
-            if (Array.isArray(botErrors)) {
-                for (let e of botErrors) {
-                    if (e === "ERROR__VEHICLE__CRITICALLY_LOW_BATTERY") {
-                        isCriticallyLowBattery =
-                            "***Critically Low Battery in RC Mode could jeopardize your recovery!***\n";
-                    }
-                }
-            }
-
-            CustomAlert.confirm(
-                isCriticallyLowBattery +
-                    "Are you sure you'd like to use remote control mode for Bot: " +
-                    bot +
-                    "?",
-                "Use Remote Control Mode",
-                () => {
-                    console.debug("Running Remote Control:");
-                    console.debug(botMission);
-                    sendBotRCCommand(botMission);
-                    setRcMode(botID, true);
-                },
-            );
-        } else {
-            issueCommand(botID, botCommands.stop, disableMessage);
-            setRcMode(botID, false);
-        }
-    });
-}
-
-async function runRCMode(bot: Bot) {
-    if (!bot) {
-        warning("No bots selected");
-        return null;
-    }
-
-    const botLat = bot.getBotSensors()?.getGPS()?.getLat();
-    const botLon = bot.getBotSensors()?.getGPS()?.getLon();
-
-    let datumLocation: GeographicCoordinate = { lat: botLat, lon: botLon };
-
-    if (!datumLocation) {
-        const warningString =
-            "RC mode issued, but bot has no location. Should I use (0, 0) as the datum, which may result in unexpected waypoint behavior?";
-
-        if (!(await CustomAlert.confirmAsync(warningString, "Use (0, 0) Datum"))) {
-            return null;
-        }
-
-        datumLocation = { lat: 0, lon: 0 };
-    }
-
-    return Missions.RCMode(bot.getBotID(), datumLocation);
-}
-
-// Get the table row for the health of the vehicle
-function healthRow(bot: Bot, allInfo: boolean) {
-    let healthClassName =
-        {
-            HEALTH__OK: "healthOK",
-            HEALTH__DEGRADED: "healthDegraded",
-            HEALTH__FAILED: "healthFailed",
-        }[bot.getHealthState()] ?? "healthOK";
-
-    let healthStateElement = <div className={healthClassName}>{bot.getHealthState()}</div>;
-
-    let errors = bot.getErrors() ?? [];
-    let errorElements = errors.map((error) => {
-        return (
-            <div key={error} className="healthFailed">
-                {error}
-            </div>
-        );
-    });
-
-    let warnings = bot.getWarnings() ?? [];
-    let warningElements = warnings.map((warning) => {
-        return (
-            <div key={warning} className="healthDegraded">
-                {warning}
-            </div>
-        );
-    });
-
-    if (allInfo) {
-        return (
-            <tr>
-                <td>Health</td>
-                <td>
-                    {healthStateElement}
-                    {errorElements}
-                    {warningElements}
-                </td>
-            </tr>
-        );
-    } else {
-        return (
-            <tr>
-                <td>Health</td>
-                <td>{healthStateElement}</td>
-            </tr>
-        );
-    }
-}
-
 export interface BotDetailsProps {
-    botID: number;
     // TODO once all uses of missionFromProps below has been replaced this prop can be deleted
     mission: MissionInterface;
     // TODO this should not be needed, most uses refactored but not all
@@ -286,10 +95,7 @@ export interface BotDetailsProps {
     downloadIndividualBot: (botID: Number, disableMessage: string) => void;
 }
 
-// TODO This has a lot of business logic mixed with React, try
-// to separate the logic from display code
-// TODO Rename to BotDetails
-export function BotDetailsComponent(props: BotDetailsProps) {
+export function BotDetails(props: BotDetailsProps) {
     // TODO We will replace all uses of theses objects from Props with ones from context
     const missionFromProps = props.mission;
 
@@ -302,22 +108,13 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     const hubContext = useContext(HubContext);
     const botContext = useContext(BotContext);
 
-    const [accordionTheme, setAccordionTheme] = useState(
-        createTheme({
-            transitions: {
-                create: () => "none",
-            },
-        }),
-    );
-
-    useEffect(() => {
-        addDropdownListener("accordionContainer", "botDetailsAccordionContainer", 30);
-    }, []);
-
+    // Make sure everything we need from Context is valid
+    // Otherwise do not rendger panel
     if (
         botContext === null ||
         hubContext === null ||
-        globalContext.shownDetails != PodElement.BOT
+        globalContext.shownDetails != PodElement.BOT ||
+        globalContext.selectedPodElement.type != PodElement.BOT
     ) {
         return <div></div>;
     }
@@ -325,10 +122,11 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     // Pull Data from the Data Model Context
     const DEFAULT_HUB_ID = 1;
     const hub = hubContext.hubs.get(DEFAULT_HUB_ID);
-    const hubGPS: GPS = hub.getHubSensors().getGPS();
 
-    const botID = props.botID;
+    const botID = globalContext.selectedPodElement.id;
     const bot = botContext.bots.get(botID);
+
+    // Make sure we have a bot
     if (!bot) {
         return <div></div>;
     }
@@ -344,47 +142,17 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     const botTemperatureSensor: TemperatureSensor = botSensors?.getTemperatureSensor();
     const botConductivitySenstor: ConductivitySensor = botSensors?.getCoductivitySensor();
 
-    const statusAge = Math.max(0.0, bot.getStatusAge() / 1e6);
-    let statusAgeClassName: string;
+    const [accordionTheme, setAccordionTheme] = useState(
+        createTheme({
+            transitions: {
+                create: () => "none",
+            },
+        }),
+    );
 
-    if (statusAge > 30) {
-        statusAgeClassName = "healthFailed";
-    } else if (statusAge > 10) {
-        statusAgeClassName = "healthDegraded";
-    }
-
-    // TODO: Can we pull this out into a function?
-    // Active Goal
-    var repeatNumberString = "N/A";
-    if (missionStatus?.repeat_index != null) {
-        repeatNumberString = `${missionStatus.repeat_index + 1}`;
-
-        if (mission?.getRepeats() != null) {
-            repeatNumberString = repeatNumberString + ` of ${mission?.getRepeats()}`;
-        }
-    }
-
-    let activeGoal = missionStatus?.activeGoal ?? "N/A";
-    let distToGoal = missionStatus?.distanceToActiveGoal ?? "N/A";
-
-    if (activeGoal !== "N/A" && distToGoal === "N/A") {
-        distToGoal = "Distance To Goal > 1000";
-    } else if (activeGoal !== "N/A" && distToGoal !== "N/A") {
-        distToGoal = distToGoal + " m";
-    } else if (activeGoal === "N/A" && distToGoal !== "N/A") {
-        activeGoal = "Recovery";
-        distToGoal = distToGoal + " m";
-    }
-
-    // TODO: Pull this into a function
-    // Distance from hub
-    let distToHub = "N/A";
-    if (botGPS && hubGPS) {
-        const botloc = turf.point([botGPS.getLat(), botGPS.getLon()]);
-        const hubloc = turf.point([hubGPS.getLat(), hubGPS.getLon()]);
-        const options = { units: "meters" as turf.Units };
-        distToHub = turf.rhumbDistance(botloc, hubloc, options).toFixed(1);
-    }
+    useEffect(() => {
+        addDropdownListener("accordionContainer", "botDetailsAccordionContainer", 30);
+    }, []);
 
     const missionState = missionStatus?.missionState;
     takeControlFunction = takeControl;
@@ -452,25 +220,324 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         );
     }
 
-    let botOffloadPercentage = "";
+    /**
+     * Provides class name for status age
+     *
+     * @returns {string}
+     */
 
-    if (botID === hub.getBotOffload()?.bot_id) {
-        botOffloadPercentage = " " + hub.getBotOffload().data_offload_percentage + "%";
+    // TODO Broke this now displaying bigger numbers than expected
+    function getStatusAgeClassName() {
+        const statusAge = Math.max(0.0, bot.getStatusAge() / 1e6);
+        let statusAgeClassName: string;
+
+        if (statusAge > 30) {
+            statusAgeClassName = "healthFailed";
+        } else if (statusAge > 10) {
+            statusAgeClassName = "healthDegraded";
+        }
+        return statusAgeClassName;
     }
 
-    // Change message for clicking on map if the bot has a run, but it is not in edit mode
-    let clickOnMap = <h3 className="name">Click on the map to create waypoints</h3>;
+    /**
+     * Provides distance from hub
+     *
+     * @returns {string}
+     */
+    function getDistToHub() {
+        const botGPS: GPS = bot.getBotSensors().getGPS();
+        const hubGPS: GPS = hub.getHubSensors().getGPS();
 
-    if (!mission?.getCanEdit()) {
-        clickOnMap = <h3 className="name">Click edit toggle to create waypoints</h3>;
+        let distToHub = "N/A";
+        if (botGPS && hubGPS) {
+            const botloc = turf.point([botGPS.getLat(), botGPS.getLon()]);
+            const hubloc = turf.point([hubGPS.getLat(), hubGPS.getLon()]);
+            const options = { units: "meters" as turf.Units };
+            distToHub = turf.rhumbDistance(botloc, hubloc, options).toFixed(1);
+        }
+        return distToHub;
     }
 
+    /**
+     * Provides bot name
+     *
+     * @returns {string}
+     */
     function getBotString() {
         return `Bot ${botID}`;
     }
 
+    /**
+     * Provides run name
+     *
+     * @returns {string}
+     */
     function getRunString() {
         return mission?.getMissionID() ?? "No Run";
+    }
+
+    /**
+     * Provides message for clicking on map
+     *
+     * @returns {string}
+     */
+    // TODO Broke the layout of the edit toggle and label,
+    // review old code and fix!
+    function getClickOnMapString() {
+        let editString = "";
+        if (mission?.getCanEdit()) {
+            editString = "Click on the map to create waypoints";
+        } else {
+            editString = "Click edit toggle to create waypoint";
+        }
+        return editString;
+    }
+
+    /**
+     * Provides off load percentage
+     *
+     * @returns {string}
+     */
+    function getBotOffloadPctString() {
+        let botOffloadPercentage = "";
+
+        if (botID === hub.getBotOffload()?.bot_id) {
+            botOffloadPercentage = " " + hub.getBotOffload().data_offload_percentage + "%";
+        }
+        return botOffloadPercentage;
+    }
+
+    /**
+     * Provides repeat status message
+     *
+     * @returns {string}
+     */
+    function getRepeatNumberString() {
+        var repeatNumberString = "N/A";
+        if (missionStatus?.repeat_index != null) {
+            repeatNumberString = `${missionStatus.repeat_index + 1}`;
+
+            if (mission?.getRepeats() != null) {
+                repeatNumberString = repeatNumberString + ` of ${mission?.getRepeats()}`;
+            }
+        }
+        return repeatNumberString;
+    }
+
+    /**
+     * Provides Health Row
+     *
+     * @returns {React.Fragment}
+     */
+    function healthRow(bot: Bot, allInfo: boolean) {
+        let healthClassName =
+            {
+                HEALTH__OK: "healthOK",
+                HEALTH__DEGRADED: "healthDegraded",
+                HEALTH__FAILED: "healthFailed",
+            }[bot.getHealthState()] ?? "healthOK";
+
+        let healthStateElement = <div className={healthClassName}>{bot.getHealthState()}</div>;
+
+        let errors = bot.getErrors() ?? [];
+        let errorElements = errors.map((error) => {
+            return (
+                <div key={error} className="healthFailed">
+                    {error}
+                </div>
+            );
+        });
+
+        let warnings = bot.getWarnings() ?? [];
+        let warningElements = warnings.map((warning) => {
+            return (
+                <div key={warning} className="healthDegraded">
+                    {warning}
+                </div>
+            );
+        });
+
+        if (allInfo) {
+            return (
+                <tr>
+                    <td>Health</td>
+                    <td>
+                        {healthStateElement}
+                        {errorElements}
+                        {warningElements}
+                    </td>
+                </tr>
+            );
+        } else {
+            return (
+                <tr>
+                    <td>Health</td>
+                    <td>{healthStateElement}</td>
+                </tr>
+            );
+        }
+    }
+
+    /**
+     * Provides Active wapoint name and distance
+     *
+     * @returns {string , string}
+     */
+
+    function getActiveWptStrings() {
+        let activeWptString = missionStatus.activeGoal ?? "N/A";
+        let distToWpt = missionStatus.distanceToActiveGoal ?? "N/A";
+
+        if (activeWptString !== "N/A" && distToWpt === "N/A") {
+            distToWpt = "Distance To Goal > 1000";
+        } else if (activeWptString !== "N/A" && distToWpt !== "N/A") {
+            distToWpt = distToWpt + " m";
+        } else if (activeWptString === "N/A" && distToWpt !== "N/A") {
+            activeWptString = "Recovery";
+            distToWpt = distToWpt + " m";
+        }
+
+        return { activeWptString, distToWpt };
+    }
+
+    let prec = 2;
+
+    // TODO The Take Control needs a complete refactor
+    // This will probably go away and all of the uses of takeControlFunction
+    // will need rework
+    // Once those are reworked we can probably move more of the non-React logic
+    // into other files
+    var takeControlFunction: (onSuccess: () => void) => void;
+
+    function issueCommand(
+        botId: number,
+        command: CommandInfo,
+        disableMessage: string,
+        setRcMode?: (botId: number, rcMode: boolean) => void,
+    ) {
+        takeControlFunction(() => {
+            // Exit if we have a disableMessage
+            if (disableMessage !== "") {
+                CustomAlert.presentAlert({ text: disableMessage });
+                return;
+            }
+
+            CustomAlert.confirm(
+                `Are you sure you'd like to ${command.description} bot: ${botId}?`,
+                command.confirmationButtonText,
+                () => {
+                    sendBotCommand(botId, command);
+                    if (setRcMode) {
+                        setRcMode(botId, false);
+                    }
+                },
+            );
+        });
+    }
+
+    // TODO look into simplifying the parameter of this
+    // Need to wait until we can eliminate need for the
+    // mission and run props
+    function issueRunCommand(
+        botID: number,
+        botRun: Command,
+        setRcMode: (botId: number, rcMode: boolean) => void,
+        disableMessage: string,
+    ) {
+        takeControlFunction(() => {
+            // Exit if we have a disableMessage
+            if (disableMessage !== "") {
+                CustomAlert.alert(disableMessage);
+                return;
+            }
+
+            CustomAlert.confirmAsync(
+                "Are you sure you'd like to play this run for Bot: " + botID + "?",
+                "Play Run",
+            ).then((confirmed) => {
+                if (confirmed) {
+                    // Set the speed values
+                    botRun.plan.speeds = GlobalSettings.missionPlanSpeeds;
+
+                    info("Submitted for Bot: " + botID);
+                    sendBotRunCommand(botRun);
+                    setRcMode(botID, false);
+                }
+            });
+        });
+    }
+
+    function issueRCCommand(
+        bot: Bot,
+        botMission: Command,
+        isRCModeActive: (botId: number) => boolean,
+        setRcMode: (botId: number, rcMode: boolean) => void,
+        disableMessage: string,
+    ) {
+        takeControlFunction(() => {
+            // Exit if we have a disableMessage
+            if (disableMessage !== "") {
+                CustomAlert.alert(disableMessage);
+                return;
+            }
+            const botID = bot.getBotID();
+            const isRCActive = isRCModeActive(botID);
+
+            if (!isRCActive) {
+                let isCriticallyLowBattery = "";
+                const botErrors = bot.getErrors();
+                if (Array.isArray(botErrors)) {
+                    for (let e of botErrors) {
+                        if (e === "ERROR__VEHICLE__CRITICALLY_LOW_BATTERY") {
+                            isCriticallyLowBattery =
+                                "***Critically Low Battery in RC Mode could jeopardize your recovery!***\n";
+                        }
+                    }
+                }
+
+                CustomAlert.confirm(
+                    isCriticallyLowBattery +
+                        "Are you sure you'd like to use remote control mode for Bot: " +
+                        bot +
+                        "?",
+                    "Use Remote Control Mode",
+                    () => {
+                        console.debug("Running Remote Control:");
+                        console.debug(botMission);
+                        sendBotRCCommand(botMission);
+                        setRcMode(botID, true);
+                    },
+                );
+            } else {
+                issueCommand(botID, botCommands.stop, disableMessage);
+                setRcMode(botID, false);
+            }
+        });
+    }
+
+    async function runRCMode(bot: Bot) {
+        if (!bot) {
+            warning("No bots selected");
+            return null;
+        }
+
+        const botLat = bot.getBotSensors()?.getGPS()?.getLat();
+        const botLon = bot.getBotSensors()?.getGPS()?.getLon();
+
+        let datumLocation: GeographicCoordinate = { lat: botLat, lon: botLon };
+
+        if (!datumLocation) {
+            const warningString =
+                "RC mode issued, but bot has no location. Should I use (0, 0) as the datum, which may result in unexpected waypoint behavior?";
+
+            if (!(await CustomAlert.confirmAsync(warningString, "Use (0, 0) Datum"))) {
+                return null;
+            }
+
+            datumLocation = { lat: 0, lon: 0 };
+        }
+
+        return Missions.RCMode(bot.getBotID(), datumLocation);
     }
 
     /**
@@ -510,7 +577,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             ⨯
                         </div>
                     </div>
-                    {clickOnMap}
+                    <h3 className="name">{getClickOnMapString()}</h3>
                     <div className="botDetailsToolbar">
                         <Button
                             className={
@@ -634,9 +701,9 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                             <AccordionDetails>
                                 <table>
                                     <tbody>
-                                        <tr className={statusAgeClassName}>
+                                        <tr className={getStatusAgeClassName()}>
                                             <td>Status Age</td>
-                                            <td>{statusAge.toFixed(0)} s</td>
+                                            <td>{bot.getStatusAge().toFixed(0)} s</td>
                                         </tr>
                                         <tr>
                                             <td>Mission State</td>
@@ -644,7 +711,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                                 {missionStatus?.missionState?.replaceAll(
                                                     "__",
                                                     "\n",
-                                                ) + botOffloadPercentage}
+                                                ) + getBotOffloadPctString()}
                                             </td>
                                         </tr>
                                         <tr>
@@ -654,24 +721,28 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                         <tr>
                                             <td>Repeat Number</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {repeatNumberString}
+                                                {getRepeatNumberString()}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Active Goal</td>
-                                            <td style={{ whiteSpace: "pre-line" }}>{activeGoal}</td>
+                                            <td style={{ whiteSpace: "pre-line" }}>
+                                                {getActiveWptStrings().activeWptString}
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td>Distance to Goal</td>
-                                            <td style={{ whiteSpace: "pre-line" }}>{distToGoal}</td>
+                                            <td style={{ whiteSpace: "pre-line" }}>
+                                                {getActiveWptStrings().distToWpt}
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td>Distance from Hub</td>
-                                            <td>{distToHub} m</td>
+                                            <td>{getDistToHub()} m</td>
                                         </tr>
                                         <tr>
                                             <td>Wi-Fi Link Quality</td>
-                                            <td>{linkQualityPercentage + " %"}</td>
+                                            <td>{bot.getWifiLinkQuality() + " %"}</td>
                                         </tr>
                                         <tr>
                                             <td>Data Logging</td>

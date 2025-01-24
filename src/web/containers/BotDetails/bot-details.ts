@@ -1,10 +1,3 @@
-// Rename to bot-details.ts
-
-// TestComponent
-// TestComponent.tsx
-
-// test-file.ts
-
 // Jaia Imports
 import { CommandInfo } from "../../types/commands";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";

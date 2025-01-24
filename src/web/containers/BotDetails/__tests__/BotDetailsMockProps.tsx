@@ -104,7 +104,6 @@ let mockSetRcMode = jest.fn();
 let mockDownloadIndividualBot = jest.fn();
 
 export let mockProps: BotDetailsProps = {
-    botID: 1,
     mission: mission,
     run: run,
     downloadQueue: mockDownloadQueue,

@@ -52,7 +52,7 @@ import {
     GlobalAction,
     PodElement,
 } from "../../context/Global/GlobalContext";
-import { BotDetailsComponent, BotDetailsProps } from "../BotDetails/BotDetails";
+import { BotDetails, BotDetailsProps } from "../BotDetails/BotDetails";
 import {
     Goal,
     TaskType,
@@ -4272,8 +4272,7 @@ export default class CommandControl extends React.Component {
                     />
                 </div>
 
-                <BotDetailsComponent
-                    botID={this.selectedBotId()}
+                <BotDetails
                     mission={this.getRunList()}
                     run={this.getRun(this.selectedBotId())}
                     downloadQueue={this.state.botDownloadQueue}

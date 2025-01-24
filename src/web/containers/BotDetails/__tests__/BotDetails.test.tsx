@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { BotDetailsComponent, BotDetailsProps } from "../BotDetails";
+import { BotDetails, BotDetailsProps } from "../BotDetails";
 
 import { mockProps } from "./BotDetailsMockProps";
 
