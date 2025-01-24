@@ -288,6 +288,7 @@ export interface BotDetailsProps {
 
 // TODO This has a lot of business logic mixed with React, try
 // to separate the logic from display code
+// TODO Rename to BotDetails
 export function BotDetailsComponent(props: BotDetailsProps) {
     // TODO We will replace all uses of theses objects from Props with ones from context
     const missionFromProps = props.mission;
@@ -338,7 +339,8 @@ export function BotDetailsComponent(props: BotDetailsProps) {
     const botSensors: BotSensors = bot.getBotSensors();
     const botGPS: GPS = botSensors?.getGPS();
     const botIMU: IMU = botSensors?.getIMU();
-    const botPressureSensor: PressureSensor = botSensors?.getPressureSensor();
+    const botPressureSensor = botSensors?.getPressureSensor();
+
     const botTemperatureSensor: TemperatureSensor = botSensors?.getTemperatureSensor();
     const botConductivitySenstor: ConductivitySensor = botSensors?.getCoductivitySensor();
 
@@ -351,6 +353,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         statusAgeClassName = "healthDegraded";
     }
 
+    // TODO: Can we pull this out into a function?
     // Active Goal
     var repeatNumberString = "N/A";
     if (missionStatus?.repeat_index != null) {
@@ -373,6 +376,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
         distToGoal = distToGoal + " m";
     }
 
+    // TODO: Pull this into a function
     // Distance from hub
     let distToHub = "N/A";
     if (botGPS && hubGPS) {
@@ -514,6 +518,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                     ? "inactive button-jcc"
                                     : " button-jcc stopMission"
                             }
+                            // Move to handleStopMissionClick()
                             onClick={() => {
                                 issueCommand(
                                     botID,
@@ -537,6 +542,7 @@ export function BotDetailsComponent(props: BotDetailsProps) {
                                     ? "inactive button-jcc"
                                     : "button-jcc"
                             }
+                            // TODO create function
                             onClick={async () => {
                                 if (
                                     bot.getHealthState() === "HEALTH__FAILED" &&

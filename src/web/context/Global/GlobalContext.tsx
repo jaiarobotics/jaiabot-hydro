@@ -76,14 +76,15 @@ export interface GlobalAction {
     clientID?: string;
     elementType?: PodElement;
     elementID?: number;
-    hubAccordionName?: string;
-    botAccordionName?: string;
+    hubAccordionName?: HubAccordionNames;
+    botAccordionName?: BotAccordionNames;
 }
 
 interface GlobalContextProviderProps {
     children: ReactNode;
 }
 
+// TODO: NodeType
 export enum PodElement {
     "NONE" = 0,
     "BOT" = 1,
@@ -194,6 +195,7 @@ function handleClosedDetails(mutableState: GlobalContextType) {
  * @param {number} id ID of Bot or Hub clicked
  * @returns {GlobalContextType} Updated mutable state object
  */
+// TODO: Switch HubOrBot to node
 function handleClickedHobOrBot(mutableState: GlobalContextType, type: PodElement, id: number) {
     if (isNaN(id)) throw new Error("Invalid hub or bot id");
 

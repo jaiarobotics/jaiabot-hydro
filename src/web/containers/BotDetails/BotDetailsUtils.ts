@@ -1,3 +1,10 @@
+// Rename to bot-details.ts
+
+// TestComponent
+// TestComponent.tsx
+
+// test-file.ts
+
 // Jaia Imports
 import { CommandInfo } from "../../types/commands";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
@@ -154,6 +161,7 @@ export function disablePlayButton(
 
     return disableInfo;
 }
+
 // TODO function will not work until Mission Management is refactored
 // missions are not being added to bots in the data model yet
 export function toggleEditMode(mission: Mission) {
