@@ -32,6 +32,11 @@ write_files:
     content: |
       {% filter indent(6) %}{{ lookup('file', virtualhub_ssh_pubkey_path) }}{% endfilter %}
 {% endif %}
+  ## Update DNS to avoid timeouts reaching IPv4 servers
+  - path: /etc/resolv.conf
+    content: |
+      nameserver 2606:4700:4700::1111
+      nameserver 2001:4860:4860::8888
 
 runcmd:
   ## Restore default hostname
