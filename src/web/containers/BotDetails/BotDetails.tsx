@@ -108,6 +108,18 @@ export function BotDetails(props: BotDetailsProps) {
     const hubContext = useContext(HubContext);
     const botContext = useContext(BotContext);
 
+    const [accordionTheme, setAccordionTheme] = useState(
+        createTheme({
+            transitions: {
+                create: () => "none",
+            },
+        }),
+    );
+
+    useEffect(() => {
+        addDropdownListener("accordionContainer", "botDetailsAccordionContainer", 30);
+    }, []);
+
     // Make sure everything we need from Context is valid
     // Otherwise do not rendger panel
     if (
@@ -142,92 +154,18 @@ export function BotDetails(props: BotDetailsProps) {
     const botTemperatureSensor: TemperatureSensor = botSensors?.getTemperatureSensor();
     const botConductivitySenstor: ConductivitySensor = botSensors?.getCoductivitySensor();
 
-    const [accordionTheme, setAccordionTheme] = useState(
-        createTheme({
-            transitions: {
-                create: () => "none",
-            },
-        }),
-    );
-
-    useEffect(() => {
-        addDropdownListener("accordionContainer", "botDetailsAccordionContainer", 30);
-    }, []);
-
     const missionState = missionStatus?.missionState;
     takeControlFunction = takeControl;
 
-    let linkQualityPercentage = 0;
-
-    if (bot.getWifiLinkQuality() != undefined) {
-        linkQualityPercentage = bot.getWifiLinkQuality();
-    }
-
-    let dataOffloadButton = (
-        <Button
-            className={
-                disableButton(botCommands.recover, missionState).isDisabled ||
-                !linkQualityPercentage
-                    ? "inactive button-jcc"
-                    : "button-jcc"
-            }
-            onClick={() => {
-                let disableMessage = disableButton(
-                    botCommands.recover,
-                    missionState,
-                ).disableMessage;
-
-                if (!linkQualityPercentage) {
-                    disableMessage +=
-                        "The command: " +
-                        botCommands.recover.commandType +
-                        " cannot be sent because the bot is not connected to Wifi (Check Link Quality in Quick Look)";
-                }
-
-                props.downloadIndividualBot(botID, disableMessage);
-            }}
-        >
-            <Icon path={mdiDownload} title="Data Offload" />
-        </Button>
-    );
-
-    if (disableButton(botCommands.recover, missionState).isDisabled) {
-        dataOffloadButton = (
-            <Button
-                className={
-                    disableButton(botCommands.retryDataOffload, missionState).isDisabled ||
-                    !linkQualityPercentage
-                        ? "inactive button-jcc"
-                        : "button-jcc"
-                }
-                onClick={() => {
-                    let disableMessage = disableButton(
-                        botCommands.retryDataOffload,
-                        missionState,
-                    ).disableMessage;
-
-                    if (!linkQualityPercentage) {
-                        disableMessage +=
-                            "The command: " +
-                            botCommands.retryDataOffload.commandType +
-                            " cannot be sent because the bot is not connected to Wifi (Check Link Quality in Quick Look)";
-                    }
-                    props.downloadIndividualBot(botID, disableMessage);
-                }}
-            >
-                <Icon path={mdiDownload} title="Retry Data Offload" />
-            </Button>
-        );
-    }
+    let displayPrecision = 2;
 
     /**
-     * Provides class name for status age
+     * Provides class name and status age
      *
-     * @returns {string}
+     * @returns { string , string }
      */
 
-    // TODO Broke this now displaying bigger numbers than expected
-    function getStatusAgeClassName() {
+    function getStatusAge() {
         const statusAge = Math.max(0.0, bot.getStatusAge() / 1e6);
         let statusAgeClassName: string;
 
@@ -236,7 +174,7 @@ export function BotDetails(props: BotDetailsProps) {
         } else if (statusAge > 10) {
             statusAgeClassName = "healthDegraded";
         }
-        return statusAgeClassName;
+        return { statusAge, statusAgeClassName };
     }
 
     /**
@@ -281,8 +219,8 @@ export function BotDetails(props: BotDetailsProps) {
      *
      * @returns {string}
      */
-    // TODO Broke the layout of the edit toggle and label,
-    // review old code and fix!
+    // TODO Edit mode toggle and related items not functional
+    // until more functionality is add to the mission management
     function getClickOnMapString() {
         let editString = "";
         if (mission?.getCanEdit()) {
@@ -322,6 +260,100 @@ export function BotDetails(props: BotDetailsProps) {
             }
         }
         return repeatNumberString;
+    }
+
+    /**
+     * Provides Active wapoint name and distance
+     *
+     * @returns {string , string}
+     */
+
+    function getActiveWptStrings() {
+        let activeWptString = missionStatus.activeGoal ?? "N/A";
+        let distToWpt = missionStatus.distanceToActiveGoal ?? "N/A";
+
+        if (activeWptString !== "N/A" && distToWpt === "N/A") {
+            distToWpt = "Distance To Goal > 1000";
+        } else if (activeWptString !== "N/A" && distToWpt !== "N/A") {
+            distToWpt = distToWpt + " m";
+        } else if (activeWptString === "N/A" && distToWpt !== "N/A") {
+            activeWptString = "Recovery";
+            distToWpt = distToWpt + " m";
+        }
+
+        return { activeWptString, distToWpt };
+    }
+
+    /**
+     * Provides data offload button
+     *
+     * @returns {React.Fragment}
+     */
+    function getDataOffloadButton() {
+        // TODO This logic should be cleaned up and simplified
+        let linkQualityPercentage = 0;
+
+        if (bot.getWifiLinkQuality() != undefined) {
+            linkQualityPercentage = bot.getWifiLinkQuality();
+        }
+
+        let dataOffloadButton = (
+            <Button
+                className={
+                    disableButton(botCommands.recover, missionState).isDisabled ||
+                    !linkQualityPercentage
+                        ? "inactive button-jcc"
+                        : "button-jcc"
+                }
+                onClick={() => {
+                    let disableMessage = disableButton(
+                        botCommands.recover,
+                        missionState,
+                    ).disableMessage;
+
+                    if (!linkQualityPercentage) {
+                        disableMessage +=
+                            "The command: " +
+                            botCommands.recover.commandType +
+                            " cannot be sent because the bot is not connected to Wifi (Check Link Quality in Quick Look)";
+                    }
+
+                    props.downloadIndividualBot(botID, disableMessage);
+                }}
+            >
+                <Icon path={mdiDownload} title="Data Offload" />
+            </Button>
+        );
+
+        if (disableButton(botCommands.recover, missionState).isDisabled) {
+            dataOffloadButton = (
+                <Button
+                    className={
+                        disableButton(botCommands.retryDataOffload, missionState).isDisabled ||
+                        !linkQualityPercentage
+                            ? "inactive button-jcc"
+                            : "button-jcc"
+                    }
+                    onClick={() => {
+                        let disableMessage = disableButton(
+                            botCommands.retryDataOffload,
+                            missionState,
+                        ).disableMessage;
+
+                        if (!linkQualityPercentage) {
+                            disableMessage +=
+                                "The command: " +
+                                botCommands.retryDataOffload.commandType +
+                                " cannot be sent because the bot is not connected to Wifi (Check Link Quality in Quick Look)";
+                        }
+                        props.downloadIndividualBot(botID, disableMessage);
+                    }}
+                >
+                    <Icon path={mdiDownload} title="Retry Data Offload" />
+                </Button>
+            );
+        }
+        return dataOffloadButton;
     }
 
     /**
@@ -377,30 +409,6 @@ export function BotDetails(props: BotDetailsProps) {
             );
         }
     }
-
-    /**
-     * Provides Active wapoint name and distance
-     *
-     * @returns {string , string}
-     */
-
-    function getActiveWptStrings() {
-        let activeWptString = missionStatus.activeGoal ?? "N/A";
-        let distToWpt = missionStatus.distanceToActiveGoal ?? "N/A";
-
-        if (activeWptString !== "N/A" && distToWpt === "N/A") {
-            distToWpt = "Distance To Goal > 1000";
-        } else if (activeWptString !== "N/A" && distToWpt !== "N/A") {
-            distToWpt = distToWpt + " m";
-        } else if (activeWptString === "N/A" && distToWpt !== "N/A") {
-            activeWptString = "Recovery";
-            distToWpt = distToWpt + " m";
-        }
-
-        return { activeWptString, distToWpt };
-    }
-
-    let prec = 2;
 
     // TODO The Take Control needs a complete refactor
     // This will probably go away and all of the uses of takeControlFunction
@@ -701,9 +709,9 @@ export function BotDetails(props: BotDetailsProps) {
                             <AccordionDetails>
                                 <table>
                                     <tbody>
-                                        <tr className={getStatusAgeClassName()}>
+                                        <tr className={getStatusAge().statusAgeClassName}>
                                             <td>Status Age</td>
-                                            <td>{bot.getStatusAge().toFixed(0)} s</td>
+                                            <td>{getStatusAge().statusAge.toFixed(0)} s</td>
                                         </tr>
                                         <tr>
                                             <td>Mission State</td>
@@ -716,7 +724,10 @@ export function BotDetails(props: BotDetailsProps) {
                                         </tr>
                                         <tr>
                                             <td>Battery Percentage</td>
-                                            <td>{bot.getBatteryPercent()?.toFixed(prec)} %</td>
+                                            <td>
+                                                {bot.getBatteryPercent()?.toFixed(displayPrecision)}{" "}
+                                                %
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td>Repeat Number</td>
@@ -835,7 +846,7 @@ export function BotDetails(props: BotDetailsProps) {
                                     <Icon path={mdiSkipNext} title="Next Task" />
                                 </Button>
 
-                                {dataOffloadButton}
+                                {getDataOffloadButton()}
 
                                 <Accordion
                                     expanded={globalContext.botAccordionStates.advancedCommands}
@@ -1080,18 +1091,26 @@ export function BotDetails(props: BotDetailsProps) {
                                                     </tr>
                                                     <tr>
                                                         <td>HDOP</td>
-                                                        <td>{botGPS?.getHDOP()?.toFixed(prec)}</td>
+                                                        <td>
+                                                            {botGPS
+                                                                ?.getHDOP()
+                                                                ?.toFixed(displayPrecision)}
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td>PDOP</td>
-                                                        <td>{botGPS?.getPDOP()?.toFixed(prec)}</td>
+                                                        <td>
+                                                            {botGPS
+                                                                ?.getPDOP()
+                                                                ?.toFixed(displayPrecision)}
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td>Ground Speed</td>
                                                         <td>
                                                             {botGPS
                                                                 ?.getSpeedOverGround()
-                                                                ?.toFixed(prec)}{" "}
+                                                                ?.toFixed(displayPrecision)}{" "}
                                                             m/s
                                                         </td>
                                                     </tr>
@@ -1100,7 +1119,7 @@ export function BotDetails(props: BotDetailsProps) {
                                                         <td>
                                                             {botGPS
                                                                 ?.getCourseOverGround()
-                                                                ?.toFixed(prec)}
+                                                                ?.toFixed(displayPrecision)}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -1182,7 +1201,7 @@ export function BotDetails(props: BotDetailsProps) {
                                                         <td>
                                                             {botTemperatureSensor
                                                                 ?.getTemperature()
-                                                                ?.toFixed(prec)}{" "}
+                                                                ?.toFixed(displayPrecision)}{" "}
                                                             °C
                                                         </td>
                                                     </tr>
@@ -1191,7 +1210,7 @@ export function BotDetails(props: BotDetailsProps) {
                                                         <td>
                                                             {botPressureSensor
                                                                 ?.getDepth()
-                                                                ?.toFixed(prec)}{" "}
+                                                                ?.toFixed(displayPrecision)}{" "}
                                                             m
                                                         </td>
                                                     </tr>
