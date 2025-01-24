@@ -365,7 +365,7 @@ if [ ! -z "$VIRTUALBOX" ]; then
     sudo chroot rootfs grub-install "$DISK_DEV"
 
     # use ipv6 and ipv4 resolv.conf for VirtualBox and AWS instances
-    sudo chroot rootfs cat /etc/resolv.conf.ipv6 /etc/resolv.conf.ipv4 > /etc/resolv.conf
+    sudo chroot rootfs /bin/bash -c "cat /etc/resolv.conf.ipv6 /etc/resolv.conf.ipv4 > /etc/resolv.conf"
     
     # unmount all the image partitions first
     finish
