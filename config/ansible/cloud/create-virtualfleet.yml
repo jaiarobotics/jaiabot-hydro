@@ -6,8 +6,8 @@
     warp: 5
     instance_type: t3a.small
     volume_size_gb: 16
-    server_ssh_privkey_path: /home/jaia/.ssh/id_ed25519
-    server_ssh_pubkey_path: /home/jaia/.ssh/id_ed25519.pub
+    server_ssh_privkey_path: /home/jaia/.ssh/cloudhub_to_vfleet
+    server_ssh_pubkey_path: /home/jaia/.ssh/cloudhub_to_vfleet.pub
     virtualhub_ssh_privkey_path: /home/jaia/.ssh/virtualhub
     virtualhub_ssh_pubkey_path: /home/jaia/.ssh/virtualhub.pub
     fleet_cfg_path: /etc/jaiabot/virtualfleet.cfg
@@ -45,6 +45,19 @@
         path: "{{ virtualhub_ssh_privkey_path }}"
         type: ed25519
       tags: read
+
+    - name: Ensure the SSH config block is present for VirtualFleet login
+      blockinfile:
+        path: /home/jaia/.ssh/config
+        marker: "# {mark} ANSIBLE MANAGED BLOCK: SSH Config for IPv6"
+        block: |
+          Host {{ vfleet_ipv6_network.split('/')[0].rstrip(':') + ':*' }} 
+              StrictHostKeyChecking accept-new
+              IdentityFile {{ server_ssh_privkey_path }}
+        create: yes
+        mode: '0600'
+        owner: jaia
+        group: jaia
 
     - name: Generate fleet config file
       template:
@@ -133,7 +146,7 @@
         wait: false
         state: present
       loop: "{{ node_map }}"
-      # Avoid writing private Wireguard keys into the log
+      # Avoid writing private Wireguard/SSH keys into the log
       no_log: true
       register: ec2_instances
         
@@ -146,6 +159,7 @@
         create: no
       loop: "{{ ec2_instances.results }}"
       become: yes
+      no_log: true
 
     - name: Restart WireGuard
       become: yes
