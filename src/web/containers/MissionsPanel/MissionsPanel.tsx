@@ -11,6 +11,7 @@ import { OperationActions } from "../../context/Operation/operation-actions";
 // Data model
 import Mission from "../../data/missions/mission";
 import { missions } from "../../data/missions/missions";
+import { missionsManager } from "../../data/missions_manager/missions-manager";
 
 // Style
 import Button from "@mui/material/Button";
@@ -42,6 +43,7 @@ export default function MissionsPanel() {
     const handleDeleteAllMissionsClick = () => {
         // Update data model
         missions.deleteAllMissions();
+        missionsManager.clear();
 
         // Update OpenLayers
 
