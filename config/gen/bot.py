@@ -142,7 +142,7 @@ if common.jaia_comms_mode == common.CommsMode.XBEE:
         xbee_serial_port='/dev/xbee'
 
     try:
-        xbee_encryption_password=os.environ['jaia_encryption_password']
+        xbee_encryption_password=os.environ['jaia_rf_encryption_password']
     except:    
         xbee_encryption_password=""
         
