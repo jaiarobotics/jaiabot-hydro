@@ -5,12 +5,15 @@ from math import *
 import numpy
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from dataclasses import asdict
+from pprint import pformat
 
-from .drift import Drift
+from .types import Drift
 from .processing import *
 from . import spectrogram
 from pyjaia.series import Series
 from .series_set import SeriesSet
+from .moskowitz import *
 
 def formatTimeDelta(td: timedelta):
     components = []
@@ -25,15 +28,15 @@ def formatTimeDelta(td: timedelta):
     return ' '.join(components)
 
 
-def htmlForWaves(sortedWaveHeights: List[float]):
+def htmlForWaves(sortedWaves: List[Wave]):
     html = ''
     html += '<table><tr><td>Wave Heights:</td>'
-    minIndexToUse = floor(len(sortedWaveHeights) * 2 / 3)
-    for index, waveHeight in enumerate(sortedWaveHeights):
+    minIndexToUse = floor(len(sortedWaves) * 2 / 3)
+    for index, wave in enumerate(sortedWaves):
         if index >= minIndexToUse:
-            html += f'<td class="used">{waveHeight:0.3f}</td>'
+            html += f'<td class="used">{wave.height:0.3f}</td>'
         else:
-            html += f'<td>{waveHeight:0.3f}</td>'
+            html += f'<td>{wave.height:0.3f}</td>'
     html += '</tr></table>'
 
     return html
@@ -53,7 +56,10 @@ def htmlForFilterGraph(filterFunc: Callable[[float], float]):
         legend_title="Legend"
     )
 
-    return '<h1>Band pass filter</h1>' + fig.to_html(full_html=False, include_plotlyjs='cdn')
+    htmlString = '<h1>Band pass filter</h1>'
+    htmlString += fig.to_html(full_html=False, include_plotlyjs='cdn', default_width='50%', default_height='50%')
+
+    return htmlString
 
 
 def htmlForChart(charts: List[Series]) -> str:
@@ -76,29 +82,33 @@ def htmlForChart(charts: List[Series]) -> str:
     return htmlString
 
 
-def htmlForSummaryTable(uniformAccelerations: List[Series]):
+def htmlForSummaryTable(drifts: List[Drift], config: DriftAnalysisConfig):
     html = '<h1>Summary</h1>'
-    html += '<table><tr><td>Drift #</td><td>Duration</td><td>Significant Wave Height</td></tr>'
+    html += '<table><tr><td>Drift #</td><td>Duration</td><td>Significant Wave Height (m)</td><td>Maximum Wave Height (m)</td><td>Peak Period (s)</td></tr>'
 
     swhSum = 0.0
     durationSum = 0.0
 
-    for index, uniformAcceleration in enumerate(uniformAccelerations):
-        sampleFreq = uniformAcceleration.averageSampleFrequency()
-        elevation = calculateElevationSeries(uniformAcceleration, sampleFreq)
-        waveHeights = calculateSortedWaveHeights(elevation)
-        duration = uniformAcceleration.duration()
+    for index, drift in enumerate(drifts):
+        duration = drift.rawVerticalAcceleration.duration()
         durationString = formatTimeDelta(duration)
 
-        if len(waveHeights) == 0:
-            html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>No waves detected</td></tr>'
+        if drift.waves is not None and len(drift.waves) == 0:
+            html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td colspan="3">No waves detected</td></tr>'
             continue
 
-        swh = significantWaveHeight(waveHeights)
+        swh = drift.significantWaveHeight
         swhSum += (swh * duration.total_seconds())
         durationSum += duration.total_seconds()
 
-        html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>{swh:0.2f}</td></tr>'
+        if drift.maxWaveHeight is not None:
+            maxWaveHeight = f"{drift.maxWaveHeight:0.2f}"
+        else:
+            maxWaveHeight = "N/A"
+
+        peakPeriod = drift.peakWavePeriod
+
+        html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>{swh:0.2f}</td><td>{maxWaveHeight}</td><td>{peakPeriod:0.2f}</td></tr>'
 
     if durationSum > 0:
         meanWaveHeight = swhSum / durationSum
@@ -134,17 +144,52 @@ def htmlForDriftObject(drift: Drift, driftIndex: int=None) -> str:
     durationString = formatTimeDelta(drift.rawVerticalAcceleration.duration())
     htmlString += f'<h3>Drift duration: {durationString}<h3>'
 
-    if len(drift.waveHeights) > 0:
-        swh = statistics.mean(drift.waveHeights[floor(len(drift.waveHeights)*2/3):])
-        htmlString += f'<h3>Significant Wave Height: {swh:0.2f}<h3>'
+    if drift.waves is not None and len(drift.waves) > 0:
+        waveHeights = [wave.height for wave in drift.waves]
+        swh = statistics.mean(waveHeights[floor(len(waveHeights)*2/3):])
+        htmlString += f'<h3>Significant Wave Height via wave counting: {swh:0.2f}<h3>'
 
-    # The wave heights
-    htmlString += htmlForWaves(drift.waveHeights)
+        # The wave heights
+        htmlString += htmlForWaves(drift.waves)
 
     htmlString += htmlForChart([drift.rawVerticalAcceleration, drift.filteredVerticalAcceleration, drift.elevation])
-    htmlString += spectrogram.htmlForSpectrogram(drift.rawVerticalAcceleration, fftWindowSeconds=80)
-    htmlString += spectrogram.htmlForSpectrogram(drift.filteredVerticalAcceleration, fftWindowSeconds=80)
+    htmlString += htmlForPowerDensitySpectrum(drift.powerDensitySpectrum, drift.filteredVerticalAcceleration.averageSampleFrequency())
 
     return htmlString
     
+
+def htmlForPowerDensitySpectrum(spectrum: List[float], sampleFrequency: float) -> str:
+    htmlString = ''
+    if spectrum is None:
+        return htmlString
+
+    fig = go.Figure()
+    
+    x: List[float] = []
+    N = len(spectrum)
+    for i in range(0, N):
+        f = i * sampleFrequency / 2 / N
+        x.append(f)
+
+    fig.add_trace(go.Scatter(x=x, y=spectrum, name="Power Density Spectrum"))
+
+    # Show Moskowitz model power density spectrum
+    moskowitzModelY = [0.0] + [moscowitzS(x[i], 6.0) for i in range(1, len(x))]
+    fig.add_trace(go.Scatter(x=x, y=moskowitzModelY, name="Moskowitz Model"))
+
+    fig.update_layout(
+        xaxis_title="Frequency (Hz)",
+        yaxis_title="Power Density (m^2/Hz)",
+        legend_title="Legend"
+    )
+
+    htmlString += fig.to_html(full_html=False, include_plotlyjs='cdn', default_width='80%', default_height='60%')
+
+    return htmlString
+
+
+def htmlForDriftAnalysisConfig(config: DriftAnalysisConfig):
+    htmlString = '<h2>Configuration</h2>'
+    htmlString += f'<pre>{pformat(asdict(config))}</pre>'
+    return htmlString
 

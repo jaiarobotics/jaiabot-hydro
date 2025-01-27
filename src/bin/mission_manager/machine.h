@@ -468,21 +468,12 @@ struct MissionManagerStateMachine
         return latest_lat_;
     }
 
-    void set_latest_max_acceleration(
-        const boost::units::quantity<boost::units::si::acceleration>& latest_max_acceleration)
+    void set_latest_imu_data(const jaiabot::protobuf::IMUData& imu_data)
     {
-        latest_max_acceleration_ = latest_max_acceleration;
-    }
-    const boost::units::quantity<boost::units::si::acceleration>& latest_max_acceleration()
-    {
-        return latest_max_acceleration_;
+        latest_imu_data_.MergeFrom(imu_data);
     }
 
-    void set_latest_significant_wave_height(const double& latest_significant_wave_height)
-    {
-        latest_significant_wave_height_ = latest_significant_wave_height;
-    }
-    const double& latest_significant_wave_height() { return latest_significant_wave_height_; }
+    const jaiabot::protobuf::IMUData latest_imu_data() { return latest_imu_data_; }
 
     void set_create_task_packet_file(const bool& create_task_packet_file)
     {
@@ -550,10 +541,7 @@ struct MissionManagerStateMachine
     boost::units::quantity<boost::units::degree::plane_angle> latest_lat_{
         45 * boost::units::degree::degrees};
     bool rf_disable_{false};
-    // IMUData.max_acceleration, to characterize the bottom type
-    boost::units::quantity<boost::units::si::acceleration> latest_max_acceleration_{
-        0 * boost::units::si::meter_per_second_squared};
-    double latest_significant_wave_height_{0};
+    jaiabot::protobuf::IMUData latest_imu_data_;
     double bottom_depth_safety_constant_heading_{0};
     double bottom_depth_safety_constant_heading_speed_{0};
     double bottom_depth_safety_constant_heading_time_{0};
@@ -1389,8 +1377,20 @@ struct SurfaceDriftTaskCommon : boost::statechart::state<Derived, Parent>,
             drift.set_heading_with_units(heading);
 
             // Set the wave height and period
-            drift_packet().set_significant_wave_height(
-                this->machine().latest_significant_wave_height());
+            auto latest_imu_data = this->machine().latest_imu_data();
+            if (latest_imu_data.has_significant_wave_height())
+            {
+                drift_packet().set_significant_wave_height(
+                    latest_imu_data.significant_wave_height());
+            }
+            if (latest_imu_data.has_maximum_wave_height())
+            {
+                drift_packet().set_maximum_wave_height(latest_imu_data.maximum_wave_height());
+            }
+            if (latest_imu_data.has_peak_period())
+            {
+                drift_packet().set_peak_period(latest_imu_data.peak_period());
+            }
 
             goby::glog.is_debug1() &&
                 goby::glog << group("task")

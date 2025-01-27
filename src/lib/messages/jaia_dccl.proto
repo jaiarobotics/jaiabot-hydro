@@ -399,6 +399,26 @@ message DriftPacket
         },
         (jaia.field).rest_api.presence = GUARANTEED
     ];
+
+    optional double maximum_wave_height = 14 [
+        (dccl.field) = {
+            min: 0
+            max: 50
+            precision: 3
+            units: { derived_dimensions: "length" }
+        },
+        (jaia.field).rest_api.presence = GUARANTEED
+    ];
+
+    optional double peak_period = 15 [
+        (dccl.field) = {
+            min: 0
+            max: 50
+            precision: 3
+            units: { derived_dimensions: "time" }
+        },
+        (jaia.field).rest_api.presence = GUARANTEED
+    ];
 }
 
 message DivePacket

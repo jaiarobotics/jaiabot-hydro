@@ -106,6 +106,20 @@ class Series:
 
         return series
 
+
+    def writeToH5File(self, log: h5py.File, path: str):
+        utime_path = get_root_item_path(path, '_utime_')
+        scheme_path = get_root_item_path(path, '_scheme_')
+
+        if utime_path not in log:
+            log[utime_path] = self.utime
+
+        if scheme_path not in log:
+            log[scheme_path] = [1] * len(self.utime)
+            
+        log[path] = self.y_values
+
+
     def extend(self, other_series: 'Series'):
         r = copy.copy(self)
         r.utime += list(other_series.utime)

@@ -5,11 +5,7 @@ from pyjaia.series import *
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
-from typing import Callable
-import numpy
-import math
-from datetime import timedelta, datetime
-import sys
+from datetime import datetime
 from typing import *
 from math import *
 from pyjaia.waves.processing import *
@@ -17,39 +13,10 @@ from pyjaia.waves.filters import *
 from pathlib import *
 from statistics import *
 from pyjaia.waves.series_set import *
-from pyjaia.waves.drift import Drift
-from pyjaia.waves import doAnalysis
+from pyjaia.waves.types import *
 from pyjaia.waves.analysis_html import *
-
-
-def htmlForSummaryTable(drifts: List[Drift]):
-    html = '<h1>Summary</h1>'
-    html += '<table><tr><td>Drift #</td><td>Duration</td><td>Significant Wave Height</td></tr>'
-
-    swhSum = 0.0
-    durationSum = 0.0
-
-    for index, drift in enumerate(drifts):
-        duration = drift.rawVerticalAcceleration.duration()
-        durationString = formatTimeDelta(duration)
-
-        if len(drift.waveHeights) == 0:
-            html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>No waves detected</td></tr>'
-            continue
-
-        swh = drift.significantWaveHeight
-        swhSum += (swh * duration.total_seconds())
-        durationSum += duration.total_seconds()
-
-        html += f'<tr><td><a href="#{index + 1}">{index + 1}</a></td><td>{durationString}</td><td>{swh:0.2f}</td></tr>'
-
-    if durationSum > 0:
-        meanWaveHeight = swhSum / durationSum
-        html += f'<tr><td><b>Mean (duration-weighted)</b></td><td></td><td><b>{meanWaveHeight:0.2f}</b></td></tr>'
-
-    html += '</table>'
-
-    return html
+from pyjaia.waves.analysis import *
+from dataclasses import *
 
 
 cssTag = '''<style>
@@ -65,17 +32,21 @@ cssTag = '''<style>
 </style>'''
 
 
-def doPlots(h5FilePath: Path, drifts: List[Drift]):
+def doPlots(h5FilePath: Path, config: DriftAnalysisConfig, drifts: List[Drift]):
     description = h5FilePath.stem
-    htmlFilePath = h5FilePath.parent.joinpath(f'waveAnalysis-{description}-{datetime.now().strftime("%Y%m%dT%H%M%S")}.html')
+    method = config.analysis.type
+    htmlFilePath = h5FilePath.parent.joinpath(f'waveAnalysis-{description}-{method}.html')
     htmlFilename = str(htmlFilePath)
+
+    bandPassFilter = getBandPassFilterFunc(config.bandPassFilter)
 
     with open(htmlFilename, 'w') as f:
         f.write('<html><meta charset="utf-8">\n')
 
         f.write(cssTag)
-        f.write(f'<h1>{description}</h1>')
-        f.write(htmlForSummaryTable(drifts))
+        f.write(f'<h1>File: {h5FilePath.name}</h1>')
+        f.write(f'<h2>Analysis methodology: {asdict(config.analysis)}</h2>')
+        f.write(htmlForSummaryTable(drifts, config))
 
         f.write(htmlForFilterGraph(bandPassFilter))
 
@@ -83,15 +54,17 @@ def doPlots(h5FilePath: Path, drifts: List[Drift]):
         for driftIndex, drift in enumerate(drifts):
             f.write(htmlForDriftObject(drift, driftIndex + 1))
 
+        f.write(htmlForDriftAnalysisConfig(config))
+
         f.write('</html>\n')
 
     os.system(f'xdg-open {htmlFilename}')
 
 
-def analyzeFile(h5File: h5py.File, sampleFreq: float, glitchy: bool):
+def analyzeFile(h5File: h5py.File, config: DriftAnalysisConfig):
     seriesSet = SeriesSet.loadFromH5File(h5File)
 
-    if glitchy:
+    if config.glitchy:
         seriesSet.filterGlitches()
 
     driftSeriesSets = seriesSet.split(isInDriftState)
@@ -99,23 +72,26 @@ def analyzeFile(h5File: h5py.File, sampleFreq: float, glitchy: bool):
     drifts: List[Drift] = []
 
     for driftSeriesSet in driftSeriesSets:
-        drift = doAnalysis(driftSeriesSet.accelerationVertical, sampleFreq)
+        drift = doDriftAnalysis(driftSeriesSet.accelerationVertical, config)
         drifts.append(drift)
 
-    doPlots(Path(h5File.filename), drifts)
+    doPlots(Path(h5File.filename), config, drifts)
 
 
 def main():
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--glitchy', action='store_true')
-    parser.add_argument('filenames', nargs='+')
+    parser.add_argument('config_file')
+    parser.add_argument('h5_files', nargs='+')
     args = parser.parse_args()
 
-    for h5Path in args.filenames:
+    config = DriftAnalysisConfig.load(args.config_file)
+    print(config)
+
+    for h5Path in args.h5_files:
         h5File = h5py.File(h5Path)
-        analyzeFile(h5File, sampleFreq=4, glitchy=args.glitchy)
+        analyzeFile(h5File, config)
 
 
 if __name__ == '__main__':

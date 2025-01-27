@@ -50,6 +50,18 @@ class SeriesSet:
         return seriesSet
 
 
+    def writeToH5File(self, h5File: h5py.File):
+        self.missionState.writeToH5File(h5File, 'jaiabot::bot_status;0/jaiabot.protobuf.BotStatus/mission_state')
+
+        self.acc_x.writeToH5File(h5File, '/jaiabot::imu/jaiabot.protobuf.IMUData/linear_acceleration/x')
+        self.acc_y.writeToH5File(h5File, '/jaiabot::imu/jaiabot.protobuf.IMUData/linear_acceleration/y')
+        self.acc_z.writeToH5File(h5File, '/jaiabot::imu/jaiabot.protobuf.IMUData/linear_acceleration/z')
+
+        self.grav_x.writeToH5File(h5File, '/jaiabot::imu/jaiabot.protobuf.IMUData/gravity/x')
+        self.grav_y.writeToH5File(h5File, '/jaiabot::imu/jaiabot.protobuf.IMUData/gravity/y')
+        self.grav_z.writeToH5File(h5File, '/jaiabot::imu/jaiabot.protobuf.IMUData/gravity/z')
+
+
     def calculateVerticalAccelerations(self):
         self.accelerationVertical = Series()
         self.accelerationVertical.name = 'Vertical Accel'

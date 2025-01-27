@@ -80,6 +80,18 @@ message IMUData
             }}
         ];
 
+    optional double maximum_wave_height = 12 [(dccl.field) = {units {
+            derived_dimensions: "length"
+            system: "si"
+            }}
+        ];
+
+    optional double peak_period = 13 [(dccl.field) = {units {
+            derived_dimensions: "time"
+            system: "si"
+            }}
+        ];
+
     // For bottom characterization
     optional double max_acceleration = 8
         [(dccl.field) = {units {
