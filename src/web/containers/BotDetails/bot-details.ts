@@ -2,12 +2,140 @@
 import { CommandInfo } from "../../types/commands";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
 import { MissionState } from "../../utils/protobuf-types";
+import { MissionStatus } from "../../types/jaia-system-types";
 import Mission from "../../data/missions/mission";
 import Waypoint from "../../data/waypoints/waypoint";
+import Bot from "../../data/bots/bot";
+import GPS from "../../data/sensors/gps";
+import Hub from "../../data/hubs/hub";
 
-interface DisableInfo {
-    isDisabled: boolean;
-    disableMessage: string;
+import { HubContext } from "../../context/Hub/HubContext";
+
+// Utility Imports
+import * as turf from "@turf/turf";
+
+/**
+ * Provides class name and status age
+ *
+ * @returns { string , string }
+ */
+
+export function getStatusAge(bot: Bot) {
+    const statusAge = Math.max(0.0, bot.getStatusAge() / 1e6);
+    let statusAgeClassName: string;
+
+    if (statusAge > 30) {
+        statusAgeClassName = "healthFailed";
+    } else if (statusAge > 10) {
+        statusAgeClassName = "healthDegraded";
+    }
+    return { statusAge, statusAgeClassName };
+}
+
+/**
+ * Provides distance from hub
+ *
+ * @returns {string}
+ */
+export function getDistToHub(bot: Bot, hub: Hub) {
+    const botGPS: GPS = bot.getBotSensors().getGPS();
+    const hubGPS: GPS = hub.getHubSensors().getGPS();
+
+    let distToHub = "N/A";
+    if (botGPS && hubGPS) {
+        const botloc = turf.point([botGPS.getLat(), botGPS.getLon()]);
+        const hubloc = turf.point([hubGPS.getLat(), hubGPS.getLon()]);
+        const options = { units: "meters" as turf.Units };
+        distToHub = turf.rhumbDistance(botloc, hubloc, options).toFixed(1);
+    }
+    return distToHub;
+}
+
+/**
+ * Provides message for clicking on map
+ *
+ * @returns {string}
+ */
+// TODO Edit mode toggle and related items not functional
+// until more functionality is add to the mission management
+export function getClickOnMapString(mission: Mission) {
+    let editString = "";
+    if (mission?.getCanEdit()) {
+        editString = "Click on the map to create waypoints";
+    } else {
+        editString = "Click edit toggle to create waypoint";
+    }
+    return editString;
+}
+
+/**
+ * Provides off load percentage
+ *
+ * @returns {string}
+ */
+export function getBotOffloadPctString(botID: number, hub: Hub) {
+    let botOffloadPercentage = "";
+
+    if (botID === hub.getBotOffload()?.bot_id) {
+        botOffloadPercentage = " " + hub.getBotOffload().data_offload_percentage + "%";
+    }
+    return botOffloadPercentage;
+}
+
+/**
+ * Provides repeat status message
+ *
+ * @returns {string}
+ */
+export function getRepeatNumberString(mission: Mission, missionStatus: MissionStatus) {
+    var repeatNumberString = "N/A";
+    if (missionStatus?.repeat_index != null) {
+        repeatNumberString = `${missionStatus.repeat_index + 1}`;
+
+        if (mission?.getRepeats() != null) {
+            repeatNumberString = repeatNumberString + ` of ${mission?.getRepeats()}`;
+        }
+    }
+    return repeatNumberString;
+}
+
+/**
+ * Checks if bot is logging
+ *
+ * @returns {boolean} The bot logging status
+ */
+export function isBotLogging(missionState: MissionState) {
+    let botLogging = true;
+    if (
+        missionState == "PRE_DEPLOYMENT__IDLE" ||
+        missionState == "PRE_DEPLOYMENT__FAILED" ||
+        missionState?.startsWith("POST_DEPLOYMENT__")
+    ) {
+        botLogging = false;
+    }
+    return botLogging;
+}
+
+/**
+ * Provides Active wapoint name and distance
+ *
+ * @returns {string , string}
+ */
+
+export function getActiveWptStrings(missionStatus: MissionStatus) {
+    let activeWptString = missionStatus.activeGoal ?? "N/A";
+    let distToWpt = missionStatus.distanceToActiveGoal ?? "N/A";
+
+    if (activeWptString !== "N/A" && distToWpt === "N/A") {
+        distToWpt = "Distance To Goal > 1000";
+    } else if (activeWptString !== "N/A" && distToWpt !== "N/A") {
+        distToWpt = distToWpt + " m";
+    } else if (activeWptString === "N/A" && distToWpt !== "N/A") {
+        activeWptString = "Recovery";
+        distToWpt = distToWpt + " m";
+    }
+
+    return { activeWptString, distToWpt };
 }
 
 // Check if there is a mission to run
@@ -26,12 +154,18 @@ export function runMission(botId: number, mission: MissionInterface) {
     }
 }
 
+interface DisableInfo {
+    isDisabled: boolean;
+    disableMessage: string;
+}
+
 /**
  * Checks if a details button should be disabled
  *
  * @param bot
  * @returns boolean
  */
+// TODO Look for ways to simplify this
 export function disableButton(
     command: CommandInfo,
     missionState: MissionState,

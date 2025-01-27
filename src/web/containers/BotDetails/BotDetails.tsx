@@ -3,6 +3,13 @@ import React, { useContext, useState, useEffect } from "react";
 // Jaia Imports
 import { CommandInfo, botCommands } from "../../types/commands";
 import {
+    getStatusAge,
+    getDistToHub,
+    getClickOnMapString,
+    getBotOffloadPctString,
+    getRepeatNumberString,
+    getActiveWptStrings,
+    isBotLogging,
     disableButton,
     disableClearRunButton,
     disablePlayButton,
@@ -66,7 +73,6 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 
 // Utility Imports
-import * as turf from "@turf/turf";
 import { CustomAlert } from "../../shared/CustomAlert";
 import { BotContext } from "../../context/Bot/BotContext";
 
@@ -96,11 +102,12 @@ export interface BotDetailsProps {
 }
 
 export function BotDetails(props: BotDetailsProps) {
-    // TODO We will replace all uses of theses objects from Props with ones from context
+    // TODO We will replace of these old objects from Props with ones from context
     const missionFromProps = props.mission;
 
     const takeControl = props.takeControl;
     const deleteSingleMission = props.deleteSingleMission;
+    // End Old code
 
     const globalContext = useContext(GlobalContext);
     const globalDispatch = useContext(GlobalDispatchContext);
@@ -158,131 +165,6 @@ export function BotDetails(props: BotDetailsProps) {
     takeControlFunction = takeControl;
 
     let displayPrecision = 2;
-
-    /**
-     * Provides class name and status age
-     *
-     * @returns { string , string }
-     */
-
-    function getStatusAge() {
-        const statusAge = Math.max(0.0, bot.getStatusAge() / 1e6);
-        let statusAgeClassName: string;
-
-        if (statusAge > 30) {
-            statusAgeClassName = "healthFailed";
-        } else if (statusAge > 10) {
-            statusAgeClassName = "healthDegraded";
-        }
-        return { statusAge, statusAgeClassName };
-    }
-
-    /**
-     * Provides distance from hub
-     *
-     * @returns {string}
-     */
-    function getDistToHub() {
-        const botGPS: GPS = bot.getBotSensors().getGPS();
-        const hubGPS: GPS = hub.getHubSensors().getGPS();
-
-        let distToHub = "N/A";
-        if (botGPS && hubGPS) {
-            const botloc = turf.point([botGPS.getLat(), botGPS.getLon()]);
-            const hubloc = turf.point([hubGPS.getLat(), hubGPS.getLon()]);
-            const options = { units: "meters" as turf.Units };
-            distToHub = turf.rhumbDistance(botloc, hubloc, options).toFixed(1);
-        }
-        return distToHub;
-    }
-
-    /**
-     * Provides bot name
-     *
-     * @returns {string}
-     */
-    function getBotString() {
-        return `Bot ${botID}`;
-    }
-
-    /**
-     * Provides run name
-     *
-     * @returns {string}
-     */
-    function getRunString() {
-        return mission?.getMissionID() ?? "No Run";
-    }
-
-    /**
-     * Provides message for clicking on map
-     *
-     * @returns {string}
-     */
-    // TODO Edit mode toggle and related items not functional
-    // until more functionality is add to the mission management
-    function getClickOnMapString() {
-        let editString = "";
-        if (mission?.getCanEdit()) {
-            editString = "Click on the map to create waypoints";
-        } else {
-            editString = "Click edit toggle to create waypoint";
-        }
-        return editString;
-    }
-
-    /**
-     * Provides off load percentage
-     *
-     * @returns {string}
-     */
-    function getBotOffloadPctString() {
-        let botOffloadPercentage = "";
-
-        if (botID === hub.getBotOffload()?.bot_id) {
-            botOffloadPercentage = " " + hub.getBotOffload().data_offload_percentage + "%";
-        }
-        return botOffloadPercentage;
-    }
-
-    /**
-     * Provides repeat status message
-     *
-     * @returns {string}
-     */
-    function getRepeatNumberString() {
-        var repeatNumberString = "N/A";
-        if (missionStatus?.repeat_index != null) {
-            repeatNumberString = `${missionStatus.repeat_index + 1}`;
-
-            if (mission?.getRepeats() != null) {
-                repeatNumberString = repeatNumberString + ` of ${mission?.getRepeats()}`;
-            }
-        }
-        return repeatNumberString;
-    }
-
-    /**
-     * Provides Active wapoint name and distance
-     *
-     * @returns {string , string}
-     */
-
-    function getActiveWptStrings() {
-        let activeWptString = missionStatus.activeGoal ?? "N/A";
-        let distToWpt = missionStatus.distanceToActiveGoal ?? "N/A";
-
-        if (activeWptString !== "N/A" && distToWpt === "N/A") {
-            distToWpt = "Distance To Goal > 1000";
-        } else if (activeWptString !== "N/A" && distToWpt !== "N/A") {
-            distToWpt = distToWpt + " m";
-        } else if (activeWptString === "N/A" && distToWpt !== "N/A") {
-            activeWptString = "Recovery";
-            distToWpt = distToWpt + " m";
-        }
-
-        return { activeWptString, distToWpt };
-    }
 
     /**
      * Provides data offload button
@@ -549,24 +431,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Checks if bot is logging
-     *
-     * @returns {boolean} The bot logging status
-     */
-    function isBotLogging() {
-        let botLogging = true;
-        if (
-            missionState == "PRE_DEPLOYMENT__IDLE" ||
-            missionState == "PRE_DEPLOYMENT__FAILED" ||
-            missionState?.startsWith("POST_DEPLOYMENT__")
-        ) {
-            botLogging = false;
-        }
-        return botLogging;
-    }
-
-    /**
-     * Dispatches an action to close the HubDetails panel
+     * Dispatches an action to close the BotDetails panel
      *
      * @returns {void}
      */
@@ -579,13 +444,13 @@ export function BotDetails(props: BotDetailsProps) {
             <div id="botDetailsBox">
                 <div className="botDetailsHeading">
                     <div className="titleBar">
-                        <h2 className="botName">{getBotString()}</h2>
-                        <h4 className="runName">{getRunString()}</h4>
+                        <h2 className="botName">{`Bot ${botID}`}</h2>
+                        <h4 className="runName">{mission?.getMissionID() ?? "No Run"}</h4>
                         <div className="closeButton" onClick={handleClosePanel}>
                             ⨯
                         </div>
                     </div>
-                    <h3 className="name">{getClickOnMapString()}</h3>
+                    <h3 className="name">{getClickOnMapString(mission)}</h3>
                     <div className="botDetailsToolbar">
                         <Button
                             className={
@@ -709,9 +574,9 @@ export function BotDetails(props: BotDetailsProps) {
                             <AccordionDetails>
                                 <table>
                                     <tbody>
-                                        <tr className={getStatusAge().statusAgeClassName}>
+                                        <tr className={getStatusAge(bot).statusAgeClassName}>
                                             <td>Status Age</td>
-                                            <td>{getStatusAge().statusAge.toFixed(0)} s</td>
+                                            <td>{getStatusAge(bot).statusAge.toFixed(0)} s</td>
                                         </tr>
                                         <tr>
                                             <td>Mission State</td>
@@ -719,7 +584,7 @@ export function BotDetails(props: BotDetailsProps) {
                                                 {missionStatus?.missionState?.replaceAll(
                                                     "__",
                                                     "\n",
-                                                ) + getBotOffloadPctString()}
+                                                ) + getBotOffloadPctString(botID, hub)}
                                             </td>
                                         </tr>
                                         <tr>
@@ -732,24 +597,24 @@ export function BotDetails(props: BotDetailsProps) {
                                         <tr>
                                             <td>Repeat Number</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {getRepeatNumberString()}
+                                                {getRepeatNumberString(mission, missionStatus)}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Active Goal</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {getActiveWptStrings().activeWptString}
+                                                {getActiveWptStrings(missionStatus).activeWptString}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Distance to Goal</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {getActiveWptStrings().distToWpt}
+                                                {getActiveWptStrings(missionStatus).distToWpt}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Distance from Hub</td>
-                                            <td>{getDistToHub()} m</td>
+                                            <td>{getDistToHub(bot, hub)} m</td>
                                         </tr>
                                         <tr>
                                             <td>Wi-Fi Link Quality</td>
@@ -757,7 +622,11 @@ export function BotDetails(props: BotDetailsProps) {
                                         </tr>
                                         <tr>
                                             <td>Data Logging</td>
-                                            <td>{isBotLogging().toString().toUpperCase()}</td>
+                                            <td>
+                                                {isBotLogging(missionState)
+                                                    .toString()
+                                                    .toUpperCase()}
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
