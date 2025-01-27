@@ -535,11 +535,11 @@ void jaiabot::comms::XBeeDevice::write(const string& raw)
 string jaiabot::comms::XBeeDevice::read_until(const string& delimiter)
 {
     string data;
-    glog.is_debug2() && glog << group(glog_group) << "read_until: " << delimiter
-                             << " (hex: " << hexadecimal(delimiter) << ")" << endl;
-    boost::asio::read_until(*port, dynamic_buffer(data), delimiter);
-    glog.is_debug2() && glog << group(glog_group) << "read_until completed with: " << delimiter
+    glog.is_debug2() && glog << group(glog_group) << "read_until: " << hexadecimal(delimiter)
                              << endl;
+    boost::asio::read_until(*port, dynamic_buffer(data), delimiter);
+    glog.is_debug2() && glog << group(glog_group)
+                             << "read_until completed with: " << hexadecimal(delimiter) << endl;
     return data;
 }
 
@@ -589,9 +589,6 @@ void jaiabot::comms::XBeeDevice::enter_command_mode()
 
             if (result.find("OK") != std::string::npos)
             {
-                // Stop io context to exit and continue
-                io->stop();
-
                 return;
             }
             else
@@ -625,6 +622,8 @@ void jaiabot::comms::XBeeDevice::async_read_with_timeout(
     std::string& buffer, const std::string& delimiter, int timeout_seconds,
     std::function<void(const std::string&)> handler)
 {
+    io->reset();
+
     // Clear the buffer before starting the read operation
     buffer.clear();
 

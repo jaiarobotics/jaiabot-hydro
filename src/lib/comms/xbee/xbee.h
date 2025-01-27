@@ -67,9 +67,6 @@ inline SerialNumber serial_from_node_data(NodeType type, int fleet_id, int bot_o
                  id64 = bot_or_hub_id & 0x7FFF;
     SerialNumber low_word = ((fleet64 << 16) + (type64 << 15) + id64) & 0xFFFFFFFF;
 
-    std::cout << "fleet: " << fleet_id << ", type: " << type64 << ", id: " << id64
-              << ": high: " << std::hex << high_word << ", low: " << low_word << std::endl;
-
     return (high_word << 32) + low_word;
 }
 
