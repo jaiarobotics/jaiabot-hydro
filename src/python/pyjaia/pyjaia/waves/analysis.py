@@ -10,6 +10,9 @@ import statistics
 
 def heightFromAcceleration(acceleration: List[float], sampleFrequency: float):
     N = len(acceleration)
+    if N < 2:
+        return numpy.array([])
+
     A = numpy.fft.fft(acceleration)
     X = [0.0] * N
 
@@ -31,6 +34,9 @@ def accelerationToElevation(acceleration: Series, sampleFrequency: float):
 
 
 def significantWaveHeight(powerSpectrum: List[float], sampleFrequency: float):
+    if len(powerSpectrum) < 1:
+        return None
+
     df = sampleFrequency / 2 / len(powerSpectrum)
     meanZetaSquared = 0.0 # Mean height
     for i in range(1, len(powerSpectrum)):
@@ -43,8 +49,31 @@ def significantWaveHeightFromElevation(elevation: List[float]):
     return 4 * meanZetaSquared**0.5
 
 
+def maximumWaveHeightFromElevation(elevations: List[float]):
+    trough = 0.0
+    crest = 0.0
+    maxWaveHeight = 0.0
+    lastElevation = 0.0
+
+    for elevation in elevations:
+        if elevation < 0.0:
+            if lastElevation >= 0.0:
+                # Completed a wave
+                waveHeight = crest - trough
+                maxWaveHeight = max(maxWaveHeight, waveHeight)
+            trough = min(trough, elevation)
+
+        if elevation > 0.0:
+            crest = max(crest, elevation)
+
+    return maxWaveHeight
+
+
 def peakWavePeriod(powerSpectrum: List[float], sampleFrequency: float):
     N = len(powerSpectrum)
+    if N < 2:
+        return None
+
     maxPowerDensity = 0.0
     maxIndex = 0
 
@@ -55,12 +84,18 @@ def peakWavePeriod(powerSpectrum: List[float], sampleFrequency: float):
 
     maxFrequency = maxIndex * sampleFrequency / 2 / N
 
+    if maxFrequency == 0.0:
+        return 0.0
+
     return 1.0 / maxFrequency
 
 
 def powerSpectrumFFT(acceleration: List[float], sampleFrequency: float):
-    A = numpy.fft.fft(acceleration)
     N = len(acceleration)
+    if N < 2:
+        return numpy.array([])
+
+    A = numpy.fft.fft(acceleration)
     S: List[float] = [0.0] * (N // 2 + 1) # Power density spectrum
 
     for i in range(1, N // 2 + 1):
@@ -72,24 +107,34 @@ def powerSpectrumFFT(acceleration: List[float], sampleFrequency: float):
 
 
 def powerSpectrumPeriodogram(elevation: List[float], config: DriftAnalysisConfig):
+    if len(elevation) < 2:
+        return numpy.array([])
+    
     from scipy.signal import periodogram
     frequencies, power_spectrum = periodogram(elevation, fs=config.sampleFreq)
     return power_spectrum
 
 
 def powerSpectrumWelch(elevation: List[float], config: DriftAnalysisConfig):
+    N = len(elevation)
+    if N < 2:
+        return numpy.array([])
+    
     from scipy.signal import welch
 
     frequencies, power_spectrum = welch(
         elevation,  # Input signal
         fs=config.sampleFreq,    # Sampling frequency (Hz)
-        nperseg=config.analysis.segmentLength, # Length of each segment
+        nperseg=min(config.analysis.segmentLength, N), # Length of each segment
         scaling='density'        # Power spectral density scaling
     )
     return power_spectrum
 
 
 def powerSpectrumBurg(elevation: List[float], config: DriftAnalysisConfig):
+    if len(elevation) < 2:
+        return numpy.array([])
+    
     from spectrum import pburg
     
     ar_psd = pburg(elevation, order=10)
@@ -143,6 +188,7 @@ def doFFT(drift: Drift, config: DriftAnalysisConfig):
     drift.powerDensitySpectrum = powerSpectrumFFT(drift.filteredVerticalAcceleration.y_values, config.sampleFreq)
     drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, config.sampleFreq)
     drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
+    drift.maxWaveHeight = maximumWaveHeightFromElevation(drift.elevation.y_values)
     
     return drift
 
@@ -151,6 +197,7 @@ def doWelch(drift: Drift, config: DriftAnalysisConfig):
     drift.powerDensitySpectrum = powerSpectrumWelch(drift.elevation.y_values, config)
     drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, config.sampleFreq)
     drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
+    drift.maxWaveHeight = maximumWaveHeightFromElevation(drift.elevation.y_values)
     
     return drift
 
@@ -159,6 +206,7 @@ def doPeriodogram(drift: Drift, config: DriftAnalysisConfig):
     drift.powerDensitySpectrum = powerSpectrumPeriodogram(drift.elevation.y_values, config)
     drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, config.sampleFreq)
     drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
+    drift.maxWaveHeight = maximumWaveHeightFromElevation(drift.elevation.y_values)
     
     return drift
 
@@ -167,6 +215,7 @@ def doBurg(drift: Drift, config: DriftAnalysisConfig):
     drift.powerDensitySpectrum = powerSpectrumBurg(drift.elevation.y_values, config)
     drift.significantWaveHeight = significantWaveHeight(drift.powerDensitySpectrum, config.sampleFreq)
     drift.peakWavePeriod = peakWavePeriod(drift.powerDensitySpectrum, config.sampleFreq)
+    drift.maxWaveHeight = maximumWaveHeightFromElevation(drift.elevation.y_values)
     
     return drift
 

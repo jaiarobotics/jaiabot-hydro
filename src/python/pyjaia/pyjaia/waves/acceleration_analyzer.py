@@ -15,12 +15,12 @@ import logging
 from jaiabot.messages.imu_pb2 import IMUData
 
 from pyjaia.series import *
-from . import doAnalysis
+from .analysis import doDriftAnalysis
+from .types import DriftAnalysisConfig
 from .processing import *
 from .filters import *
-# from .analysis_html import *
+from .analysis_html import *
 
-import csv
 import os
 
 logger = logging.getLogger('jaiabot_imu')
@@ -37,11 +37,11 @@ def magnitude(v):
 
 
 class AccelerationAnalyzer:
+    config: DriftAnalysisConfig
+
     vertical_acceleration = Series('Raw Acceleration (m/s^2)')
 
     max_acceleration_magnitude = 0.0
-
-    sample_frequency: float
 
     # Whether to dump the raw data to a file when significant wave height is calculated
     # (for debugging)
@@ -52,10 +52,10 @@ class AccelerationAnalyzer:
     _lock = Lock()
 
 
-    def __init__(self, sample_frequency: float, dump_html_flag: bool=False):
-        logger.info(f'Analyzer sampling rate: {sample_frequency} Hz')
+    def __init__(self, config: DriftAnalysisConfig, dump_html_flag: bool=False):
+        self.config = config
 
-        self.sample_frequency = sample_frequency
+        logger.info(f'Analyzer sampling rate: {config.sampleFreq} Hz')
 
         self.dump_html_flag = dump_html_flag
 
@@ -92,11 +92,9 @@ class AccelerationAnalyzer:
             self.clearAccelerationSeries()
             self._sampling_for_wave_height = False
 
-    def getSignificantWaveHeight(self):
+    def getDriftAnalysis(self):
         with self._lock:
-            drift = doAnalysis(self.vertical_acceleration, self.sample_frequency)
-            swh = drift.significantWaveHeight
-        return swh
+            return doDriftAnalysis(self.vertical_acceleration, self.config)
 
     # Bottom characterization
     def startSamplingForBottomCharacterization(self):
@@ -117,7 +115,7 @@ class AccelerationAnalyzer:
         print(self.getSignificantWaveHeight())
 
     def dumpToFile(self):
-        drift = doAnalysis(self.vertical_acceleration, self.sample_frequency)
+        drift = doDriftAnalysis(self.vertical_acceleration, self.config)
 
         date_string = datetime.now().strftime('%Y%m%dT%H%M%S')
         filename = os.path.expanduser(f'/var/log/jaiabot/swh-debug-{date_string}.html')
@@ -127,21 +125,15 @@ class AccelerationAnalyzer:
 
 
 if __name__ == '__main__':
-    # imu = Simulator(wave_frequency=0.33, wave_height=0.35)
-    # analyzer = Analyzer(imu=imu, sample_frequency=4)
-
-    # analyzer.startSamplingForWaveHeight()
-
-    # while True:
-    #     print(analyzer.getSignificantWaveHeight())
-    #     sleep(1)
     import sys
     import h5py
     from .series_set import *
 
     sampleFreq = 4.0
 
-    analyzer = AccelerationAnalyzer(imu=None, sample_frequency=sampleFreq)
+    config = DriftAnalysisConfig.default()
+
+    analyzer = AccelerationAnalyzer(imu=None, config=config)
 
     for h5Path in sys.argv[1:]:
         h5File = h5py.File(h5Path)
