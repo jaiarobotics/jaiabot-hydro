@@ -175,7 +175,7 @@ export function BotDetails(props: BotDetailsProps) {
      *
      * @returns {React.Fragment}
      */
-    function getDataOffloadButton() {
+    function dataOffloadButton() {
         // TODO This logic should be cleaned up and simplified
         let linkQualityPercentage = 0;
 
@@ -337,7 +337,7 @@ export function BotDetails(props: BotDetailsProps) {
      *
      * @returns {void}
      */
-    async function handleActivateRcClick() {
+    async function handleActivateRCClick() {
         issueRCCommand(
             bot,
             await runRCMode(bot),
@@ -638,7 +638,12 @@ export function BotDetails(props: BotDetailsProps) {
                     <div className="titleBar">
                         <h2 className="botName">{`Bot ${botID}`}</h2>
                         <h4 className="runName">{mission?.getMissionID() ?? "No Run"}</h4>
-                        <div className="closeButton" onClick={handleClosePanel}>
+                        <div
+                            className="closeButton"
+                            onClick={() => {
+                                handleClosePanel();
+                            }}
+                        >
                             ⨯
                         </div>
                     </div>
@@ -822,7 +827,7 @@ export function BotDetails(props: BotDetailsProps) {
                                         ${props.isRCModeActive(botID) ? "rc-active" : "rc-inactive"}
                                         `}
                                     onClick={async () => {
-                                        handleActivateRcClick();
+                                        handleActivateRCClick();
                                     }}
                                 >
                                     <img src={rcMode} alt="Activate RC Mode" title="RC Mode"></img>
@@ -841,7 +846,7 @@ export function BotDetails(props: BotDetailsProps) {
                                     <Icon path={mdiSkipNext} title="Next Task" />
                                 </Button>
 
-                                {getDataOffloadButton()}
+                                {dataOffloadButton()}
 
                                 <Accordion
                                     expanded={globalContext.botAccordionStates.advancedCommands}
