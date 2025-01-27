@@ -9,8 +9,9 @@ export interface GlobalContextType {
     clientID: string;
     controllingClientID: string;
     selectedPodElement: SelectedPodElement;
-    showHubDetails: boolean;
+    shownDetails: PodElement;
     hubAccordionStates: HubAccordionStates;
+    botAccordionStates: BotAccordionStates;
     isRCMode: boolean;
 }
 
@@ -19,26 +20,16 @@ export interface SelectedPodElement {
     id: number;
 }
 
+export const enum HubAccordionNames {
+    QUICKLOOK = "quickLook",
+    COMMANDS = "commands",
+    LINKS = "links",
+}
+
 export interface HubAccordionStates {
     quickLook: boolean;
     commands: boolean;
     links: boolean;
-}
-
-export interface GlobalAction {
-    type: GlobalActions;
-    clientID?: string;
-    hubID?: number;
-    hubAccordionName?: string;
-}
-
-interface GlobalContextProviderProps {
-    children: ReactNode;
-}
-
-export enum PodElement {
-    "BOT" = 1,
-    "HUB" = 2,
 }
 
 const defaultHubAccordionStates = {
@@ -47,12 +38,66 @@ const defaultHubAccordionStates = {
     links: false,
 };
 
+export const enum BotAccordionNames {
+    QUICKLOOK = "quickLook",
+    COMMANDS = "commands",
+    ADVANCEDCOMMANDS = "advancedCommands",
+    HEALTH = "health",
+    DATA = "data",
+    GPS = "gps",
+    IMU = "imu",
+    SENSOR = "sensor",
+}
+
+export interface BotAccordionStates {
+    quickLook: boolean;
+    commands: boolean;
+    advancedCommands: boolean;
+    health: boolean;
+    data: boolean;
+    gps: boolean;
+    imu: boolean;
+    sensor: boolean;
+}
+
+const defaultBotAccordionStates = {
+    quickLook: false,
+    commands: false,
+    advancedCommands: false,
+    health: false,
+    data: false,
+    gps: false,
+    imu: false,
+    sensor: false,
+};
+
+export interface GlobalAction {
+    type: GlobalActions;
+    clientID?: string;
+    elementType?: PodElement;
+    elementID?: number;
+    hubAccordionName?: HubAccordionNames;
+    botAccordionName?: BotAccordionNames;
+}
+
+interface GlobalContextProviderProps {
+    children: ReactNode;
+}
+
+// TODO: NodeType
+export enum PodElement {
+    "NONE" = 0,
+    "BOT" = 1,
+    "HUB" = 2,
+}
+
 export const globalDefaultContext: GlobalContextType = {
     clientID: "",
     controllingClientID: "",
-    selectedPodElement: null,
-    showHubDetails: false,
+    selectedPodElement: { type: PodElement.NONE, id: -1 },
+    shownDetails: PodElement.NONE,
     hubAccordionStates: defaultHubAccordionStates,
+    botAccordionStates: defaultBotAccordionStates,
     isRCMode: false,
 };
 
@@ -78,23 +123,17 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
         case GlobalActions.EXITED_RC_MODE:
             return handleExitedRCMode(mutableState);
 
-        case GlobalActions.CLOSED_HUB_DETAILS:
-            return handleClosedHubDetails(mutableState);
+        case GlobalActions.CLOSED_DETAILS:
+            return handleClosedDetails(mutableState);
 
-        case GlobalActions.CLICKED_HUB_TAB:
-            return handleClickedHubTab(mutableState, action.hubID);
-
-        case GlobalActions.CLICKED_BOT_TAB:
-            return handleClickedBotTab(mutableState);
-
-        case GlobalActions.CLICKED_HUB_MAP_ICON:
-            return handleClickedHubMapIcon(mutableState, action.hubID);
-
-        case GlobalActions.CLICKED_BOT_MAP_ICON:
-            return handleClickedBotMapIcon(mutableState);
+        case GlobalActions.CLICKED_NODE:
+            return handleClickedNode(mutableState, action.elementType, action.elementID);
 
         case GlobalActions.CLICKED_HUB_ACCORDION:
             return handleClickedHubAccordion(mutableState, action.hubAccordionName);
+
+        case GlobalActions.CLICKED_BOT_ACCORDION:
+            return handleClickedBotAccordion(mutableState, action.botAccordionName);
 
         default:
             return state;
@@ -138,108 +177,37 @@ function handleExitedRCMode(mutableState: GlobalContextType) {
 }
 
 /**
- * Closes the HubDetails panel
+ * Closes the HubDetails or BotDetails panel
  *
  * @param {GlobalContextType} mutableState State object ref for making modifications
  * @returns {GlobalContextType} Updated mutable state object
  */
-function handleClosedHubDetails(mutableState: GlobalContextType) {
-    mutableState.showHubDetails = false;
+function handleClosedDetails(mutableState: GlobalContextType) {
+    mutableState.shownDetails = PodElement.NONE;
     return mutableState;
 }
 
 /**
- * Handles the interplay between selecting the hub and clicking the HubTab
+ * Handles click events for the hub and bot icons on the map and in bots drawer
  *
  * @param {GlobalContextType} mutableState State object ref for making modifications
+ * @param {PodElement} type What type of elemetnt was clicked (HUB or BOT)
+ * @param {number} id ID of Bot or Hub clicked
  * @returns {GlobalContextType} Updated mutable state object
  */
-function handleClickedHubTab(mutableState: GlobalContextType, hubID: number) {
-    if (isNaN(hubID)) throw new Error("Invalid hubID");
+function handleClickedNode(mutableState: GlobalContextType, type: PodElement, id: number) {
+    if (isNaN(id)) throw new Error("Invalid hub or bot id");
 
-    const isHubSelected =
-        mutableState.selectedPodElement !== null &&
-        mutableState.selectedPodElement.type === PodElement.HUB;
-
-    if (isHubSelected) {
-        mutableState.showHubDetails = false;
+    // Clicked currently selected element
+    if (mutableState.selectedPodElement.type == type && mutableState.selectedPodElement.id == id) {
+        // Close deselect and close details
+        mutableState.shownDetails = PodElement.NONE;
+        mutableState.selectedPodElement.type = PodElement.NONE;
     } else {
-        mutableState.showHubDetails = true;
+        // Clicked non-selected element, select and show details
+        mutableState.selectedPodElement = { type: type, id: id };
+        mutableState.shownDetails = type;
     }
-
-    if (mutableState.showHubDetails) {
-        mutableState.selectedPodElement = { type: PodElement.HUB, id: hubID };
-    } else {
-        mutableState.selectedPodElement = null;
-    }
-
-    return mutableState;
-}
-
-/**
- * Handles the interplay between selecting a bot and clicking a BotTab
- *
- * @param {GlobalContextType} mutableState State object ref for making modifications
- * @returns {GlobalContextType} Updated mutable state object
- *
- * @notes
- * This function only unselects the hub and closes the HubDetails panel.
- * It does not handle bot selection yet.
- */
-function handleClickedBotTab(mutableState: GlobalContextType) {
-    const isHubSelected =
-        mutableState.selectedPodElement !== null &&
-        mutableState.selectedPodElement.type === PodElement.HUB;
-
-    if (isHubSelected) {
-        mutableState.showHubDetails = false;
-        // TEMPORARY: Once bot details are integrated into context,
-        // selectedPodElement will be assinged to the bot selected by the user
-        mutableState.selectedPodElement = null;
-    }
-    return mutableState;
-}
-
-/**
- * Handles click events for the hub icon located on map
- *
- * @param {GlobalContextType} mutableState State object ref for making modifications
- * @returns {GlobalContextType} Updated mutable state object
- */
-function handleClickedHubMapIcon(mutableState: GlobalContextType, hubID: number) {
-    if (isNaN(hubID)) throw new Error("Invalid hubID");
-
-    const isHubSelected =
-        mutableState.selectedPodElement !== null &&
-        mutableState.selectedPodElement.type === PodElement.HUB;
-
-    if (isHubSelected) {
-        mutableState.selectedPodElement = null;
-        mutableState.showHubDetails = false;
-    } else {
-        mutableState.selectedPodElement = { type: PodElement.HUB, id: hubID };
-        mutableState.showHubDetails = true;
-    }
-    return mutableState;
-}
-
-/**
- * Handles click events for the bot icon located on map
- *
- * @param {GlobalContextType} mutableState State object ref for making modifications
- * @returns {GlobalContextType} Updated mutable state object
- */
-function handleClickedBotMapIcon(mutableState: GlobalContextType) {
-    const isHubSelected =
-        mutableState.selectedPodElement !== null &&
-        mutableState.selectedPodElement.type === PodElement.HUB;
-
-    if (isHubSelected) {
-        // When bot logic is integrated into context, selectedPodElement will be set to the clicked bot
-        mutableState.selectedPodElement = null;
-        mutableState.showHubDetails = false;
-    }
-
     return mutableState;
 }
 
@@ -255,15 +223,54 @@ function handleClickedHubAccordion(mutableState: GlobalContextType, accordionNam
 
     let hubAccordionStates = mutableState.hubAccordionStates;
     switch (accordionName) {
-        case "quickLook":
+        case HubAccordionNames.QUICKLOOK:
             hubAccordionStates.quickLook = !hubAccordionStates.quickLook;
             break;
-        case "commands":
+        case HubAccordionNames.COMMANDS:
             hubAccordionStates.commands = !hubAccordionStates.commands;
             break;
-        case "links":
+        case HubAccordionNames.LINKS:
             hubAccordionStates.links = !hubAccordionStates.links;
             break;
+    }
+    return mutableState;
+}
+
+/**
+ * Opens and closes the BotDetails accordion tabs
+ *
+ * @param {GlobalContextType} mutableState State object ref for making modifications
+ * @param {string} accordionName Which accordion to open or close
+ * @returns {GlobalContextType} Updated mutable state object
+ */
+function handleClickedBotAccordion(mutableState: GlobalContextType, accordionName: string) {
+    if (!accordionName) throw new Error("Invalid accordionName");
+
+    let botAccordionStates = mutableState.botAccordionStates;
+    switch (accordionName) {
+        case BotAccordionNames.QUICKLOOK:
+            botAccordionStates.quickLook = !botAccordionStates.quickLook;
+            break;
+        case BotAccordionNames.COMMANDS:
+            botAccordionStates.commands = !botAccordionStates.commands;
+            break;
+        case BotAccordionNames.ADVANCEDCOMMANDS:
+            botAccordionStates.advancedCommands = !botAccordionStates.advancedCommands;
+            break;
+        case BotAccordionNames.HEALTH:
+            botAccordionStates.health = !botAccordionStates.health;
+            break;
+        case BotAccordionNames.DATA:
+            botAccordionStates.data = !botAccordionStates.data;
+            break;
+        case BotAccordionNames.GPS:
+            botAccordionStates.gps = !botAccordionStates.gps;
+            break;
+        case BotAccordionNames.IMU:
+            botAccordionStates.imu = !botAccordionStates.imu;
+            break;
+        case BotAccordionNames.SENSOR:
+            botAccordionStates.sensor = !botAccordionStates.sensor;
     }
     return mutableState;
 }
