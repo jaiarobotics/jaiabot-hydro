@@ -56,6 +56,12 @@ message FleetConfig
         enum DebconfType
         {
             SELECT = 0;
+            MULTISELECT = 1;
+            STRING = 2;
+            BOOLEAN = 3;
+            NOTE = 4;
+            TEXT = 5;
+            PASSWORD = 6;
         }
 
         required string key = 1;
