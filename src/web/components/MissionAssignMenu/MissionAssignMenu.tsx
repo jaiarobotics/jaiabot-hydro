@@ -11,10 +11,9 @@ import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 import Bot from "../../data/bots/bot";
-import { missions } from "../../data/missions/missions";
-import { bots } from "../../data/bots/bots";
+import { missionsManager } from "../../data/missions_manager/missions-manager";
 
-const UNASSIGNED_BOT_ID = -1;
+const UNASSIGNED_ID = -1;
 
 interface Props {
     missionID: number;
@@ -24,15 +23,13 @@ export default function MissionAssignMenu(props: Props) {
     const operationContext = useContext(OperationContext);
     const operationDispatch = useContext(OperationDispatchContext);
 
-    const mission = operationContext.missions.get(props.missionID);
-
     /**
      * Provides MenuItem value needed to display text in the Select element
      *
      * @returns Number The MenuItem value which maps to `Bot-{BotID}` or "Unassigned"
      */
     const getMenuValue = () => {
-        return mission.getAssignedBotID() ?? UNASSIGNED_BOT_ID;
+        return missionsManager.getBot(props.missionID);
     };
 
     /**
@@ -49,26 +46,28 @@ export default function MissionAssignMenu(props: Props) {
         }
 
         // Update data model
-        const mission = missions.getMission(props.missionID);
-        mission.setAssignedBotID(selectedBotID);
-
-        const bot = bots.getBot(selectedBotID);
-        if (bot) {
-            bot.setMissionID(mission.getMissionID());
-        }
+        missionsManager.assign(selectedBotID, props.missionID);
 
         // Update OperationContext
         operationDispatch({ type: OperationActions.SYNC_REQUESTED });
     };
 
     /**
-     *
+     * If a Bot is not assigned to a mission or the Bot is already assigned to this mission, display it in the dropdown menu
      *
      * @param {Bot} bot Used to access its ID and its assigned mission ID
-     * @returns <MenuItem>
+     * @returns <MenuItem> A dropdown option for a MUI Select element
+     *
+     * @notes
+     * If the Bot is already assigned to this mission, we need to display the Bot in the dropdown menu
+     * because the selected element needs to be an option in the menu
+     *
+     * This function is called each time the Select component calls the onChange handler
      */
     const generateMenuItems = (bot: Bot) => {
-        if (bot.getMissionID() < 0 || bot.getMissionID() === props.missionID) {
+        const botAssignment = missionsManager.getMission(bot.getBotID());
+
+        if (botAssignment === UNASSIGNED_ID || botAssignment === props.missionID) {
             const botID = bot.getBotID();
             return <MenuItem key={botID} value={botID}>{`Bot-${botID}`}</MenuItem>;
         }
@@ -82,7 +81,7 @@ export default function MissionAssignMenu(props: Props) {
                 onChange={(evt: SelectChangeEvent) => handleMenuSelection(evt)}
                 value={getMenuValue().toString()}
             >
-                <MenuItem value={UNASSIGNED_BOT_ID}>Unassigned</MenuItem>
+                <MenuItem value={UNASSIGNED_ID}>Unassigned</MenuItem>
                 {Array.from(operationContext.bots.values()).map((bot) => generateMenuItems(bot))}
             </Select>
         </FormControl>

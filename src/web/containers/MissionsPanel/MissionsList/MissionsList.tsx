@@ -12,6 +12,8 @@ import {
 
 import MissionAssignMenu from "../../../components/MissionAssignMenu/MissionAssignMenu";
 
+import { missionsManager } from "../../../data/missions_manager/missions-manager";
+
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
     Accordion,
@@ -25,8 +27,9 @@ import "./MissionsList.less";
 
 interface MissionAccordionTitleProps {
     missionID: number;
-    assignedBotID: number;
 }
+
+const UNASSIGNED_ID = -1;
 
 // Disable animations from MUI accordions because of lag experienced by operators
 const accordionTheme = createTheme({ transitions: { create: () => "none" } });
@@ -72,10 +75,7 @@ export default function MissionsList() {
                                 className="mission-accordion-summary"
                                 expandIcon={<ExpandMoreIcon />}
                             >
-                                <MissionAccordionTitle
-                                    missionID={mission.getMissionID()}
-                                    assignedBotID={mission.getAssignedBotID()}
-                                />
+                                <MissionAccordionTitle missionID={mission.getMissionID()} />
                             </AccordionSummary>
                             <AccordionDetails>
                                 <MissionAssignMenu missionID={mission.getMissionID()} />
@@ -89,11 +89,12 @@ export default function MissionsList() {
 }
 
 function MissionAccordionTitle(props: MissionAccordionTitleProps) {
+    const assignedBotID = missionsManager.getBot(props.missionID) ?? -1;
     return (
         <div className="mission-accordion-title">
             <p>{`Mission-${props.missionID}`}</p>
             <p className="mission-assignment">
-                {props.assignedBotID > 0 ? `Bot-${props.assignedBotID}` : "Unassigned"}
+                {assignedBotID === UNASSIGNED_ID ? "Unassigned" : `Bot-${assignedBotID}`}
             </p>
         </div>
     );
