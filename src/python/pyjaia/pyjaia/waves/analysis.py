@@ -5,8 +5,8 @@ from pyjaia.series import Series
 from .processing import *
 from .series_set import *
 from .types import *
-import functools
-
+from .window import applyWindow
+import statistics
 
 def heightFromAcceleration(acceleration: List[float], sampleFrequency: float):
     N = len(acceleration)
@@ -21,11 +21,25 @@ def heightFromAcceleration(acceleration: List[float], sampleFrequency: float):
     return numpy.real(numpy.fft.ifft(X))
 
 
+def accelerationToElevation(acceleration: Series, sampleFrequency: float):
+    # acceleration = deMean(acceleration)
+
+    elevation = Series('Elevation (m)')
+    elevation.utime = deepcopy(acceleration.utime)
+    elevation.y_values = heightFromAcceleration(acceleration.y_values, sampleFrequency)
+    return elevation
+
+
 def significantWaveHeight(powerSpectrum: List[float], sampleFrequency: float):
     df = sampleFrequency / 2 / len(powerSpectrum)
     meanZetaSquared = 0.0 # Mean height
     for i in range(1, len(powerSpectrum)):
         meanZetaSquared += powerSpectrum[i] * df
+    return 4 * meanZetaSquared**0.5
+
+
+def significantWaveHeightFromElevation(elevation: List[float]):
+    meanZetaSquared = statistics.mean([height**2 for height in elevation])
     return 4 * meanZetaSquared**0.5
 
 
@@ -85,8 +99,17 @@ def powerSpectrumBurg(elevation: List[float], config: DriftAnalysisConfig):
 def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
     drift = Drift()
     drift.rawVerticalAcceleration = verticalAcceleration.makeUniform(config.sampleFreq)
-    drift.filteredVerticalAcceleration = filterAcceleration(drift.rawVerticalAcceleration, config.sampleFreq, config.bandPassFilter)
-    drift.elevation = calculateElevationSeries(drift.rawVerticalAcceleration, config.sampleFreq, config.bandPassFilter)
+
+    drift.filteredVerticalAcceleration = drift.rawVerticalAcceleration
+
+    # Trim the series to avoid motor-induce noise
+    drift.filteredVerticalAcceleration = trimSeries(drift.filteredVerticalAcceleration, 10e6, 5e6)
+    # # Apply time-domain windowing
+    drift.filteredVerticalAcceleration = applyWindow(drift.filteredVerticalAcceleration, config.window)
+    # Apply band-pass filter
+    drift.filteredVerticalAcceleration = filterAcceleration(drift.filteredVerticalAcceleration, config.sampleFreq, config.bandPassFilter)
+    # Integrate to elevation
+    drift.elevation = accelerationToElevation(drift.filteredVerticalAcceleration, config.sampleFreq)
 
     if config.analysis.type == 'counting':
         drift = doWaveCounting(drift, config)

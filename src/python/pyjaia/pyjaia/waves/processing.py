@@ -6,40 +6,8 @@ import statistics
 from math import *
 from .filters import cos2Filter
 from .types import *
-
-
-def applyHannWindow(series: Series, fadePeriod: float=2e6):
-    """Apply a Hann window to the start and end of the series.
-
-    Args:
-        series (Series): Input series.
-        fadePeriod (float, optional): Time period (in microseconds), for the Hann window to move from 0 to 1. Defaults to 2e6.
-
-    Returns:
-        Series: The resulting Hann-windowed series.
-    """
-
-    newSeries = deepcopy(series)
-
-    if len(series.utime) == 0:
-        return newSeries
-
-    startFadeEndTime = series.utime[0] + fadePeriod
-    endFadeStartTime = series.utime[-1] - fadePeriod
-
-    for index in range(len(series.utime)):
-        t = series.utime[index]
-        # Fade range
-        k = 1
-
-        if t < startFadeEndTime:
-            k *= ((cos((startFadeEndTime - t) * (pi) / (fadePeriod)) + 1) / 2)
-        elif t > endFadeStartTime:
-            k *= ((cos((t - endFadeStartTime) * (pi) / (fadePeriod)) + 1) / 2)
-
-        newSeries.y_values[index] *= k
-
-    return newSeries
+import filters
+from.window import applyTukeyWindow
 
 
 def trimSeries(series: Series, startGap: float, endGap: float=None):
@@ -86,6 +54,8 @@ def getBandPassFilterFunc(bandPassFilterConfig: BandPassFilterConfig):
         maxWindow = 1.0 / bandPassFilterConfig.minZeroPeriod - maxFreq
         minWindow = minFreq - 1.0 / bandPassFilterConfig.maxZeroPeriod
         return cos2Filter(minFreq, minWindow, maxFreq, maxWindow)
+    elif bandPassFilterConfig.type == 'none':
+        return filters.noFilter
     else:
         print(f'Unknown band pass filter type: {bandPassFilterConfig.type}')
         exit(1)
@@ -107,74 +77,20 @@ def filterFrequencies(inputSeries: Series, sampleFreq: float, bandPassFilterConf
 
     bandPassFilterFunc = getBandPassFilterFunc(bandPassFilterConfig)
 
-    A = numpy.fft.rfft(inputSeries.y_values)
-    n = len(A)
-    nyquist = sampleFreq / 2
+    A = numpy.fft.fft(inputSeries.y_values)
+    N = len(inputSeries.y_values)
 
-    if n % 2 == 0:
-        freqCoefficient = nyquist / n
-    else:
-        freqCoefficient = nyquist * (n - 1) / n / n
+    for i in range(1, N // 2 + 1):
+        f = i * sampleFreq / N
+        A[i] *= bandPassFilterFunc(f)
+        A[N - i] *= bandPassFilterFunc(f)
 
-    for index in range(len(A)):
-        freq = freqCoefficient * index
-        A[index] *= bandPassFilterFunc(freq)
-
-    a = numpy.fft.irfft(A)
+    a = numpy.real(numpy.fft.ifft(A))
     series = Series()
     series.utime = inputSeries.utime[:len(a)]
     series.y_values = list(a)
 
     if (len(series.utime) != len(series.y_values)):
-        print(len(series.utime), len(series.y_values))
-        exit(1)
-
-    return series
-
-
-def accelerationToElevation(inputSeries: Series, sampleFreq: float, filterFunc: Callable[[float], float]):
-    """Converts a uniform acceleration series to a uniform elevation series, by applying a frequency filter and double-integrating.
-
-    Args:
-        inputSeries (Series): Uniform series of acceleration values (m/s^2).
-        sampleFreq (float): Sampling frequency (Hz).
-        filterFunc (Callable[[float], float]): A function that takes a frequency, and returns a gain coefficient to apply to that frequency.
-
-    Returns:
-        Series: The resulting elevation series.
-    """
-
-    if len(inputSeries.utime) < 2:
-        # If there are 0 or 1 data points, we're not going to be able to do the irfft
-        return Series()
-
-    A = numpy.fft.rfft(inputSeries.y_values)
-    n = len(A)
-    nyquist = sampleFreq / 2
-
-    if n % 2 == 0:
-        freqCoefficient = nyquist / n
-    else:
-        freqCoefficient = nyquist * (n - 1) / n / n
-
-    for index in range(len(A)):
-        if index == 0: # Get rid of constant acceleration term
-            A[index] = 0
-            continue
-
-        freq = freqCoefficient * index
-
-        A[index] *= filterFunc(freq)
-
-        A[index] /= (-(2 * pi * freq) ** 2) # Integrate acceleration to elevation series (integrate a sin curve twice)
-
-    a = numpy.fft.irfft(A)
-    series = Series()
-    series.utime = inputSeries.utime[:len(a)]
-    series.y_values = list(a)
-
-    if (len(series.utime) != len(series.y_values)):
-        print(f'ERROR: utime and y_values not of same length!')
         print(len(series.utime), len(series.y_values))
         exit(1)
 
@@ -264,28 +180,6 @@ def significantWaveHeightFromWaveList(waves: List[Wave]):
     return statistics.mean(significantWaveHeights)
 
 
-def calculateElevationSeries(accelerationSeries: Series, sampleFreq: float, bandPassFilterConfig: BandPassFilterConfig):
-    """Calculates the elevation series from an input acceleration series.
-
-    Args:
-        accelerationSeries (Series): The acceleration series.
-
-    Returns:
-        Series: The elevation series, calculated by de-meaning, trimming, windowing, FFT, and double integration.
-    """
-
-    bandPassFilter = getBandPassFilterFunc(bandPassFilterConfig)
-
-    series = accelerationSeries
-    series = trimSeries(series, 10e6, 5e6)
-    series = applyHannWindow(series, fadePeriod=10e6)
-    series = deMean(series)
-    series = accelerationToElevation(series, sampleFreq=sampleFreq, filterFunc=bandPassFilter)
-    series.name = 'Elevation (m)'
-
-    return series
-
-
 def filterAcceleration(accelerationSeries: Series, sampleFreq: float, bandPassFilterConfig: BandPassFilterConfig):
     """Process and filter an input acceleration series.
 
@@ -297,9 +191,6 @@ def filterAcceleration(accelerationSeries: Series, sampleFreq: float, bandPassFi
     """
 
     series = accelerationSeries
-    series = trimSeries(series, 10e6, 5e6)
-    series = applyHannWindow(series, fadePeriod=10e6)
-    series = deMean(series)
     series = filterFrequencies(series, sampleFreq, bandPassFilterConfig)
     series.name = 'Filtered acceleration (m/s^2)'
 

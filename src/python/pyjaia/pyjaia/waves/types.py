@@ -33,6 +33,16 @@ class Drift:
 
 
 @dataclass
+class WindowConfig:
+    type: str
+    duration: float = None
+
+    @staticmethod
+    def fromDict(input: Dict):
+        return WindowConfig(**input)
+
+
+@dataclass
 class BandPassFilterConfig:
     type: str
     minZeroPeriod: float
@@ -60,12 +70,15 @@ class AnalysisConfig:
 class DriftAnalysisConfig:
     glitchy: bool = False
     sampleFreq: float = 4.0
+
+    window: WindowConfig = None
     bandPassFilter: BandPassFilterConfig = None
     analysis: AnalysisConfig = None
 
     @staticmethod
     def fromDict(input: Dict):
         config = DriftAnalysisConfig(**input)
+        config.window = WindowConfig.fromDict(config.window)
         config.bandPassFilter = BandPassFilterConfig.fromDict(config.bandPassFilter)
         config.analysis = AnalysisConfig.fromDict(config.analysis)
         return config

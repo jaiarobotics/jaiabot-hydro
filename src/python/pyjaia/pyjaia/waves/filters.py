@@ -52,3 +52,8 @@ def cos2Filter(minFreq: float, minWindow: float, maxFreq: float, maxWindow: floa
         return 0.0
 
     return filterFunc
+
+
+def noFilter(freq: float):
+    return 1.0
+
