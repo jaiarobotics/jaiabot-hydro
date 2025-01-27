@@ -1,9 +1,16 @@
 import React, { useContext } from "react";
-import { GlobalContext, GlobalContextType } from "../../../context/Global/GlobalContext";
+import {
+    GlobalContext,
+    GlobalContextType,
+    GlobalDispatchContext,
+} from "../../../context/Global/GlobalContext";
+import { GlobalActions } from "../../../context/Global/GlobalActions";
 import {
     OperationContext,
     OperationContextType,
 } from "../../../context/Operation/OperationContext";
+
+import MissionAssignMenu from "../../../components/MissionAssignMenu/MissionAssignMenu";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
@@ -28,16 +35,25 @@ export default function MissionsList() {
     const globalContext: GlobalContextType = useContext(GlobalContext);
     const operationContext: OperationContextType = useContext(OperationContext);
 
+    const globalDispatchContext = useContext(GlobalDispatchContext);
+
     if (!globalContext || !operationContext) {
         return <div></div>;
     }
 
     const handleAccordionChange = (missionID: number, isExpanded: boolean) => {
-        globalContext.missionAccordionStates[missionID] = isExpanded;
+        globalDispatchContext({
+            type: GlobalActions.CLICKED_MISSION_ACCORDION,
+            missionID: missionID,
+            isMissionAccordionExpanded: isExpanded,
+        });
     };
 
     const isMissionAccordionExpanded = (missionID: number) => {
-        return globalContext.missionAccordionStates[missionID];
+        if (missionID in globalContext.missionAccordionStates) {
+            return globalContext.missionAccordionStates[missionID];
+        }
+        return false;
     };
 
     return (
@@ -61,7 +77,9 @@ export default function MissionsList() {
                                     assignedBotID={mission.getAssignedBotID()}
                                 />
                             </AccordionSummary>
-                            <AccordionDetails></AccordionDetails>
+                            <AccordionDetails>
+                                <MissionAssignMenu missionID={mission.getMissionID()} />
+                            </AccordionDetails>
                         </Accordion>
                     </ThemeProvider>
                 );
@@ -75,7 +93,7 @@ function MissionAccordionTitle(props: MissionAccordionTitleProps) {
         <div className="mission-accordion-title">
             <p>{`Mission-${props.missionID}`}</p>
             <p className="mission-assignment">
-                {props.assignedBotID ? `Bot-${props.assignedBotID}` : "Unassigned"}
+                {props.assignedBotID > 0 ? `Bot-${props.assignedBotID}` : "Unassigned"}
             </p>
         </div>
     );

@@ -30,7 +30,9 @@ export interface GlobalAction {
     type: GlobalActions;
     clientID?: string;
     hubID?: number;
+    missionID?: number;
     hubAccordionName?: string;
+    isMissionAccordionExpanded?: boolean;
 }
 
 interface GlobalContextProviderProps {
@@ -97,6 +99,13 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
 
         case GlobalActions.CLICKED_HUB_ACCORDION:
             return handleClickedHubAccordion(mutableState, action.hubAccordionName);
+
+        case GlobalActions.CLICKED_MISSION_ACCORDION:
+            return handleClickedMissionAccordion(
+                mutableState,
+                action.missionID,
+                action.isMissionAccordionExpanded,
+            );
 
         case GlobalActions.DESELECT_POD_ELEMENT:
             return handleDeselectPodElement(mutableState);
@@ -270,6 +279,15 @@ function handleClickedHubAccordion(mutableState: GlobalContextType, accordionNam
             hubAccordionStates.links = !hubAccordionStates.links;
             break;
     }
+    return mutableState;
+}
+
+function handleClickedMissionAccordion(
+    mutableState: GlobalContextType,
+    missionID: number,
+    isMissionAccordionExpanded: boolean,
+) {
+    mutableState.missionAccordionStates[missionID] = isMissionAccordionExpanded;
     return mutableState;
 }
 

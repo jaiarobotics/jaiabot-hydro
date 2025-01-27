@@ -10,7 +10,7 @@ export default class Bot {
     private healthState: HealthState;
     private errors: Error[];
     private warnings: Warning[];
-    private mission: Mission;
+    private missionID: number;
     private missionStatus: MissionStatus;
     private botSensors: BotSensors;
     private taskPackets: TaskPacket[];
@@ -64,12 +64,12 @@ export default class Bot {
         this.warnings = warnings;
     }
 
-    getMission() {
-        return this.mission;
+    getMissionID() {
+        return this.missionID;
     }
 
-    setMission(mission: Mission) {
-        this.mission = mission;
+    setMissionID(missionID: number) {
+        this.missionID = missionID;
     }
 
     getMissionStatus() {
