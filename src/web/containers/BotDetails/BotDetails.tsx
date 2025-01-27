@@ -150,6 +150,10 @@ export function BotDetails(props: BotDetailsProps) {
         return <div></div>;
     }
 
+    // TODO some mission related code was changed to use the mission
+    // from globalContext but the management of missions in globablContext
+    // is not complete know bugs affected by this include
+    // Edit Mode Toggle, Play Button etc
     const mission: Mission = bot.getMission();
     const missionStatus: MissionStatus = bot.getMissionStatus();
 
@@ -301,7 +305,61 @@ export function BotDetails(props: BotDetailsProps) {
         globalDispatch({ type: GlobalActions.CLOSED_DETAILS });
     }
 
-    function handleStopMissionClick() {}
+    /**
+     * Handles System Check Button Click
+     *
+     * @returns {void}
+     */
+    function handleSystemCheckClick() {
+        issueCommand(
+            botID,
+            botCommands.active,
+            disableButton(botCommands.active, missionState).disableMessage,
+        );
+    }
+
+    /**
+     * Handles Stop Mission Button Click
+     *
+     * @returns {void}
+     */
+    function handleStopMissionClick() {
+        issueCommand(
+            botID,
+            botCommands.stop,
+            disableButton(botCommands.stop, missionState).disableMessage,
+            props.setRcMode,
+        );
+    }
+
+    /**
+     * Handles Activate RC Button Click
+     *
+     * @returns {void}
+     */
+    async function handleActivateRcClick() {
+        issueRCCommand(
+            bot,
+            await runRCMode(bot),
+            props.isRCModeActive,
+            props.setRcMode,
+            disableButton(botCommands.rcMode, missionState, botID, props.downloadQueue)
+                .disableMessage,
+        );
+    }
+
+    /**
+     * Handles Next Task Button Click
+     *
+     * @returns {void}
+     */
+    function handleNextTaskClick() {
+        issueCommand(
+            botID,
+            botCommands.nextTask,
+            disableButton(botCommands.nextTask, missionState).disableMessage,
+        );
+    }
 
     /**
      * Handles Play Button Click
@@ -592,14 +650,8 @@ export function BotDetails(props: BotDetailsProps) {
                                     ? "inactive button-jcc"
                                     : " button-jcc stopMission"
                             }
-                            // Move to handleStopMissionClick()
                             onClick={() => {
-                                issueCommand(
-                                    botID,
-                                    botCommands.stop,
-                                    disableButton(botCommands.stop, missionState).disableMessage,
-                                    props.setRcMode,
-                                );
+                                handleStopMissionClick();
                             }}
                         >
                             <Icon path={mdiStop} title="Stop Mission" />
@@ -755,12 +807,7 @@ export function BotDetails(props: BotDetailsProps) {
                                             : "button-jcc"
                                     }
                                     onClick={() => {
-                                        issueCommand(
-                                            botID,
-                                            botCommands.active,
-                                            disableButton(botCommands.active, missionState)
-                                                .disableMessage,
-                                        );
+                                        handleSystemCheckClick();
                                     }}
                                 >
                                     <Icon
@@ -775,18 +822,7 @@ export function BotDetails(props: BotDetailsProps) {
                                         ${props.isRCModeActive(botID) ? "rc-active" : "rc-inactive"}
                                         `}
                                     onClick={async () => {
-                                        issueRCCommand(
-                                            bot,
-                                            await runRCMode(bot),
-                                            props.isRCModeActive,
-                                            props.setRcMode,
-                                            disableButton(
-                                                botCommands.rcMode,
-                                                missionState,
-                                                botID,
-                                                props.downloadQueue,
-                                            ).disableMessage,
-                                        );
+                                        handleActivateRcClick();
                                     }}
                                 >
                                     <img src={rcMode} alt="Activate RC Mode" title="RC Mode"></img>
@@ -799,12 +835,7 @@ export function BotDetails(props: BotDetailsProps) {
                                             : "button-jcc"
                                     }
                                     onClick={() => {
-                                        issueCommand(
-                                            botID,
-                                            botCommands.nextTask,
-                                            disableButton(botCommands.nextTask, missionState)
-                                                .disableMessage,
-                                        );
+                                        handleNextTaskClick();
                                     }}
                                 >
                                     <Icon path={mdiSkipNext} title="Next Task" />
