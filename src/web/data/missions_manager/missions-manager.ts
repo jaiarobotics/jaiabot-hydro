@@ -32,6 +32,11 @@ class MissionsManager {
 
         this.missionsToBots.set(missionID, botID);
     }
+
+    clear() {
+        this.botsToMissions.clear();
+        this.missionsToBots.clear();
+    }
 }
 
 export const missionsManager = new MissionsManager();
