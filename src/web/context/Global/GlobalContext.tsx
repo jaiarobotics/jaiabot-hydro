@@ -126,8 +126,8 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
         case GlobalActions.CLOSED_DETAILS:
             return handleClosedDetails(mutableState);
 
-        case GlobalActions.CLICKED_HUB_OR_BOT:
-            return handleClickedHobOrBot(mutableState, action.elementType, action.elementID);
+        case GlobalActions.CLICKED_NODE:
+            return handleClickedNode(mutableState, action.elementType, action.elementID);
 
         case GlobalActions.CLICKED_HUB_ACCORDION:
             return handleClickedHubAccordion(mutableState, action.hubAccordionName);
@@ -195,8 +195,7 @@ function handleClosedDetails(mutableState: GlobalContextType) {
  * @param {number} id ID of Bot or Hub clicked
  * @returns {GlobalContextType} Updated mutable state object
  */
-// TODO: Switch HubOrBot to node
-function handleClickedHobOrBot(mutableState: GlobalContextType, type: PodElement, id: number) {
+function handleClickedNode(mutableState: GlobalContextType, type: PodElement, id: number) {
     if (isNaN(id)) throw new Error("Invalid hub or bot id");
 
     // Clicked currently selected element

@@ -63,7 +63,7 @@ export function BotListPanel(props: Props) {
          */
         const handleClick = () => {
             globalDispatch({
-                type: GlobalActions.CLICKED_HUB_OR_BOT,
+                type: GlobalActions.CLICKED_NODE,
                 elementType: PodElement.BOT,
                 elementID: bot.bot_id,
             });
@@ -110,7 +110,7 @@ export function BotListPanel(props: Props) {
         const handleClick = () => {
             props.didClickHub(hub.hub_id);
             globalDispatch({
-                type: GlobalActions.CLICKED_HUB_OR_BOT,
+                type: GlobalActions.CLICKED_NODE,
                 elementType: PodElement.HUB,
                 elementID: hub.hub_id,
             });

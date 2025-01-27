@@ -2154,7 +2154,7 @@ export default class CommandControl extends React.Component {
             const botStatus = feature.get("bot") as PortalBotStatus;
             if (botStatus) {
                 this.props.globalDispatch({
-                    type: GlobalActions.CLICKED_HUB_OR_BOT,
+                    type: GlobalActions.CLICKED_NODE,
                     elementType: PodElement.BOT,
                     elementID: botStatus.bot_id,
                 });
@@ -2168,7 +2168,7 @@ export default class CommandControl extends React.Component {
                 const hubKey = Object.keys(this.state.podStatus.hubs)[0];
                 const hubID = this.state.podStatus.hubs[hubKey].hub_id;
                 this.props.globalDispatch({
-                    type: GlobalActions.CLICKED_HUB_OR_BOT,
+                    type: GlobalActions.CLICKED_NODE,
                     elementType: PodElement.HUB,
                     elementID: hubID,
                 });
