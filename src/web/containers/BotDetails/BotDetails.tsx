@@ -305,6 +305,12 @@ export function BotDetails(props: BotDetailsProps) {
         globalDispatch({ type: GlobalActions.CLOSED_DETAILS });
     }
 
+    function handleAccordionClick(accordionName: BotAccordionNames) {
+        globalDispatch({
+            type: GlobalActions.CLICKED_BOT_ACCORDION,
+            botAccordionName: accordionName,
+        });
+    }
     /**
      * Handles System Check Button Click
      *
@@ -708,12 +714,9 @@ export function BotDetails(props: BotDetailsProps) {
                     <ThemeProvider theme={accordionTheme}>
                         <Accordion
                             expanded={globalContext.botAccordionStates.quickLook}
-                            onChange={() =>
-                                globalDispatch({
-                                    type: GlobalActions.CLICKED_BOT_ACCORDION,
-                                    botAccordionName: BotAccordionNames.QUICKLOOK,
-                                })
-                            }
+                            onChange={() => {
+                                handleAccordionClick(BotAccordionNames.QUICKLOOK);
+                            }}
                             className="accordionContainer"
                         >
                             <AccordionSummary
@@ -789,12 +792,9 @@ export function BotDetails(props: BotDetailsProps) {
                     <ThemeProvider theme={accordionTheme}>
                         <Accordion
                             expanded={globalContext.botAccordionStates.commands}
-                            onChange={() =>
-                                globalDispatch({
-                                    type: GlobalActions.CLICKED_BOT_ACCORDION,
-                                    botAccordionName: BotAccordionNames.COMMANDS,
-                                })
-                            }
+                            onChange={() => {
+                                handleAccordionClick(BotAccordionNames.COMMANDS);
+                            }}
                             className="accordionContainer"
                         >
                             <AccordionSummary
@@ -850,12 +850,9 @@ export function BotDetails(props: BotDetailsProps) {
 
                                 <Accordion
                                     expanded={globalContext.botAccordionStates.advancedCommands}
-                                    onChange={() =>
-                                        globalDispatch({
-                                            type: GlobalActions.CLICKED_BOT_ACCORDION,
-                                            botAccordionName: BotAccordionNames.ADVANCEDCOMMANDS,
-                                        })
-                                    }
+                                    onChange={() => {
+                                        handleAccordionClick(BotAccordionNames.ADVANCEDCOMMANDS);
+                                    }}
                                     className="accordionContainer"
                                 >
                                     <AccordionSummary
@@ -927,12 +924,9 @@ export function BotDetails(props: BotDetailsProps) {
                     <ThemeProvider theme={accordionTheme}>
                         <Accordion
                             expanded={globalContext.botAccordionStates.health}
-                            onChange={() =>
-                                globalDispatch({
-                                    type: GlobalActions.CLICKED_BOT_ACCORDION,
-                                    botAccordionName: BotAccordionNames.HEALTH,
-                                })
-                            }
+                            onChange={() => {
+                                handleAccordionClick(BotAccordionNames.HEALTH);
+                            }}
                             className="accordionContainer"
                         >
                             <AccordionSummary
@@ -953,12 +947,9 @@ export function BotDetails(props: BotDetailsProps) {
                     <ThemeProvider theme={accordionTheme}>
                         <Accordion
                             expanded={globalContext.botAccordionStates.data}
-                            onChange={() =>
-                                globalDispatch({
-                                    type: GlobalActions.CLICKED_BOT_ACCORDION,
-                                    botAccordionName: BotAccordionNames.DATA,
-                                })
-                            }
+                            onChange={() => {
+                                handleAccordionClick(BotAccordionNames.DATA);
+                            }}
                             className="accordionContainer"
                         >
                             <AccordionSummary
@@ -973,12 +964,9 @@ export function BotDetails(props: BotDetailsProps) {
                                 <ThemeProvider theme={accordionTheme}>
                                     <Accordion
                                         expanded={globalContext.botAccordionStates.GPS}
-                                        onChange={() =>
-                                            globalDispatch({
-                                                type: GlobalActions.CLICKED_BOT_ACCORDION,
-                                                botAccordionName: BotAccordionNames.GPS,
-                                            })
-                                        }
+                                        onChange={() => {
+                                            handleAccordionClick(BotAccordionNames.GPS);
+                                        }}
                                         className="nestedAccordionContainer"
                                     >
                                         <AccordionSummary
@@ -1041,12 +1029,9 @@ export function BotDetails(props: BotDetailsProps) {
                                 <ThemeProvider theme={accordionTheme}>
                                     <Accordion
                                         expanded={globalContext.botAccordionStates.imu}
-                                        onChange={() =>
-                                            globalDispatch({
-                                                type: GlobalActions.CLICKED_BOT_ACCORDION,
-                                                botAccordionName: BotAccordionNames.IMU,
-                                            })
-                                        }
+                                        onChange={() => {
+                                            handleAccordionClick(BotAccordionNames.IMU);
+                                        }}
                                         className="nestedAccordionContainer"
                                     >
                                         <AccordionSummary
@@ -1088,12 +1073,9 @@ export function BotDetails(props: BotDetailsProps) {
                                 <ThemeProvider theme={accordionTheme}>
                                     <Accordion
                                         expanded={globalContext.botAccordionStates.sensor}
-                                        onChange={() =>
-                                            globalDispatch({
-                                                type: GlobalActions.CLICKED_BOT_ACCORDION,
-                                                botAccordionName: BotAccordionNames.SENSOR,
-                                            })
-                                        }
+                                        onChange={() => {
+                                            handleAccordionClick(BotAccordionNames.SENSOR);
+                                        }}
                                         className="nestedAccordionContainer"
                                     >
                                         <AccordionSummary
