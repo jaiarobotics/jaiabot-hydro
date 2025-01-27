@@ -292,6 +292,149 @@ export function BotDetails(props: BotDetailsProps) {
         }
     }
 
+    /**
+     * Dispatches an action to close the BotDetails panel
+     *
+     * @returns {void}
+     */
+    function handleClosePanel() {
+        globalDispatch({ type: GlobalActions.CLOSED_DETAILS });
+    }
+
+    function handleStopMissionClick() {}
+
+    /**
+     * Handles Play Button Click
+     *
+     * @returns {void}
+     */
+    async function handlePlayButtonClick() {
+        if (
+            bot.getHealthState() === "HEALTH__FAILED" &&
+            missionStatus?.missionState !== MissionState.PRE_DEPLOYMENT__IDLE &&
+            missionStatus?.missionState !== MissionState.PRE_DEPLOYMENT__FAILED
+        ) {
+            (await CustomAlert.confirmAsync(
+                "Running the command may have severe consequences because the bot is in a failed health state.\n",
+                "Confirm",
+                "Warning",
+            ))
+                ? issueRunCommand(
+                      botID,
+                      runMission(botID, missionFromProps),
+                      props.setRcMode,
+                      disablePlayButton(
+                          botID,
+                          mission,
+                          botCommands.play,
+                          missionState,
+                          props.downloadQueue,
+                      ).disableMessage,
+                  )
+                : false;
+        } else {
+            issueRunCommand(
+                botID,
+                runMission(botID, missionFromProps),
+                props.setRcMode,
+                disablePlayButton(
+                    botID,
+                    mission,
+                    botCommands.play,
+                    missionState,
+                    props.downloadQueue,
+                ).disableMessage,
+            );
+        }
+    }
+
+    /**
+     * Handles Shut Down Bot Click
+     *
+     * @returns {void}
+     */
+    async function handleBotShutDownClick() {
+        if (missionStatus?.missionState == "IN_MISSION__UNDERWAY__RECOVERY__STOPPED") {
+            (await CustomAlert.confirmAsync(
+                `Are you sure you'd like to shutdown bot: ${botID} without doing a data offload?`,
+                "Shutdown Bot",
+            ))
+                ? issueCommand(
+                      botID,
+                      botCommands.shutdown,
+                      disableButton(botCommands.shutdown, missionState, botID, props.downloadQueue)
+                          .disableMessage,
+                  )
+                : false;
+        } else {
+            issueCommand(
+                botID,
+                botCommands.shutdown,
+                disableButton(botCommands.shutdown, missionState, botID, props.downloadQueue)
+                    .disableMessage,
+            );
+        }
+    }
+
+    /**
+     * Handles Reboot Bot Click
+     *
+     * @returns {void}
+     */
+    async function handleRebootBotClick() {
+        if (missionStatus?.missionState == "IN_MISSION__UNDERWAY__RECOVERY__STOPPED") {
+            (await CustomAlert.confirmAsync(
+                `Are you sure you'd like to reboot bot: ${botID} without doing a data offload?`,
+                "Reboot Bot",
+            ))
+                ? issueCommand(
+                      botID,
+                      botCommands.reboot,
+                      disableButton(botCommands.reboot, missionState, botID, props.downloadQueue)
+                          .disableMessage,
+                  )
+                : false;
+        } else {
+            issueCommand(
+                botID,
+                botCommands.reboot,
+                disableButton(botCommands.reboot, missionState, botID, props.downloadQueue)
+                    .disableMessage,
+            );
+        }
+    }
+
+    /**
+     * Handles Restart Bot Services Click
+     *
+     * @returns {void}
+     */
+    async function handleRestartBotClick() {
+        if (missionStatus?.missionState == "IN_MISSION__UNDERWAY__RECOVERY__STOPPED") {
+            (await CustomAlert.confirmAsync(
+                `Are you sure you'd like to restart bot: ${botID} without doing a data offload?`,
+                "Restart Bot",
+            ))
+                ? issueCommand(
+                      botID,
+                      botCommands.restartServices,
+                      disableButton(
+                          botCommands.restartServices,
+                          missionState,
+                          botID,
+                          props.downloadQueue,
+                      ).disableMessage,
+                  )
+                : false;
+        } else {
+            issueCommand(
+                botID,
+                botCommands.restartServices,
+                disableButton(botCommands.restartServices, missionState, botID, props.downloadQueue)
+                    .disableMessage,
+            );
+        }
+    }
     // TODO The Take Control needs a complete refactor
     // This will probably go away and all of the uses of takeControlFunction
     // will need rework
@@ -430,15 +573,6 @@ export function BotDetails(props: BotDetailsProps) {
         return Missions.RCMode(bot.getBotID(), datumLocation);
     }
 
-    /**
-     * Dispatches an action to close the BotDetails panel
-     *
-     * @returns {void}
-     */
-    function handleClosePanel() {
-        globalDispatch({ type: GlobalActions.CLOSED_DETAILS });
-    }
-
     return (
         <React.Fragment>
             <div id="botDetailsBox">
@@ -482,47 +616,8 @@ export function BotDetails(props: BotDetailsProps) {
                                     ? "inactive button-jcc"
                                     : "button-jcc"
                             }
-                            // TODO create function
-                            onClick={async () => {
-                                if (
-                                    bot.getHealthState() === "HEALTH__FAILED" &&
-                                    missionStatus?.missionState !==
-                                        MissionState.PRE_DEPLOYMENT__IDLE &&
-                                    missionStatus?.missionState !==
-                                        MissionState.PRE_DEPLOYMENT__FAILED
-                                ) {
-                                    (await CustomAlert.confirmAsync(
-                                        "Running the command may have severe consequences because the bot is in a failed health state.\n",
-                                        "Confirm",
-                                        "Warning",
-                                    ))
-                                        ? issueRunCommand(
-                                              botID,
-                                              runMission(botID, missionFromProps),
-                                              props.setRcMode,
-                                              disablePlayButton(
-                                                  botID,
-                                                  mission,
-                                                  botCommands.play,
-                                                  missionState,
-                                                  props.downloadQueue,
-                                              ).disableMessage,
-                                          )
-                                        : false;
-                                } else {
-                                    issueRunCommand(
-                                        botID,
-                                        runMission(botID, missionFromProps),
-                                        props.setRcMode,
-                                        disablePlayButton(
-                                            botID,
-                                            mission,
-                                            botCommands.play,
-                                            missionState,
-                                            props.downloadQueue,
-                                        ).disableMessage,
-                                    );
-                                }
+                            onClick={() => {
+                                handlePlayButtonClick();
                             }}
                         >
                             <Icon path={mdiPlay} title="Run Mission" />
@@ -748,37 +843,7 @@ export function BotDetails(props: BotDetailsProps) {
                                                     : "button-jcc"
                                             }
                                             onClick={async () => {
-                                                if (
-                                                    missionStatus?.missionState ==
-                                                    "IN_MISSION__UNDERWAY__RECOVERY__STOPPED"
-                                                ) {
-                                                    (await CustomAlert.confirmAsync(
-                                                        `Are you sure you'd like to shutdown bot: ${botID} without doing a data offload?`,
-                                                        "Shutdown Bot",
-                                                    ))
-                                                        ? issueCommand(
-                                                              botID,
-                                                              botCommands.shutdown,
-                                                              disableButton(
-                                                                  botCommands.shutdown,
-                                                                  missionState,
-                                                                  botID,
-                                                                  props.downloadQueue,
-                                                              ).disableMessage,
-                                                          )
-                                                        : false;
-                                                } else {
-                                                    issueCommand(
-                                                        botID,
-                                                        botCommands.shutdown,
-                                                        disableButton(
-                                                            botCommands.shutdown,
-                                                            missionState,
-                                                            botID,
-                                                            props.downloadQueue,
-                                                        ).disableMessage,
-                                                    );
-                                                }
+                                                handleBotShutDownClick();
                                             }}
                                         >
                                             <Icon path={mdiPower} title="Shutdown" />
@@ -795,37 +860,7 @@ export function BotDetails(props: BotDetailsProps) {
                                                     : "button-jcc"
                                             }
                                             onClick={async () => {
-                                                if (
-                                                    missionStatus?.missionState ==
-                                                    "IN_MISSION__UNDERWAY__RECOVERY__STOPPED"
-                                                ) {
-                                                    (await CustomAlert.confirmAsync(
-                                                        `Are you sure you'd like to reboot bot: ${botID} without doing a data offload?`,
-                                                        "Reboot Bot",
-                                                    ))
-                                                        ? issueCommand(
-                                                              botID,
-                                                              botCommands.reboot,
-                                                              disableButton(
-                                                                  botCommands.reboot,
-                                                                  missionState,
-                                                                  botID,
-                                                                  props.downloadQueue,
-                                                              ).disableMessage,
-                                                          )
-                                                        : false;
-                                                } else {
-                                                    issueCommand(
-                                                        botID,
-                                                        botCommands.reboot,
-                                                        disableButton(
-                                                            botCommands.reboot,
-                                                            missionState,
-                                                            botID,
-                                                            props.downloadQueue,
-                                                        ).disableMessage,
-                                                    );
-                                                }
+                                                handleRebootBotClick();
                                             }}
                                         >
                                             <Icon path={mdiRestartAlert} title="Reboot" />
@@ -842,37 +877,7 @@ export function BotDetails(props: BotDetailsProps) {
                                                     : "button-jcc"
                                             }
                                             onClick={async () => {
-                                                if (
-                                                    missionStatus?.missionState ==
-                                                    "IN_MISSION__UNDERWAY__RECOVERY__STOPPED"
-                                                ) {
-                                                    (await CustomAlert.confirmAsync(
-                                                        `Are you sure you'd like to restart bot: ${botID} without doing a data offload?`,
-                                                        "Restart Bot",
-                                                    ))
-                                                        ? issueCommand(
-                                                              botID,
-                                                              botCommands.restartServices,
-                                                              disableButton(
-                                                                  botCommands.restartServices,
-                                                                  missionState,
-                                                                  botID,
-                                                                  props.downloadQueue,
-                                                              ).disableMessage,
-                                                          )
-                                                        : false;
-                                                } else {
-                                                    issueCommand(
-                                                        botID,
-                                                        botCommands.restartServices,
-                                                        disableButton(
-                                                            botCommands.restartServices,
-                                                            missionState,
-                                                            botID,
-                                                            props.downloadQueue,
-                                                        ).disableMessage,
-                                                    );
-                                                }
+                                                handleRestartBotClick();
                                             }}
                                         >
                                             <Icon path={mdiRestart} title="Restart Services" />
