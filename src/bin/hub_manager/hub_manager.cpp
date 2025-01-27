@@ -164,19 +164,7 @@ jaiabot::apps::HubManager::HubManager()
         latest_hub_status_.mutable_bot_ids_in_radio_file()->Add(id);
     };
 
-    // deprecated, remove in 2.y
-    if (cfg().has_xbee())
-    {
-        for (auto peer : cfg().xbee().peers())
-        {
-            if (peer.has_bot_id())
-                add_expected_bot_id(peer.bot_id());
-        }
-    }
-    else if (cfg().has_expected_bots())
-    {
-        for (auto id : cfg().expected_bots().id()) add_expected_bot_id(id);
-    }
+    for (auto id : cfg().expected_bots().id()) add_expected_bot_id(id);
 
     for (auto contact_gps : cfg().contact_gps())
     {
