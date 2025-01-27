@@ -236,9 +236,11 @@ RUN cd / && git clone https://github.com/jaiarobotics/jaiabot.git ${git_branch_c
 EOF
 fi
 
+rf_encryption_password=$(head -c 16 /dev/urandom | xxd -p -c 16)
+
 
 function run_debconf() {
-    docker run -v /tmp:/tmp -it ${debconf_image_name} /bin/bash -c '
+    docker run -v /tmp:/tmp -it ${debconf_image_name} /bin/bash -c "
 #!/bin/bash    
 
 export DEBIAN_PRIORITY=low
@@ -249,6 +251,7 @@ git pull
 cat <<EOM | debconf-set-selections
 unknown jaiabot-embedded/type select hub
 unknown jaiabot-embedded/fleet_id select 0
+unknown jaiabot-embedded/rf_encryption_password string ${rf_encryption_password}
 unknown jaiabot-embedded/hub_id select 0
 unknown jaiabot-embedded/mode select runtime
 EOM
@@ -262,7 +265,7 @@ EOM
 
 /jaiabot/debian/jaiabot-embedded.config
 
-debconf-get-selections | grep jaiabot-embedded | sed "s/^unknown/jaiabot-embedded/" > /tmp/jaia-fleet-selections.txt'
+debconf-get-selections | grep jaiabot-embedded | sed 's/^unknown/jaiabot-embedded/' > /tmp/jaia-fleet-selections.txt"
 }
 
 function parse_debconf() {
