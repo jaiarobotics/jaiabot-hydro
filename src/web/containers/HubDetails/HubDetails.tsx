@@ -81,6 +81,18 @@ export function HubDetails() {
     }
 
     /**
+     * Dispatches an action to toggle accordion states
+     *
+     * @returns {void}
+     */
+    function handleAccordionClick(accordionName: HubAccordionNames) {
+        globalDispatch({
+            type: GlobalActions.CLICKED_HUB_ACCORDION,
+            botAccordionName: accordionName,
+        });
+    }
+
+    /**
      * Provides a class name that corresponds to styles illustrating comms health
      *
      * @param {number} portalStatusAge Time since last communication between hub and tablet
@@ -189,12 +201,9 @@ export function HubDetails() {
                 <ThemeProvider theme={accordionTheme}>
                     <Accordion
                         expanded={globalContext.hubAccordionStates.quickLook}
-                        onChange={() =>
-                            globalDispatch({
-                                type: GlobalActions.CLICKED_HUB_ACCORDION,
-                                hubAccordionName: HubAccordionNames.QUICKLOOK,
-                            })
-                        }
+                        onChange={() => {
+                            handleAccordionClick(HubAccordionNames.QUICKLOOK);
+                        }}
                         className="accordionContainer"
                     >
                         <AccordionSummary
@@ -259,12 +268,9 @@ export function HubDetails() {
                 <ThemeProvider theme={accordionTheme}>
                     <Accordion
                         expanded={globalContext.hubAccordionStates.commands}
-                        onChange={() =>
-                            globalDispatch({
-                                type: GlobalActions.CLICKED_HUB_ACCORDION,
-                                hubAccordionName: HubAccordionNames.COMMANDS,
-                            })
-                        }
+                        onChange={() => {
+                            handleAccordionClick(HubAccordionNames.COMMANDS);
+                        }}
                         className="accordionContainer"
                     >
                         <AccordionSummary
@@ -306,12 +312,9 @@ export function HubDetails() {
                 <ThemeProvider theme={accordionTheme}>
                     <Accordion
                         expanded={globalContext.hubAccordionStates.links}
-                        onChange={() =>
-                            globalDispatch({
-                                type: GlobalActions.CLICKED_HUB_ACCORDION,
-                                hubAccordionName: HubAccordionNames.LINKS,
-                            })
-                        }
+                        onChange={() => {
+                            handleAccordionClick(HubAccordionNames.LINKS);
+                        }}
                         className="accordionContainer"
                     >
                         <AccordionSummary
