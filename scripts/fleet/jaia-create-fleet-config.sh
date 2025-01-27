@@ -217,14 +217,24 @@ echo "## Choose COMMON jaiabot-embedded settings          ##"
 echo "## (may take a bit to prepare)                      ##"
 echo "######################################################"
 
-debconf_image_name=jaia_fleet_debconf
+
+# if running in git, use the same rev
+if [ -e "${jaiabot_root}/.git" ]; then
+    git_branch=$(git branch --show-current)
+else
+    # default to release branch
+    set -a; source ${script_dir}/../common-versions.env; set +a
+    git_branch=${jaia_version_release_branch}
+fi
+
+debconf_image_name=jaia_fleet_debconf_${git_branch}
 if [ "$(docker image ls ${debconf_image_name} --format='true')" != "true" ];
 then
     echo "Building the docker ${debconf_image_name} image"
     docker build --no-cache -t ${debconf_image_name} -f - . <<EOF
 FROM ubuntu:jammy
 RUN apt-get update && apt-get install -y debconf-utils whiptail git
-RUN cd / && git clone https://github.com/jaiarobotics/jaiabot.git
+RUN cd / && git clone https://github.com/jaiarobotics/jaiabot.git -b ${git_branch}
 EOF
 fi
 
