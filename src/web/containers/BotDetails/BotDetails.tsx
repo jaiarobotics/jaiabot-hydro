@@ -107,6 +107,7 @@ export function BotDetails(props: BotDetailsProps) {
 
     const takeControl = props.takeControl;
     const deleteSingleMission = props.deleteSingleMission;
+    takeControlFunction = props.takeControl;
     // End Old code
 
     const globalContext = useContext(GlobalContext);
@@ -152,7 +153,7 @@ export function BotDetails(props: BotDetailsProps) {
 
     // TODO some mission related code was changed to use the mission
     // from globalContext but the management of missions in globablContext
-    // is not complete know bugs affected by this include
+    // is not complete known bugs affected by this include
     // Edit Mode Toggle, Play Button etc
     const mission: Mission = bot.getMission();
     const missionStatus: MissionStatus = bot.getMissionStatus();
@@ -160,13 +161,8 @@ export function BotDetails(props: BotDetailsProps) {
     const botSensors: BotSensors = bot.getBotSensors();
     const botGPS: GPS = botSensors?.getGPS();
     const botIMU: IMU = botSensors?.getIMU();
-    const botPressureSensor = botSensors?.getPressureSensor();
-
-    const botTemperatureSensor: TemperatureSensor = botSensors?.getTemperatureSensor();
-    const botConductivitySenstor: ConductivitySensor = botSensors?.getCoductivitySensor();
 
     const missionState = missionStatus?.missionState;
-    takeControlFunction = takeControl;
 
     let displayPrecision = 2;
 
@@ -305,12 +301,18 @@ export function BotDetails(props: BotDetailsProps) {
         globalDispatch({ type: GlobalActions.CLOSED_DETAILS });
     }
 
+    /**
+     * Dispatches an action to toggle accordion states
+     *
+     * @returns {void}
+     */
     function handleAccordionClick(accordionName: BotAccordionNames) {
         globalDispatch({
             type: GlobalActions.CLICKED_BOT_ACCORDION,
             botAccordionName: accordionName,
         });
     }
+
     /**
      * Handles System Check Button Click
      *
@@ -1091,7 +1093,8 @@ export function BotDetails(props: BotDetailsProps) {
                                                     <tr>
                                                         <td>Temperature</td>
                                                         <td>
-                                                            {botTemperatureSensor
+                                                            {botSensors
+                                                                ?.getTemperatureSensor()
                                                                 ?.getTemperature()
                                                                 ?.toFixed(displayPrecision)}{" "}
                                                             °C
@@ -1100,7 +1103,8 @@ export function BotDetails(props: BotDetailsProps) {
                                                     <tr>
                                                         <td>Depth</td>
                                                         <td>
-                                                            {botPressureSensor
+                                                            {botSensors
+                                                                ?.getPressureSensor()
                                                                 ?.getDepth()
                                                                 ?.toFixed(displayPrecision)}{" "}
                                                             m
