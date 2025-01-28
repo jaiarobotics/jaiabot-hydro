@@ -15,7 +15,7 @@ class MissionsManager {
      * @param {number} botID Used in search for mission assoicated with Bot
      * @returns {number} Mission ID associated with a Bot or (-1) if the Bot is not assigned to a mission
      */
-    getMission(botID: number) {
+    getMissionID(botID: number) {
         return this.botsToMissions.get(botID) ?? this.UNASSIGNED_ID;
     }
 
@@ -25,7 +25,7 @@ class MissionsManager {
      * @param {number} missionID Used in search for Bot associated with mission
      * @returns {number} Bot ID associated with a mission or (-1) if the mission is not assigned to a Bot
      */
-    getBot(missionID: number) {
+    getBotID(missionID: number) {
         return this.missionsToBots.get(missionID) ?? this.UNASSIGNED_ID;
     }
 
@@ -38,7 +38,7 @@ class MissionsManager {
      */
     assign(botID: number, missionID: number) {
         // Reset Bot previously assigned to mission
-        const previousBotAssignment = this.getBot(missionID);
+        const previousBotAssignment = this.getBotID(missionID);
 
         if (previousBotAssignment !== this.UNASSIGNED_ID) {
             this.botsToMissions.set(previousBotAssignment, this.UNASSIGNED_ID);
