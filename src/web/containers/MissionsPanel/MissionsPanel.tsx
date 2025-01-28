@@ -55,7 +55,13 @@ export default function MissionsPanel() {
 
     const handleSaveMissionsClick = () => {};
 
-    const handleAutoAssignClick = () => {};
+    const handleAutoAssignClick = () => {
+        // Update data model
+        missionsManager.autoAssign();
+
+        // Update JaiaSystemContext
+        jaiaSystemDispatch({ type: JaiaSystemActions.SYNC_REQUESTED });
+    };
 
     return (
         <div className="jaia-panel missions-panel">
