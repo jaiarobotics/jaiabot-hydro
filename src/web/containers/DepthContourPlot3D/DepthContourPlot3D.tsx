@@ -4,7 +4,8 @@ import "./DepthContourPlot3D.less";
 import { taskData } from "../../data/task_packets/task-packets";
 import { DivePacket, TaskPacket } from "../../shared/JAIAProtobuf";
 import internal from "stream";
-import { cm_data } from "./DepthColorMap";
+import { getColorScale } from "./DepthColorMap";
+import { colors } from "@mui/material";
 
 interface Props {
     taskPackets: TaskPacket[];
@@ -37,12 +38,8 @@ function setupDepthContourPlot3D(taskPackets: TaskPacket[]) {
     const bottomDepth = Math.min(...depths);
     const depthRange = topDepth - bottomDepth;
 
-    const intensity = depths.map((depth) => (topDepth - depth) / depthRange);
-
-    const colorscale = [
-        [0, "red"],
-        [1, "green"],
-    ];
+    const intensity = depths.map((depth) => (depth - bottomDepth) / depthRange);
+    const colorscale = getColorScale();
 
     var data = [
         {

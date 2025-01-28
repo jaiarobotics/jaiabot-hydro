@@ -1,4 +1,4 @@
-export const cm_data = [
+const cm_data = [
     [0.15610197, 0.10260825, 0.17272157],
     [0.15879951, 0.10562813, 0.17808215],
     [0.16148781, 0.10863318, 0.18344165],
@@ -256,3 +256,8 @@ export const cm_data = [
     [0.98493745, 0.99135452, 0.79532716],
     [0.99283718, 0.99437346, 0.8001362],
 ];
+
+export function getColorScale() {
+    const N = Math.max(2, cm_data.length);
+    return cm_data.map((rgb, index) => [index / (N - 1), `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`]);
+}
