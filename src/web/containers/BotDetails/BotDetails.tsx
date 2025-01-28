@@ -24,9 +24,6 @@ import BotSensors from "../../data/bots/bot-sensors";
 import Bot from "../../data/bots/bot";
 import GPS from "../../data/sensors/gps";
 import IMU from "../../data/sensors/imu";
-import PressureSensor from "../../data/sensors/pressure";
-import TemperatureSensor from "../../data/sensors/temperature";
-import ConductivitySensor from "../../data/sensors/conductivity";
 
 import { GlobalSettings } from "../../missions/settings";
 import { warning, info } from "../../notifications/notifications";
@@ -46,8 +43,9 @@ import {
     BotAccordionNames,
     PodElement,
 } from "../../context/Global/GlobalContext";
+import { JaiaSystemContext } from "../../context/JaiaSystem/JaiaSystemContext";
+
 import { GlobalActions } from "../../context/Global/GlobalActions";
-import { HubContext } from "../../context/Hub/HubContext";
 
 // Style Imports
 import "./BotDetails.less";
@@ -74,7 +72,6 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 
 // Utility Imports
 import { CustomAlert } from "../../shared/CustomAlert";
-import { BotContext } from "../../context/Bot/BotContext";
 
 const rcMode = require("../../style/icons/controller.svg");
 
@@ -113,8 +110,7 @@ export function BotDetails(props: BotDetailsProps) {
     const globalContext = useContext(GlobalContext);
     const globalDispatch = useContext(GlobalDispatchContext);
 
-    const hubContext = useContext(HubContext);
-    const botContext = useContext(BotContext);
+    const jaiaSystemContext = useContext(JaiaSystemContext);
 
     const [accordionTheme, setAccordionTheme] = useState(
         createTheme({
@@ -131,8 +127,7 @@ export function BotDetails(props: BotDetailsProps) {
     // Make sure everything we need from Context is valid
     // Otherwise do not rendger panel
     if (
-        botContext === null ||
-        hubContext === null ||
+        jaiaSystemContext === null ||
         globalContext.shownDetails != PodElement.BOT ||
         globalContext.selectedPodElement.type != PodElement.BOT
     ) {
@@ -141,10 +136,10 @@ export function BotDetails(props: BotDetailsProps) {
 
     // Pull Data from the Data Model Context
     const DEFAULT_HUB_ID = 1;
-    const hub = hubContext.hubs.get(DEFAULT_HUB_ID);
+    const hub = jaiaSystemContext.hubs.get(DEFAULT_HUB_ID);
 
     const botID = globalContext.selectedPodElement.id;
-    const bot = botContext.bots.get(botID);
+    const bot = jaiaSystemContext.bots.get(botID);
 
     // Make sure we have a bot
     if (!bot) {
