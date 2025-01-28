@@ -40,7 +40,7 @@ class MissionsManager {
         // Reset Bot previously assigned to mission
         const previousBotAssignment = this.getBot(missionID);
 
-        if (previousBotAssignment) {
+        if (previousBotAssignment !== this.UNASSIGNED_ID) {
             this.botsToMissions.set(previousBotAssignment, this.UNASSIGNED_ID);
         }
 

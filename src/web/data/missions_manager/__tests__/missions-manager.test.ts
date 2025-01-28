@@ -1,11 +1,13 @@
 import { missionsManager } from "../missions-manager";
 
-test("Assign two Bots to two different missions then swap assignments", () => {
+test("Exercise Bot and mission assignments", () => {
     const botID1 = 1;
     const missionID1 = 1;
 
     const botID2 = 2;
     const missionID2 = 2;
+
+    const botID3 = 3;
 
     const unassignedID = -1;
 
@@ -33,4 +35,10 @@ test("Assign two Bots to two different missions then swap assignments", () => {
     missionsManager.assign(botID1, missionID2);
     expect(missionsManager.getBot(missionID2)).toBe(botID1);
     expect(missionsManager.getMission(botID1)).toBe(missionID2);
+
+    // Assign Bot 3 to Mission 2
+    missionsManager.assign(botID3, missionID2);
+    expect(missionsManager.getBot(missionID2)).toBe(botID3);
+    expect(missionsManager.getMission(botID3)).toBe(missionID2);
+    expect(missionsManager.getMission(botID1)).toBe(unassignedID);
 });
