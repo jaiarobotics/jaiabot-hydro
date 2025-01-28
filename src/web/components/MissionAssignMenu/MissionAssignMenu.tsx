@@ -1,9 +1,9 @@
 import React, { useEffect, useContext } from "react";
 import {
-    OperationContext,
-    OperationDispatchContext,
-} from "../../context/Operation/OperationContext";
-import { OperationActions } from "../../context/Operation/operation-actions";
+    JaiaSystemContext,
+    JaiaSystemDispatchContext,
+} from "../../context/JaiaSystem/JaiaSystemContext";
+import { JaiaSystemActions } from "../../context/JaiaSystem/jaia-system-actions";
 
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -20,8 +20,8 @@ interface Props {
 }
 
 export default function MissionAssignMenu(props: Props) {
-    const operationContext = useContext(OperationContext);
-    const operationDispatch = useContext(OperationDispatchContext);
+    const jaiaSystemContext = useContext(JaiaSystemContext);
+    const jaiaSystemDispatch = useContext(JaiaSystemDispatchContext);
 
     /**
      * Provides MenuItem value needed to display text in the Select element
@@ -33,7 +33,7 @@ export default function MissionAssignMenu(props: Props) {
     };
 
     /**
-     * Updates the data model and OperationContext with new mission assignment
+     * Updates the data model and JaiaSystemContext with new mission assignment
      *
      * @param {SelectChangeEvent} evt Contains the ID of the item selected
      * @returns {void}
@@ -48,8 +48,8 @@ export default function MissionAssignMenu(props: Props) {
         // Update data model
         missionsManager.assign(selectedBotID, props.missionID);
 
-        // Update OperationContext
-        operationDispatch({ type: OperationActions.SYNC_REQUESTED });
+        // Update JaiaSystemContext
+        jaiaSystemDispatch({ type: JaiaSystemActions.SYNC_REQUESTED });
     };
 
     /**
@@ -82,7 +82,7 @@ export default function MissionAssignMenu(props: Props) {
                 value={getMenuValue().toString()}
             >
                 <MenuItem value={UNASSIGNED_ID}>Unassigned</MenuItem>
-                {Array.from(operationContext.bots.values()).map((bot) => generateMenuItems(bot))}
+                {Array.from(jaiaSystemContext.bots.values()).map((bot) => generateMenuItems(bot))}
             </Select>
         </FormControl>
     );
