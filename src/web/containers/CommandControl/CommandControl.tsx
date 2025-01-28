@@ -42,7 +42,12 @@ import {
     MissionParams,
 } from "../MissionSettingsPanel/MissionSettingsPanel";
 import { PodStatus, PortalBotStatus, PortalHubStatus, Metadata } from "../../shared/PortalStatus";
-import { divePacketIconStyle, driftPacketIconStyle, getRallyStyle } from "../../shared/Styles";
+import {
+    divePacketIconStyle,
+    driftPacketIconStyle,
+    wavePacketIconStyle,
+    getRallyStyle,
+} from "../../shared/Styles";
 import { createBotCourseOverGroundFeature, createBotHeadingFeature } from "../../shared/BotFeature";
 import {
     getSurveyMissionPlans,
@@ -2116,6 +2121,7 @@ export default class CommandControl extends React.Component {
             const editModeExemptions = [
                 "dive",
                 "drift",
+                "wave",
                 "rallyPoint",
                 "bot",
                 "hub",
@@ -2296,16 +2302,49 @@ export default class CommandControl extends React.Component {
                     duration: { value: driftFeature.get("duration"), units: "s" },
                     speed: { value: driftFeature.get("speed"), units: "m/s" },
                     drift_direction: { value: driftFeature.get("driftDirection"), units: "deg" },
-                    sig_wave_height_beta: { value: driftFeature.get("sigWaveHeight"), units: "m" },
                     start_time: { value: startTime.toLocaleString(), units: "" },
                     end_time: { value: endTime.toLocaleString(), units: "" },
                 };
 
-                this.setTaskPacketInterval(driftFeature, "drfit");
+                this.setTaskPacketInterval(driftFeature, "drift");
 
                 this.setState(
                     {
                         taskPacketType: driftFeature.get("type"),
+                        taskPacketData: taskPacketData,
+                    },
+                    () => this.setVisiblePanel(PanelType.TASK_PACKET),
+                );
+                return;
+            }
+
+            // Clicked on wave task packet
+            const isWavePacket =
+                isCollection &&
+                isCollection.length === 1 &&
+                feature.get("features")[0].get("type") === "wave";
+            if (isWavePacket) {
+                if (this.state.selectedTaskPacketFeature) {
+                    this.unselectAllTaskPackets();
+                }
+
+                const waveFeature = feature.get("features")[0];
+                const startTime = new Date(waveFeature.get("startTime") / 1000);
+                const endTime = new Date(waveFeature.get("endTime") / 1000);
+                const taskPacketData = {
+                    // Snake case used for string parsing in task packet panel
+                    bot_id: { value: waveFeature.get("botId"), units: "" },
+                    duration: { value: waveFeature.get("duration"), units: "s" },
+                    sig_wave_height_beta: { value: waveFeature.get("sigWaveHeight"), units: "m" },
+                    start_time: { value: startTime.toLocaleString(), units: "" },
+                    end_time: { value: endTime.toLocaleString(), units: "" },
+                };
+
+                this.setTaskPacketInterval(waveFeature, "wave");
+
+                this.setState(
+                    {
+                        taskPacketType: waveFeature.get("type"),
                         taskPacketData: taskPacketData,
                     },
                     () => this.setVisiblePanel(PanelType.TASK_PACKET),
@@ -2579,33 +2618,49 @@ export default class CommandControl extends React.Component {
     // Task Packets (Start)
     //
     updateTaskPacketLayer() {
-        const feature = this.state.selectedTaskPacketFeature;
-        if (!feature) {
+        let taskPacketFeature = this.state.selectedTaskPacketFeature;
+        let type = taskPacketFeature.get("type");
+        let styleFunction;
+
+        if (!taskPacketFeature) {
             return;
         }
 
-        const styleFunction =
-            feature.get("type") === "dive" ? divePacketIconStyle : driftPacketIconStyle;
-
-        if (feature.get("animated")) {
-            feature.setStyle(styleFunction(feature, "white"));
+        if (type === "dive") {
+            styleFunction = divePacketIconStyle;
+        } else if (type === "drift") {
+            styleFunction = driftPacketIconStyle;
         } else {
-            feature.setStyle(styleFunction(feature, "black"));
+            styleFunction = wavePacketIconStyle;
         }
-        feature.set("animated", !feature.get("animated"));
+
+        if (taskPacketFeature.get("animated")) {
+            taskPacketFeature.setStyle(styleFunction(taskPacketFeature, "white"));
+        } else {
+            taskPacketFeature.setStyle(styleFunction(taskPacketFeature, "black"));
+        }
+        taskPacketFeature.set("animated", !taskPacketFeature.get("animated"));
     }
 
     unselectTaskPacket(type: string) {
-        const features =
-            type === "dive"
-                ? taskData.divePacketLayer.getSource().getFeatures()
-                : taskData.driftPacketLayer.getSource().getFeatures();
-        for (const featuresArray of features) {
+        let taskPacketFeatures;
+        let styleFunction;
+        if (type === "dive") {
+            taskPacketFeatures = taskData.divePacketLayer.getSource().getFeatures();
+            styleFunction = divePacketIconStyle;
+        } else if (type === "drift") {
+            taskPacketFeatures = taskData.driftPacketLayer.getSource().getFeatures();
+            styleFunction = driftPacketIconStyle;
+        } else {
+            taskPacketFeatures = taskData.wavePacketLayer.getSource().getFeatures();
+            styleFunction = wavePacketIconStyle;
+        }
+
+        for (const featuresArray of taskPacketFeatures) {
             const feature = featuresArray.get("features")[0];
             if (feature.get("selected")) {
                 feature.set("selected", false);
                 // Reset style
-                const styleFunction = type === "dive" ? divePacketIconStyle : driftPacketIconStyle;
                 feature.setStyle(styleFunction(feature, "white"));
             }
         }
@@ -2616,14 +2671,23 @@ export default class CommandControl extends React.Component {
     unselectAllTaskPackets() {
         this.unselectTaskPacket("dive");
         this.unselectTaskPacket("drift");
+        this.unselectTaskPacket("wave");
     }
 
     setTaskPacketInterval(selectedFeature: OlFeature, type: string) {
-        const taskPacketFeatures =
-            type === "dive"
-                ? taskData.divePacketLayer.getSource().getFeatures()
-                : taskData.driftPacketLayer.getSource().getFeatures();
-        const styleFunction = type === "dive" ? divePacketIconStyle : driftPacketIconStyle;
+        let taskPacketFeatures;
+        let styleFunction;
+        if (type === "dive") {
+            taskPacketFeatures = taskData.divePacketLayer.getSource().getFeatures();
+            styleFunction = divePacketIconStyle;
+        } else if (type === "drift") {
+            taskPacketFeatures = taskData.driftPacketLayer.getSource().getFeatures();
+            styleFunction = driftPacketIconStyle;
+        } else {
+            taskPacketFeatures = taskData.wavePacketLayer.getSource().getFeatures();
+            styleFunction = wavePacketIconStyle;
+        }
+
         for (const taskPacketFeature of taskPacketFeatures) {
             if (taskPacketFeature.get("features")[0].get("id") === selectedFeature.get("id")) {
                 selectedFeature.set("selected", true);
