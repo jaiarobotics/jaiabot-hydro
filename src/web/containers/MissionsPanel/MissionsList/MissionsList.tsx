@@ -1,15 +1,20 @@
 import React, { useContext } from "react";
 import { GlobalContext, GlobalDispatchContext } from "../../../context/Global/GlobalContext";
+import {
+    JaiaSystemContext,
+    JaiaSystemDispatchContext,
+} from "../../../context/JaiaSystem/JaiaSystemContext";
 import { GlobalActions } from "../../../context/Global/GlobalActions";
-import { JaiaSystemContext } from "../../../context/JaiaSystem/JaiaSystemContext";
+import { JaiaSystemActions } from "../../../context/JaiaSystem/jaia-system-actions";
 
 import MissionAssignMenu from "../../../components/MissionAssignMenu/MissionAssignMenu";
 
 import { missionsManager } from "../../../data/missions_manager/missions-manager";
+import { missions } from "../../../data/missions/missions";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Icon from "@mdi/react";
-import { mdiContentDuplicate } from "@mdi/js";
+import { mdiContentDuplicate, mdiDelete } from "@mdi/js";
 import {
     Accordion,
     AccordionDetails,
@@ -34,6 +39,7 @@ export default function MissionsList() {
     const globalContext = useContext(GlobalContext);
     const globalDispatch = useContext(GlobalDispatchContext);
     const jaiaSystemContext = useContext(JaiaSystemContext);
+    const jaiaSystemDispatch = useContext(JaiaSystemDispatchContext);
 
     const globalDispatchContext = useContext(GlobalDispatchContext);
 
@@ -59,6 +65,16 @@ export default function MissionsList() {
     const handleDuplicateMissionClick = (missionID: number) => {
         globalDispatch({ type: GlobalActions.DESELECT_POD_ELEMENT });
         // missions.duplicateMission(missionID);
+    };
+
+    const handleDeleteMissionClick = (missionID: number) => {
+        // Update data model
+        missions.deleteMission(missionID);
+
+        // Update OpenLayers
+
+        // Update JaiaSystemContext
+        jaiaSystemDispatch({ type: JaiaSystemActions.SYNC_REQUESTED });
     };
 
     return (
@@ -88,6 +104,12 @@ export default function MissionsList() {
                                     }
                                 >
                                     <Icon path={mdiContentDuplicate} />
+                                </Button>
+                                <Button
+                                    className="jaia-button"
+                                    onClick={() => handleDeleteMissionClick(mission.getMissionID())}
+                                >
+                                    <Icon path={mdiDelete} />
                                 </Button>
                             </AccordionDetails>
                         </Accordion>
