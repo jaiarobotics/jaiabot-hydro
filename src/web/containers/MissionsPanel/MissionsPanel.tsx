@@ -4,9 +4,9 @@ import React, { useContext } from "react";
 import MissionSpeedSettings from "../MissionControllerPanel/MissionSpeedSettings/MissionSpeedSettings";
 import MissionsList from "./MissionsList/MissionsList";
 import { GlobalDispatchContext } from "../../context/Global/GlobalContext";
-import { OperationDispatchContext } from "../../context/Operation/OperationContext";
+import { JaiaSystemDispatchContext } from "../../context/JaiaSystem/JaiaSystemContext";
 import { GlobalActions } from "../../context/Global/GlobalActions";
-import { OperationActions } from "../../context/Operation/operation-actions";
+import { JaiaSystemActions } from "../../context/JaiaSystem/jaia-system-actions";
 
 // Data model
 import Mission from "../../data/missions/mission";
@@ -23,7 +23,7 @@ import "../../style/stylesheets/util.less";
 
 export default function MissionsPanel() {
     const globalDispatch = useContext(GlobalDispatchContext);
-    const operationDispatch = useContext(OperationDispatchContext);
+    const jaiaSystemDispatch = useContext(JaiaSystemDispatchContext);
 
     const handleAddMissionClick = () => {
         globalDispatch({ type: GlobalActions.DESELECT_POD_ELEMENT });
@@ -31,8 +31,8 @@ export default function MissionsPanel() {
         // Update data model
         missions.addMission(new Mission());
 
-        // Update OperationContext
-        operationDispatch({ type: OperationActions.SYNC_REQUESTED });
+        // Update JaiaSystemContext
+        jaiaSystemDispatch({ type: JaiaSystemActions.SYNC_REQUESTED });
 
         // Prevents new missions from not being visible in the viewport
         autoScrollMissions();
@@ -47,8 +47,8 @@ export default function MissionsPanel() {
 
         // Update OpenLayers
 
-        // Update OperationContext
-        operationDispatch({ type: OperationActions.SYNC_REQUESTED });
+        // Update JaiaSystemContext
+        jaiaSystemDispatch({ type: JaiaSystemActions.SYNC_REQUESTED });
     };
 
     const handleLoadMissionsClick = () => {};

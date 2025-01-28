@@ -1,14 +1,7 @@
 import React, { useContext } from "react";
-import {
-    GlobalContext,
-    GlobalContextType,
-    GlobalDispatchContext,
-} from "../../../context/Global/GlobalContext";
+import { GlobalContext, GlobalDispatchContext } from "../../../context/Global/GlobalContext";
 import { GlobalActions } from "../../../context/Global/GlobalActions";
-import {
-    OperationContext,
-    OperationContextType,
-} from "../../../context/Operation/OperationContext";
+import { JaiaSystemContext } from "../../../context/JaiaSystem/JaiaSystemContext";
 
 import MissionAssignMenu from "../../../components/MissionAssignMenu/MissionAssignMenu";
 
@@ -35,12 +28,12 @@ const UNASSIGNED_ID = -1;
 const accordionTheme = createTheme({ transitions: { create: () => "none" } });
 
 export default function MissionsList() {
-    const globalContext: GlobalContextType = useContext(GlobalContext);
-    const operationContext: OperationContextType = useContext(OperationContext);
+    const globalContext = useContext(GlobalContext);
+    const jaiaSystemContext = useContext(JaiaSystemContext);
 
     const globalDispatchContext = useContext(GlobalDispatchContext);
 
-    if (!globalContext || !operationContext) {
+    if (!globalContext || !jaiaSystemContext) {
         return <div></div>;
     }
 
@@ -61,7 +54,7 @@ export default function MissionsList() {
 
     return (
         <div className="missions-list">
-            {Array.from(operationContext.missions.values()).map((mission) => {
+            {Array.from(jaiaSystemContext.missions.values()).map((mission) => {
                 return (
                     <ThemeProvider theme={accordionTheme} key={mission.getMissionID()}>
                         <Accordion

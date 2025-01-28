@@ -1,7 +1,7 @@
 // React
 import React, { createContext, ReactNode, useEffect, useReducer } from "react";
 
-import { OperationActions } from "./operation-actions";
+import { JaiaSystemActions } from "./jaia-system-actions";
 
 import { bots } from "../../data/bots/bots";
 import { hubs } from "../../data/hubs/hubs";
@@ -10,41 +10,41 @@ import Bot from "../../data/bots/bot";
 import Hub from "../../data/hubs/hub";
 import Mission from "../../data/missions/mission";
 
-export interface OperationContextType {
+interface JaiaSystemContextType {
     bots: Map<number, Bot>;
     hubs: Map<number, Hub>;
     missions: Map<number, Mission>;
 }
 
 interface Action {
-    type: OperationActions;
+    type: JaiaSystemActions;
     bots?: Map<number, Bot>;
     hubs?: Map<number, Hub>;
     missions?: Map<number, Mission>;
 }
 
-interface OperationContextProviderProps {
+interface JaiaSystemContextProviderProps {
     children: ReactNode;
 }
 
 const DATA_MODEL_POLL_TIME = 500; // milliseconds
 
-export const OperationContext = createContext<OperationContextType>(null);
-export const OperationDispatchContext = createContext(null);
+export const JaiaSystemContext = createContext<JaiaSystemContextType>(null);
+export const JaiaSystemDispatchContext = createContext(null);
 
 /**
- * Updates OperationContext
+ * Updates JaiaSystemContext
  *
- * @param {OperationContextType} state Holds the most recent reference to state
+ * @param {JaiaSystemContextType} state Holds the most recent reference to state
  * @param {Action} action Contains data associated with a state update
- * @returns {OperationContextType} The updated state object
+ * @returns {JaiaSystemContextType} The updated state object
  */
-function operationReducer(state: OperationContextType, action: Action) {
+function jaiaSystemReducer(state: JaiaSystemContextType, action: Action) {
     let mutableState = { ...state };
     switch (action.type) {
-        case OperationActions.DATA_MODEL_POLLED:
+        case JaiaSystemActions.DATA_MODEL_POLLED:
             return handleDataModelPolled(mutableState, action.bots, action.hubs);
-        case OperationActions.SYNC_REQUESTED:
+        case JaiaSystemActions.SYNC_REQUESTED:
             return handleSyncRequested(mutableState);
         default:
             return state;
@@ -54,13 +54,13 @@ function operationReducer(state: OperationContextType, action: Action) {
 /**
  * Saves the latest data from incoming Bot and Hub status messages to state
  *
- * @param {OperationContextType} mutableState State object ref for making modifications
+ * @param {JaiaSystemContextType} mutableState State object ref for making modifications
  * @param {Map<number, Bot>} bots Contains most up to date data on Bots
  * @param {Map<number, Hub>} hubs Contains most up to date data on Hubs
- * @returns {OperationContextType} Updated mutable state object
+ * @returns {JaiaSystemContextType} Updated mutable state object
  */
 function handleDataModelPolled(
-    mutableState: OperationContextType,
+    mutableState: JaiaSystemContextType,
     bots: Map<number, Bot>,
     hubs: Map<number, Hub>,
 ) {
@@ -72,18 +72,18 @@ function handleDataModelPolled(
 /**
  * Puts React in sync with the data model
  *
- * @param {OperationContextType} mutableState State object ref for making modifications
- * @returns {OperationContextType} Updated mutable state object
+ * @param {JaiaSystemContextType} mutableState State object ref for making modifications
+ * @returns {JaiaSystemContextType} Updated mutable state object
  */
-function handleSyncRequested(mutableState: OperationContextType) {
+function handleSyncRequested(mutableState: JaiaSystemContextType) {
     mutableState.bots = bots.getBots();
     mutableState.hubs = hubs.getHubs();
     mutableState.missions = missions.getMissions();
     return mutableState;
 }
 
-export function OperationContextProvider({ children }: OperationContextProviderProps) {
-    const [state, dispatch] = useReducer(operationReducer, null);
+export function JaiaSystemContextProvider({ children }: JaiaSystemContextProviderProps) {
+    const [state, dispatch] = useReducer(jaiaSystemReducer, null);
 
     /**
      * Starts polling data model when component mounts
@@ -91,9 +91,6 @@ export function OperationContextProvider({ children }: OperationContextProviderP
      * @returns {void}
      */
     useEffect(() => {
-        // Initialize Context
-        dispatch({ type: OperationActions.SYNC_REQUESTED });
-
         const intervalID = pollDataModel(dispatch);
 
         // Clean up when component dismounts
@@ -101,11 +98,11 @@ export function OperationContextProvider({ children }: OperationContextProviderP
     }, []);
 
     return (
-        <OperationContext.Provider value={state}>
-            <OperationDispatchContext.Provider value={dispatch}>
+        <JaiaSystemContext.Provider value={state}>
+            <JaiaSystemDispatchContext.Provider value={dispatch}>
                 {children}
-            </OperationDispatchContext.Provider>
-        </OperationContext.Provider>
+            </JaiaSystemDispatchContext.Provider>
+        </JaiaSystemContext.Provider>
     );
 }
 
@@ -121,7 +118,7 @@ export function OperationContextProvider({ children }: OperationContextProviderP
 function pollDataModel(dispatch: React.Dispatch<Action>) {
     return setInterval(() => {
         dispatch({
-            type: OperationActions.DATA_MODEL_POLLED,
+            type: JaiaSystemActions.DATA_MODEL_POLLED,
             bots: bots.getBots(),
             hubs: hubs.getHubs(),
         });
