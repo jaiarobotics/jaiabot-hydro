@@ -86,7 +86,7 @@ export function JaiaSystemContextProvider({ children }: JaiaSystemContextProvide
     const [state, dispatch] = useReducer(jaiaSystemReducer, null);
 
     /**
-     * Sync Context with data model and starts polling when component mounts
+     * Syncs Context with data model and starts polling when component mounts
      *
      * @returns {void}
      */
