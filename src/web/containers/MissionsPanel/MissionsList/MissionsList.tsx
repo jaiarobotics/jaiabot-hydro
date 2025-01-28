@@ -8,10 +8,13 @@ import MissionAssignMenu from "../../../components/MissionAssignMenu/MissionAssi
 import { missionsManager } from "../../../data/missions_manager/missions-manager";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Icon from "@mdi/react";
+import { mdiContentDuplicate } from "@mdi/js";
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
+    Button,
     ThemeProvider,
     createTheme,
 } from "@mui/material";
@@ -29,6 +32,7 @@ const accordionTheme = createTheme({ transitions: { create: () => "none" } });
 
 export default function MissionsList() {
     const globalContext = useContext(GlobalContext);
+    const globalDispatch = useContext(GlobalDispatchContext);
     const jaiaSystemContext = useContext(JaiaSystemContext);
 
     const globalDispatchContext = useContext(GlobalDispatchContext);
@@ -52,6 +56,11 @@ export default function MissionsList() {
         return false;
     };
 
+    const handleDuplicateMissionClick = (missionID: number) => {
+        globalDispatch({ type: GlobalActions.DESELECT_POD_ELEMENT });
+        // missions.duplicateMission(missionID);
+    };
+
     return (
         <div className="missions-list">
             {Array.from(jaiaSystemContext.missions.values()).map((mission) => {
@@ -70,8 +79,16 @@ export default function MissionsList() {
                             >
                                 <MissionAccordionTitle missionID={mission.getMissionID()} />
                             </AccordionSummary>
-                            <AccordionDetails>
+                            <AccordionDetails className="mission-accordion-details">
                                 <MissionAssignMenu missionID={mission.getMissionID()} />
+                                <Button
+                                    className="jaia-button"
+                                    onClick={() =>
+                                        handleDuplicateMissionClick(mission.getMissionID())
+                                    }
+                                >
+                                    <Icon path={mdiContentDuplicate} />
+                                </Button>
                             </AccordionDetails>
                         </Accordion>
                     </ThemeProvider>
