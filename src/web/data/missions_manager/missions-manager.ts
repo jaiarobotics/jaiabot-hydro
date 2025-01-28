@@ -9,14 +9,33 @@ class MissionsManager {
         this.missionsToBots = new Map<number, number>();
     }
 
+    /**
+     * Provides the mission ID associated with a Bot
+     *
+     * @param {number} botID Used in search for mission assoicated with Bot
+     * @returns {number} Mission ID associated with a Bot or (-1) if the Bot is not assigned to a mission
+     */
     getMission(botID: number) {
         return this.botsToMissions.get(botID) ?? this.UNASSIGNED_ID;
     }
 
+    /**
+     * Provides the Bot ID associated with a mission
+     *
+     * @param {number} missionID Used in search for Bot associated with mission
+     * @returns {number} Bot ID associated with a mission or (-1) if the mission is not assigned to a Bot
+     */
     getBot(missionID: number) {
         return this.missionsToBots.get(missionID) ?? this.UNASSIGNED_ID;
     }
 
+    /**
+     * Connects Bots and missions
+     *
+     * @param {number} botID Used in assignment
+     * @param {number} missionID Used in assignment
+     * @returns {void}
+     */
     assign(botID: number, missionID: number) {
         // Reset Bot previously assigned to mission
         const previousBotAssignment = this.getBot(missionID);
@@ -33,6 +52,11 @@ class MissionsManager {
         this.missionsToBots.set(missionID, botID);
     }
 
+    /**
+     * Resets the Bot and mission connections
+     *
+     * @returns {void}
+     */
     clear() {
         this.botsToMissions.clear();
         this.missionsToBots.clear();
