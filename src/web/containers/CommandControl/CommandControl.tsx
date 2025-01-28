@@ -121,6 +121,7 @@ import "./CommandControl.less";
 // Utility
 import cloneDeep from "lodash.clonedeep";
 import { HelpWindow } from "../HelpWindow/HelpWindow";
+import DepthContourPlot3D from "../DepthContourPlot3D/DepthContourPlot3D";
 
 const rallyIcon = require("../../shared/rally.svg") as string;
 
@@ -249,6 +250,7 @@ interface State {
     taskPacketsTimeline: { [key: string]: string | boolean };
     isClusterModeOn: boolean;
     isHelpWindowDisplayed: boolean;
+    isDepthContourPlot3DDisplayed: boolean;
 
     disconnectionMessage?: string;
     viewportPadding: number[];
@@ -428,6 +430,7 @@ export default class CommandControl extends React.Component {
             },
             isClusterModeOn: true,
             isHelpWindowDisplayed: false,
+            isDepthContourPlot3DDisplayed: false,
 
             viewportPadding: [
                 viewportDefaultPadding,
@@ -2327,7 +2330,7 @@ export default class CommandControl extends React.Component {
             }
 
             if (feature.get("type") === "depth-contour") {
-                info("Clicked on a depth contour!");
+                this.setState({ isDepthContourPlot3DDisplayed: true });
             }
         }
 
@@ -4351,6 +4354,10 @@ export default class CommandControl extends React.Component {
                             this.setState({ isHelpWindowDisplayed: false });
                         }}
                     ></HelpWindow>
+                ) : null}
+
+                {this.state.isDepthContourPlot3DDisplayed ? (
+                    <DepthContourPlot3D taskPackets={taskData.taskPackets}></DepthContourPlot3D>
                 ) : null}
 
                 {this.state.customAlert}
