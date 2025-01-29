@@ -7,9 +7,11 @@ except:
 
 class AtlasOEM:
 
-    def __init__(self, bus=1, address=0x64) -> None:
+    # Default address and type are for EC chip
+    def __init__(self, bus=0, address=0x64, devType=0x04) -> None:
         self._bus = SMBus(bus)
         self._address = address
+        self._devType = devType
 
     def __enter__(self):
         return self
