@@ -1,5 +1,10 @@
 import React, { useContext } from "react";
-import { GlobalContext, GlobalDispatchContext, NodeType } from "../../context/Global/GlobalContext";
+import {
+    GlobalContext,
+    GlobalDispatchContext,
+    GlobalAction,
+    NodeType,
+} from "../../context/Global/GlobalContext";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 
 import { HubStatus, BotStatus, HealthState } from "../../shared/JAIAProtobuf";
@@ -39,7 +44,7 @@ export function NodeListPanel(props: Props) {
     let hubs = Object.values(props.podStatus?.hubs ?? {}).sort(compareByHubId);
 
     function BotTab(bot: PortalBotStatus) {
-        const globalDispatch = useContext(GlobalDispatchContext);
+        const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
 
         var key = "bot-" + bot.bot_id;
         var botClass = "bot-item";
@@ -79,7 +84,7 @@ export function NodeListPanel(props: Props) {
 
     function HubTab(hub: HubStatus) {
         const globalContext = useContext(GlobalContext);
-        const globalDispatch = useContext(GlobalDispatchContext);
+        const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
 
         var key = "hub-" + hub.hub_id;
         var bothubClass = "hub-item";

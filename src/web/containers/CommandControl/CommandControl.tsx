@@ -4315,7 +4315,7 @@ export default class CommandControl extends React.Component {
  */
 export function CommandControlWrapper() {
     const globalContext = useContext(GlobalContext);
-    const globalDispatch = useContext(GlobalDispatchContext);
+    const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
     const props = { globalContext, globalDispatch };
     return <CommandControl {...props} />;
 }

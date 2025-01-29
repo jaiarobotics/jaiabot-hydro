@@ -42,6 +42,7 @@ import {
 import {
     GlobalContext,
     GlobalDispatchContext,
+    GlobalAction,
     BotAccordionNames,
     NodeType,
 } from "../../context/Global/GlobalContext";
@@ -111,7 +112,7 @@ export function BotDetails(props: BotDetailsProps) {
     // End Old code
 
     const globalContext = useContext(GlobalContext);
-    const globalDispatch = useContext(GlobalDispatchContext);
+    const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
 
     const jaiaSystemContext = useContext(JaiaSystemContext);
 

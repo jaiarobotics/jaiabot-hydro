@@ -4,6 +4,7 @@ import { GlobalActions } from "../../context/Global/GlobalActions";
 import {
     GlobalContext,
     GlobalDispatchContext,
+    GlobalAction,
     HubAccordionNames,
     NodeType,
 } from "../../context/Global/GlobalContext";
@@ -43,7 +44,7 @@ const DEFAULT_HUB_ID = 1;
 
 export function HubDetails() {
     const globalContext = useContext(GlobalContext);
-    const globalDispatch = useContext(GlobalDispatchContext);
+    const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
     const jaiaSystemContext = useContext(JaiaSystemContext);
 
     const IPPrefix = getIPPrefix(location.hostname);
