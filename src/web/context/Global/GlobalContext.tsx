@@ -282,6 +282,14 @@ function handleClickedHubAccordion(mutableState: GlobalContextType, accordionNam
     return mutableState;
 }
 
+/**
+ * Updates the missionAccordionStates object based on the provided missionID and expand/collapse state
+ *
+ * @param {GlobalContextType} mutableState State object ref for making modifications
+ * @param {number} missionID Determines which mission accordion state to modify
+ * @param {boolean} isMissionAccordionExpanded New expand/collapse state of the accordion
+ * @returns {GlobalContextType} Updated mutable state object
+ */
 function handleClickedMissionAccordion(
     mutableState: GlobalContextType,
     missionID: number,
@@ -291,6 +299,12 @@ function handleClickedMissionAccordion(
     return mutableState;
 }
 
+/**
+ * Deselects the currently selected pod element
+ *
+ * @param {GlobalContextType} mutableState State object ref for making modifications
+ * @returns {GlobalContextType} Updated mutable state object
+ */
 function handleDeselectPodElement(mutableState: GlobalContextType) {
     mutableState.selectedPodElement = null;
     return mutableState;
