@@ -1,0 +1,8 @@
+../Core/Src/ec_oem.c:19:19:EC_OEM_Initialize	24	static
+../Core/Src/ec_oem.c:50:19:EC_OEM_Activate	24	static
+../Core/Src/ec_oem.c:55:19:EC_OEM_Hibernate	24	static
+../Core/Src/ec_oem.c:60:19:EC_OEM_GetDevType	24	static
+../Core/Src/ec_oem.c:68:19:EC_OEM_ReadEC	32	static
+../Core/Src/ec_oem.c:90:19:EC_OEM_ReadRegister	40	static
+../Core/Src/ec_oem.c:94:19:EC_OEM_ReadRegisters	40	static
+../Core/Src/ec_oem.c:98:19:EC_OEM_WriteRegister	40	static
