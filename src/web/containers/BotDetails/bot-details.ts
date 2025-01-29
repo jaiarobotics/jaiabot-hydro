@@ -12,14 +12,29 @@ import Hub from "../../data/hubs/hub";
 // Utility Imports
 import * as turf from "@turf/turf";
 
-/**
- * Provides class name and status age
- *
- * @returns { string , string }
- */
+interface DisableInfo {
+    isDisabled: boolean;
+    disableMessage: string;
+}
 
-export function getStatusAge(bot: Bot) {
-    const statusAge = Math.max(0.0, bot.getStatusAge() / 1e6);
+/**
+ * Provides a bots status age in seconds
+ *
+ * @param {Bot} bot Bot object
+ * @returns {number} status age in seconds
+ */
+export function getStatusAgeSeconds(bot: Bot) {
+    return Math.max(0.0, bot.getStatusAge() / 1e6);
+}
+
+/**
+ * Provides class name for status age
+ *
+ * @param {Bot} bot Bot object
+ * @returns {string} status age class name
+ */
+export function getStatusAgeClass(bot: Bot) {
+    const statusAge = getStatusAgeSeconds(bot);
     let statusAgeClassName: string;
 
     if (statusAge > 30) {
@@ -27,13 +42,15 @@ export function getStatusAge(bot: Bot) {
     } else if (statusAge > 10) {
         statusAgeClassName = "healthDegraded";
     }
-    return { statusAge, statusAgeClassName };
+    return statusAgeClassName;
 }
 
 /**
  * Provides distance from hub
  *
- * @returns {string}
+ * @param {Bot} bot Bot object
+ * @param {Hub} hub Hub object
+ * @returns {string} Distance between bot and hub in meters
  */
 export function getDistToHub(bot: Bot, hub: Hub) {
     const botGPS: GPS = bot.getBotSensors().getGPS();
@@ -41,22 +58,24 @@ export function getDistToHub(bot: Bot, hub: Hub) {
 
     let distToHub = "N/A";
     if (botGPS && hubGPS) {
-        const botloc = turf.point([botGPS.getLat(), botGPS.getLon()]);
-        const hubloc = turf.point([hubGPS.getLat(), hubGPS.getLon()]);
+        const botLocation = turf.point([botGPS.getLat(), botGPS.getLon()]);
+        const hubLocation = turf.point([hubGPS.getLat(), hubGPS.getLon()]);
         const options = { units: "meters" as turf.Units };
-        distToHub = turf.rhumbDistance(botloc, hubloc, options).toFixed(1);
+        distToHub = turf.rhumbDistance(botLocation, hubLocation, options).toFixed(1);
     }
     return distToHub;
 }
 
 /**
- * Provides message for clicking on map
+ * Provides helper text for creating waypoints
  *
- * @returns {string}
+ * @param {Mission} mission object
+ * @returns {string} Message describing how to create waypoints
+ *
+ * @notes Edit mode toggle and related items not functional
+ *         until more functionality is add to the mission management
  */
-// TODO Edit mode toggle and related items not functional
-// until more functionality is add to the mission management
-export function getClickOnMapString(mission: Mission) {
+export function getWaypontHelperText(mission: Mission) {
     let editString = "";
     if (mission?.getCanEdit()) {
         editString = "Click on the map to create waypoints";
@@ -69,9 +88,12 @@ export function getClickOnMapString(mission: Mission) {
 /**
  * Provides off load percentage
  *
- * @returns {string}
+ * @param {number} botID Id of bot
+ * @param {Hub} hub Hub object
+ *
+ * @returns {string} Offload progress in percent
  */
-export function getBotOffloadPctString(botID: number, hub: Hub) {
+export function getBotOffloadPercent(botID: number, hub: Hub) {
     let botOffloadPercentage = "";
 
     if (botID === hub.getBotOffload()?.bot_id) {
@@ -81,24 +103,26 @@ export function getBotOffloadPctString(botID: number, hub: Hub) {
 }
 
 /**
- * Provides repeat status message
+ * Provides repeat progress message
  *
- * @returns {string}
+ * @param {Mission} mission Mission object
+ * @param {MissionStatus} missionStatus Mission Status object
+ *
+ * @returns {string} Repeat progress
  */
-export function getRepeatNumberString(mission: Mission, missionStatus: MissionStatus) {
-    var repeatNumberString = "N/A";
+export function getRepeatProgress(mission: Mission, missionStatus: MissionStatus) {
+    let repeatProgressString = "N/A";
     if (missionStatus?.repeat_index != null) {
-        repeatNumberString = `${missionStatus.repeat_index + 1}`;
-
-        if (mission?.getRepeats() != null) {
-            repeatNumberString = repeatNumberString + ` of ${mission?.getRepeats()}`;
-        }
+        repeatProgressString = `${missionStatus.repeat_index + 1}`;
+        repeatProgressString = repeatProgressString + ` of ${mission?.getRepeats()}`;
     }
-    return repeatNumberString;
+    return repeatProgressString;
 }
 
 /**
  * Checks if bot is logging
+ *
+ * @param {MissionState} missionState Mission State object
  *
  * @returns {boolean} The bot logging status
  */
@@ -116,8 +140,13 @@ export function isBotLogging(missionState: MissionState) {
 
 /**
  * Provides Active wapoint name and distance
+ * @param {MissionStatus} missionStatus Mission Status object
  *
- * @returns {string , string}
+ * @returns {string , string} Tuple containg the active goal and distance to it
+ *
+ * @notes When Mission Status is reworked to remove Runs from the vocabulary
+ *        We should add logic to the new Mission Status to make this simpler
+ *        alleviating need to return a tuple
  */
 
 export function getActiveWptStrings(missionStatus: MissionStatus) {
@@ -135,8 +164,17 @@ export function getActiveWptStrings(missionStatus: MissionStatus) {
 
     return { activeWptString, distToWpt };
 }
-
-// Check if there is a mission to run
+/**
+ * Creates a run command
+ *
+ * @param {number} botId Bot ID
+ * @param {MissionInterface} Mission Mission Interface object
+ *
+ * @returns {Command} Command to run the mission
+ *
+ * @notes This is based on RunInterface which is likely to change
+ *        and this will be reworked
+ */
 export function runMission(botId: number, mission: MissionInterface) {
     let runs = mission.runs;
     let runId = mission.botsAssignedToRuns[botId];
@@ -152,18 +190,15 @@ export function runMission(botId: number, mission: MissionInterface) {
     }
 }
 
-interface DisableInfo {
-    isDisabled: boolean;
-    disableMessage: string;
-}
-
 /**
  * Checks if a details button should be disabled
  *
  * @param bot
  * @returns boolean
+ *
+ * @notes Look for ways to simplify this when working
+ *        on the Notifications processing
  */
-// TODO Look for ways to simplify this
 export function disableButton(
     command: CommandInfo,
     missionState: MissionState,
@@ -229,9 +264,9 @@ export function disableButton(
  *
  * @param bot
  * @returns boolean
+ *
+ * @notes Runs are no longer defined in JCC data model, this will need rework
  */
-
-// TODO Rework, Runs are no longer defined in JCC
 export function disableClearRunButton(mission: Mission) {
     let disableInfo: DisableInfo;
 
@@ -248,6 +283,19 @@ export function disableClearRunButton(mission: Mission) {
     return disableInfo;
 }
 
+/**
+ * Checks if play button should be disabled
+ *
+ * @param {number} botID ID of selected bot
+ * @param {Mission} mission Current mission
+ * @param {CommandInfo} command Command and information associated with it
+ * @param {MissionState} missionState State of current mission
+ * @param {number[]} downloadQueue Download Queue for selected bot
+ *
+ * @returns boolean
+ *
+ * @notes Runs are no longer defined in JCC data model, this will need rework
+ */
 export function disablePlayButton(
     botID: number,
     mission: Mission,
@@ -286,9 +334,14 @@ export function disablePlayButton(
 
     return disableInfo;
 }
-
-// TODO function will not work until Mission Management is refactored
-// missions are not being added to bots in the data model yet
+/**
+ * Toggles edit mode of a mission
+ * @param {Mission} mission Mission object
+ * @returns {void}
+ *
+ * @notes function will not work until Mission Management is refactored
+ *         missions are not being added to bots in the data model yet
+ */
 export function toggleEditMode(mission: Mission) {
     if (!mission) return;
     const canEdit = mission.getCanEdit();

@@ -3,11 +3,12 @@ import React, { useContext, useState, useEffect } from "react";
 // Jaia Imports
 import { CommandInfo, botCommands } from "../../types/commands";
 import {
-    getStatusAge,
+    getStatusAgeSeconds,
+    getStatusAgeClass,
     getDistToHub,
-    getClickOnMapString,
-    getBotOffloadPctString,
-    getRepeatNumberString,
+    getWaypontHelperText,
+    getBotOffloadPercent,
+    getRepeatProgress,
     getActiveWptStrings,
     isBotLogging,
     disableButton,
@@ -657,7 +658,7 @@ export function BotDetails(props: BotDetailsProps) {
                             ⨯
                         </div>
                     </div>
-                    <h3 className="name">{getClickOnMapString(mission)}</h3>
+                    <h3 className="name">{getWaypontHelperText(mission)}</h3>
                     <div className="botDetailsToolbar">
                         <Button
                             className={
@@ -733,9 +734,9 @@ export function BotDetails(props: BotDetailsProps) {
                             <AccordionDetails>
                                 <table>
                                     <tbody>
-                                        <tr className={getStatusAge(bot).statusAgeClassName}>
+                                        <tr className={getStatusAgeClass(bot)}>
                                             <td>Status Age</td>
-                                            <td>{getStatusAge(bot).statusAge.toFixed(0)} s</td>
+                                            <td>{getStatusAgeSeconds(bot).toFixed(0)} s</td>
                                         </tr>
                                         <tr>
                                             <td>Mission State</td>
@@ -743,7 +744,7 @@ export function BotDetails(props: BotDetailsProps) {
                                                 {missionStatus?.missionState?.replaceAll(
                                                     "__",
                                                     "\n",
-                                                ) + getBotOffloadPctString(botID, hub)}
+                                                ) + getBotOffloadPercent(botID, hub)}
                                             </td>
                                         </tr>
                                         <tr>
@@ -756,7 +757,7 @@ export function BotDetails(props: BotDetailsProps) {
                                         <tr>
                                             <td>Repeat Number</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {getRepeatNumberString(mission, missionStatus)}
+                                                {getRepeatProgress(mission, missionStatus)}
                                             </td>
                                         </tr>
                                         <tr>
