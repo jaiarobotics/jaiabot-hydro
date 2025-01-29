@@ -1,6 +1,7 @@
 // React
 import React, { useContext } from "react";
 
+// Jaia
 import MissionSpeedSettings from "../MissionControllerPanel/MissionSpeedSettings/MissionSpeedSettings";
 import MissionsList from "./MissionsList/MissionsList";
 import { GlobalDispatchContext } from "../../context/Global/GlobalContext";
@@ -8,12 +9,11 @@ import { JaiaSystemDispatchContext } from "../../context/JaiaSystem/JaiaSystemCo
 import { GlobalActions } from "../../context/Global/GlobalActions";
 import { JaiaSystemActions } from "../../context/JaiaSystem/jaia-system-actions";
 
-// Data model
 import Mission from "../../data/missions/mission";
 import { missions } from "../../data/missions/missions";
 import { missionsManager } from "../../data/missions_manager/missions-manager";
 
-// Style
+// MUI | MDI
 import Button from "@mui/material/Button";
 import Icon from "@mdi/react";
 import { mdiAutoFix, mdiContentSave, mdiDelete, mdiFolderOpen, mdiPlus } from "@mdi/js";
@@ -25,6 +25,11 @@ export default function MissionsPanel() {
     const globalDispatch = useContext(GlobalDispatchContext);
     const jaiaSystemDispatch = useContext(JaiaSystemDispatchContext);
 
+    /**
+     * Creates a new mission when an operator clicks the add mission button
+     *
+     * @returns {void}
+     */
     const handleAddMissionClick = () => {
         globalDispatch({ type: GlobalActions.DESELECT_POD_ELEMENT });
 
@@ -38,8 +43,21 @@ export default function MissionsPanel() {
         autoScrollMissions();
     };
 
+    /**
+     * Prevents a newly created missions from not appearing in the viewport
+     *
+     * @returns {void}
+     *
+     * @notes
+     * To be implemented
+     */
     const autoScrollMissions = () => {};
 
+    /**
+     * Clears all missions when an operator clicks the delete all missions button
+     *
+     * @returns {void}
+     */
     const handleDeleteAllMissionsClick = () => {
         // Update data model
         missions.deleteAllMissions();
@@ -51,10 +69,23 @@ export default function MissionsPanel() {
         jaiaSystemDispatch({ type: JaiaSystemActions.SYNC_REQUESTED });
     };
 
+    /**
+     * @notes
+     * To be implemented
+     */
     const handleLoadMissionsClick = () => {};
 
+    /**
+     * @notes
+     * To be implemented
+     */
     const handleSaveMissionsClick = () => {};
 
+    /**
+     * Assigns available Bots to open missions when an operator selects the magic wand button
+     *
+     * @returns {void}
+     */
     const handleAutoAssignClick = () => {
         // Update data model
         missionsManager.autoAssign();
