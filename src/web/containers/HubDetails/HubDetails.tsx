@@ -5,7 +5,7 @@ import {
     GlobalContext,
     GlobalDispatchContext,
     HubAccordionNames,
-    PodElement,
+    NodeType,
 } from "../../context/Global/GlobalContext";
 import { JaiaSystemContext } from "../../context/JaiaSystem/JaiaSystemContext";
 import { HealthStatusLine } from "../../components/HealthStatusLine/HealthStatusLine";
@@ -60,7 +60,7 @@ export function HubDetails() {
         addDropdownListener("accordionContainer", "hubDetailsAccordionContainer", 30);
     }, []);
 
-    if (jaiaSystemContext === null || globalContext.shownDetails != PodElement.HUB) {
+    if (jaiaSystemContext === null || globalContext.visibleDetails != NodeType.HUB) {
         return <div></div>;
     }
 

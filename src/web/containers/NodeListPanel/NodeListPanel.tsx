@@ -1,9 +1,5 @@
 import React, { useContext } from "react";
-import {
-    GlobalContext,
-    GlobalDispatchContext,
-    PodElement,
-} from "../../context/Global/GlobalContext";
+import { GlobalContext, GlobalDispatchContext, NodeType } from "../../context/Global/GlobalContext";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 
 import { HubStatus, BotStatus, HealthState } from "../../shared/JAIAProtobuf";
@@ -28,7 +24,7 @@ function faultLevel(health_state: HealthState) {
     );
 }
 
-export function BotListPanel(props: Props) {
+export function NodeListPanel(props: Props) {
     if (props.podStatus == null) return null;
 
     function compareByHubId(hub1: HubStatus, hub2: HubStatus) {
@@ -64,8 +60,8 @@ export function BotListPanel(props: Props) {
         const handleClick = () => {
             globalDispatch({
                 type: GlobalActions.CLICKED_NODE,
-                elementType: PodElement.BOT,
-                elementID: bot.bot_id,
+                nodeType: NodeType.BOT,
+                nodeID: bot.bot_id,
             });
             props.didClickBot(bot.bot_id);
         };
@@ -93,8 +89,8 @@ export function BotListPanel(props: Props) {
         let selected = "";
 
         if (
-            globalContext.selectedPodElement !== null &&
-            globalContext.selectedPodElement.type === PodElement.HUB
+            globalContext.selectedNode !== null &&
+            globalContext.selectedNode.type === NodeType.HUB
         ) {
             selected = "selected";
         }
@@ -111,8 +107,8 @@ export function BotListPanel(props: Props) {
             props.didClickHub(hub.hub_id);
             globalDispatch({
                 type: GlobalActions.CLICKED_NODE,
-                elementType: PodElement.HUB,
-                elementID: hub.hub_id,
+                nodeType: NodeType.HUB,
+                nodeID: hub.hub_id,
             });
         };
 
@@ -130,7 +126,7 @@ export function BotListPanel(props: Props) {
     }
 
     return (
-        <div id="botsList">
+        <div id="nodesList">
             {hubs.map(HubTab)}
             {bots.map(BotTab)}
         </div>

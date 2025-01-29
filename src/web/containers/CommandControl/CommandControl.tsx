@@ -20,7 +20,7 @@ import { ContactLayers } from "../../openlayers/map/layers/contact-layers";
 import { HubDetails } from "../HubDetails/HubDetails";
 import { CommandList } from "../../missions/missions";
 import { SurveyLines } from "../../missions/survey/survey-lines";
-import { BotListPanel } from "../BotListPanel/BotListPanel";
+import { NodeListPanel } from "../NodeListPanel/NodeListPanel";
 import { Interactions } from "../../openlayers/map/interactions";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 import { SettingsPanel } from "../SettingsPanel/SettingsPanel";
@@ -50,7 +50,7 @@ import {
     GlobalDispatchContext,
     GlobalContextType,
     GlobalAction,
-    PodElement,
+    NodeType,
 } from "../../context/Global/GlobalContext";
 import { BotDetails, BotDetailsProps } from "../BotDetails/BotDetails";
 import {
@@ -606,10 +606,7 @@ export default class CommandControl extends React.Component {
             prevState.podStatusVersion !== this.state.podStatusVersion ||
             prevState.selectedHubOrBot !== this.state.selectedHubOrBot
         ) {
-            this.hubLayers.update(
-                this.state.podStatus.hubs,
-                this.props.globalContext.selectedPodElement,
-            );
+            this.hubLayers.update(this.state.podStatus.hubs, this.props.globalContext.selectedNode);
             this.botLayers.update(this.state.podStatus.bots, this.state.selectedHubOrBot);
             this.contactLayers.update(this.state.podStatus?.contacts);
             this.updateHubCommsCircles();
@@ -2094,7 +2091,6 @@ export default class CommandControl extends React.Component {
         }
 
         if (feature) {
-            console.log(feature);
             // Allow an operator to click on certain features while edit mode is off
             const editModeExemptions = [
                 "dive",
@@ -2155,8 +2151,8 @@ export default class CommandControl extends React.Component {
             if (botStatus) {
                 this.props.globalDispatch({
                     type: GlobalActions.CLICKED_NODE,
-                    elementType: PodElement.BOT,
-                    elementID: botStatus.bot_id,
+                    nodeType: NodeType.BOT,
+                    nodeID: botStatus.bot_id,
                 });
                 this.toggleBot(botStatus.bot_id);
                 return false;
@@ -2169,8 +2165,8 @@ export default class CommandControl extends React.Component {
                 const hubID = this.state.podStatus.hubs[hubKey].hub_id;
                 this.props.globalDispatch({
                     type: GlobalActions.CLICKED_NODE,
-                    elementType: PodElement.HUB,
-                    elementID: hubID,
+                    nodeType: NodeType.HUB,
+                    nodeID: hubID,
                 });
                 this.didClickHub(hubID);
                 return false;
@@ -4261,8 +4257,8 @@ export default class CommandControl extends React.Component {
                     {settingsPanelButton}
                 </div>
 
-                <div id="botsDrawer">
-                    <BotListPanel
+                <div id="nodesDrawer">
+                    <NodeListPanel
                         podStatus={this.getPodStatus()}
                         selectedBotId={this.selectedBotId()}
                         selectedHubId={this.selectedHubId()}

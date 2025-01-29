@@ -43,7 +43,7 @@ import {
     GlobalContext,
     GlobalDispatchContext,
     BotAccordionNames,
-    PodElement,
+    NodeType,
 } from "../../context/Global/GlobalContext";
 import { JaiaSystemContext } from "../../context/JaiaSystem/JaiaSystemContext";
 
@@ -131,8 +131,8 @@ export function BotDetails(props: BotDetailsProps) {
     // Otherwise do not rendger panel
     if (
         jaiaSystemContext === null ||
-        globalContext.shownDetails != PodElement.BOT ||
-        globalContext.selectedPodElement.type != PodElement.BOT
+        globalContext.visibleDetails != NodeType.BOT ||
+        globalContext.selectedNode.type != NodeType.BOT
     ) {
         return <div></div>;
     }
@@ -141,7 +141,7 @@ export function BotDetails(props: BotDetailsProps) {
     const DEFAULT_HUB_ID = 1;
     const hub = jaiaSystemContext.hubs.get(DEFAULT_HUB_ID);
 
-    const botID = globalContext.selectedPodElement.id;
+    const botID = globalContext.selectedNode.id;
     const bot = jaiaSystemContext.bots.get(botID);
 
     // Make sure we have a bot

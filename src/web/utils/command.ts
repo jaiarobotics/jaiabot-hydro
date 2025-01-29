@@ -58,8 +58,6 @@ export async function sendHubCommand(hubID: number, hubCommand: CommandInfo) {
     }
 }
 
-// TODO Look into consolidating the logic below
-// These functions were extracted from existing code in BotDetails
 export function sendBotCommand(botId: number, command: CommandInfo) {
     let c = {
         bot_id: botId,

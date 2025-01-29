@@ -3,13 +3,13 @@ import CommandControl, { Props } from "../CommandControl";
 import {
     GlobalContextType,
     SelectedPodElement,
-    PodElement,
+    NodeType,
     HubAccordionStates,
     BotAccordionStates,
 } from "../../../context/Global/GlobalContext";
 
 const mockSelectedPodElement1: SelectedPodElement = {
-    type: PodElement.HUB,
+    type: NodeType.HUB,
     id: 1,
 };
 
@@ -33,8 +33,8 @@ const mockBotAccordionStates: BotAccordionStates = {
 const mockGlobalContext1: GlobalContextType = {
     clientID: "",
     controllingClientID: "",
-    selectedPodElement: mockSelectedPodElement1,
-    shownDetails: PodElement.NONE,
+    selectedNode: mockSelectedPodElement1,
+    visibleDetails: NodeType.NONE,
     hubAccordionStates: mockHubAccordionStates1,
     botAccordionStates: mockBotAccordionStates,
     isRCMode: false,

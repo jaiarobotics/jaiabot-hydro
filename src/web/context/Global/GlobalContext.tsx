@@ -8,15 +8,15 @@ import { GlobalActions } from "./GlobalActions";
 export interface GlobalContextType {
     clientID: string;
     controllingClientID: string;
-    selectedPodElement: SelectedPodElement;
-    shownDetails: PodElement;
+    selectedNode: SelectedPodElement;
+    visibleDetails: NodeType;
     hubAccordionStates: HubAccordionStates;
     botAccordionStates: BotAccordionStates;
     isRCMode: boolean;
 }
 
 export interface SelectedPodElement {
-    type: PodElement;
+    type: NodeType;
     id: number;
 }
 
@@ -74,8 +74,8 @@ const defaultBotAccordionStates = {
 export interface GlobalAction {
     type: GlobalActions;
     clientID?: string;
-    elementType?: PodElement;
-    elementID?: number;
+    nodeType?: NodeType;
+    nodeID?: number;
     hubAccordionName?: HubAccordionNames;
     botAccordionName?: BotAccordionNames;
 }
@@ -84,8 +84,7 @@ interface GlobalContextProviderProps {
     children: ReactNode;
 }
 
-// TODO: NodeType
-export enum PodElement {
+export enum NodeType {
     "NONE" = 0,
     "BOT" = 1,
     "HUB" = 2,
@@ -94,8 +93,8 @@ export enum PodElement {
 export const globalDefaultContext: GlobalContextType = {
     clientID: "",
     controllingClientID: "",
-    selectedPodElement: { type: PodElement.NONE, id: -1 },
-    shownDetails: PodElement.NONE,
+    selectedNode: { type: NodeType.NONE, id: -1 },
+    visibleDetails: NodeType.NONE,
     hubAccordionStates: defaultHubAccordionStates,
     botAccordionStates: defaultBotAccordionStates,
     isRCMode: false,
@@ -127,7 +126,7 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
             return handleClosedDetails(mutableState);
 
         case GlobalActions.CLICKED_NODE:
-            return handleClickedNode(mutableState, action.elementType, action.elementID);
+            return handleClickedNode(mutableState, action.nodeType, action.nodeID);
 
         case GlobalActions.CLICKED_HUB_ACCORDION:
             return handleClickedHubAccordion(mutableState, action.hubAccordionName);
@@ -183,7 +182,7 @@ function handleExitedRCMode(mutableState: GlobalContextType) {
  * @returns {GlobalContextType} Updated mutable state object
  */
 function handleClosedDetails(mutableState: GlobalContextType) {
-    mutableState.shownDetails = PodElement.NONE;
+    mutableState.visibleDetails = NodeType.NONE;
     return mutableState;
 }
 
@@ -191,22 +190,22 @@ function handleClosedDetails(mutableState: GlobalContextType) {
  * Handles click events for the hub and bot icons on the map and in bots drawer
  *
  * @param {GlobalContextType} mutableState State object ref for making modifications
- * @param {PodElement} type What type of elemetnt was clicked (HUB or BOT)
+ * @param {NodeType} type What type of elemetnt was clicked (HUB or BOT)
  * @param {number} id ID of Bot or Hub clicked
  * @returns {GlobalContextType} Updated mutable state object
  */
-function handleClickedNode(mutableState: GlobalContextType, type: PodElement, id: number) {
+function handleClickedNode(mutableState: GlobalContextType, type: NodeType, id: number) {
     if (isNaN(id)) throw new Error("Invalid hub or bot id");
 
     // Clicked currently selected element
-    if (mutableState.selectedPodElement.type == type && mutableState.selectedPodElement.id == id) {
-        // Close deselect and close details
-        mutableState.shownDetails = PodElement.NONE;
-        mutableState.selectedPodElement.type = PodElement.NONE;
+    if (mutableState.selectedNode.type == type && mutableState.selectedNode.id == id) {
+        // Close details and deselect node
+        mutableState.visibleDetails = NodeType.NONE;
+        mutableState.selectedNode.type = NodeType.NONE;
     } else {
         // Clicked non-selected element, select and show details
-        mutableState.selectedPodElement = { type: type, id: id };
-        mutableState.shownDetails = type;
+        mutableState.selectedNode = { type: type, id: id };
+        mutableState.visibleDetails = type;
     }
     return mutableState;
 }
@@ -218,7 +217,10 @@ function handleClickedNode(mutableState: GlobalContextType, type: PodElement, id
  * @param {string} accordionName Which accordion to open or close
  * @returns {GlobalContextType} Updated mutable state object
  */
-function handleClickedHubAccordion(mutableState: GlobalContextType, accordionName: string) {
+function handleClickedHubAccordion(
+    mutableState: GlobalContextType,
+    accordionName: HubAccordionNames,
+) {
     if (!accordionName) throw new Error("Invalid accordionName");
 
     let hubAccordionStates = mutableState.hubAccordionStates;
@@ -243,7 +245,10 @@ function handleClickedHubAccordion(mutableState: GlobalContextType, accordionNam
  * @param {string} accordionName Which accordion to open or close
  * @returns {GlobalContextType} Updated mutable state object
  */
-function handleClickedBotAccordion(mutableState: GlobalContextType, accordionName: string) {
+function handleClickedBotAccordion(
+    mutableState: GlobalContextType,
+    accordionName: BotAccordionNames,
+) {
     if (!accordionName) throw new Error("Invalid accordionName");
 
     let botAccordionStates = mutableState.botAccordionStates;

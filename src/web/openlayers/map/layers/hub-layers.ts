@@ -3,7 +3,7 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Collection } from "ol";
 import LayerGroup from "ol/layer/Group";
-import { SelectedPodElement, PodElement } from "../../../context/Global/GlobalContext";
+import { SelectedPodElement, NodeType } from "../../../context/Global/GlobalContext";
 import { PortalHubStatus } from "../../../shared/PortalStatus";
 import { getMapCoordinate } from "../../../shared/Utilities";
 import { Point } from "ol/geom";
@@ -88,7 +88,7 @@ export class HubLayers {
 
             const selected =
                 selectedHubOrBot !== null &&
-                selectedHubOrBot.type === PodElement.HUB &&
+                selectedHubOrBot.type === NodeType.HUB &&
                 selectedHubOrBot.id === hub_id;
             hubFeature.set("selected", selected);
 
