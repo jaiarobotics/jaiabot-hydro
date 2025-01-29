@@ -4300,6 +4300,20 @@ export default class CommandControl extends React.Component {
                 break;
         }
 
+        var depthContourPlot = null;
+        if (this.state.isDepthContourPlot3DDisplayed) {
+            const closeContourPlot = () => {
+                this.setState({ isDepthContourPlot3DDisplayed: false }); // Come on JavaScript.  Leave this alone.
+            };
+
+            depthContourPlot = (
+                <DepthContourPlot3D
+                    taskPackets={taskData.taskPackets}
+                    onClose={closeContourPlot}
+                ></DepthContourPlot3D>
+            );
+        }
+
         return (
             <div
                 id="jcc_container"
@@ -4356,9 +4370,7 @@ export default class CommandControl extends React.Component {
                     ></HelpWindow>
                 ) : null}
 
-                {this.state.isDepthContourPlot3DDisplayed ? (
-                    <DepthContourPlot3D taskPackets={taskData.taskPackets}></DepthContourPlot3D>
-                ) : null}
+                {depthContourPlot}
 
                 {this.state.customAlert}
             </div>

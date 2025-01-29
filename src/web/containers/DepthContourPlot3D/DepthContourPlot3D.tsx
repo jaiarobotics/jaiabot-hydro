@@ -1,24 +1,37 @@
 import React from "react";
 const Plotly = require("plotly.js-dist");
 import "./DepthContourPlot3D.less";
-import { taskData } from "../../data/task_packets/task-packets";
-import { DivePacket, TaskPacket } from "../../shared/JAIAProtobuf";
-import internal from "stream";
+import { TaskPacket } from "../../shared/JAIAProtobuf";
 import { getColorScale } from "./DepthColorMap";
-import { colors } from "@mui/material";
+import Icon from "@mdi/react";
+import Button from "@mui/material/Button";
+import { mdiWindowClose } from "@mdi/js";
 
 interface Props {
     taskPackets: TaskPacket[];
+    onClose: () => void;
 }
 
 export default function DepthContourPlot3D(props: Props) {
+    const topBar = (
+        <div className="depth-contour-plot-topbar">
+            <Button onClick={props.onClose}>
+                <Icon path={mdiWindowClose} title="Close Window"></Icon>
+            </Button>
+        </div>
+    );
     const div = <div id="depth-contour-plot"></div>;
 
     React.useEffect(() => {
         setupDepthContourPlot3D(props.taskPackets);
     }, []);
 
-    return <div className="depth-contour-plot-container">{div}</div>;
+    return (
+        <div className="depth-contour-plot-container">
+            {topBar}
+            {div}
+        </div>
+    );
 }
 
 function setupDepthContourPlot3D(taskPackets: TaskPacket[]) {
