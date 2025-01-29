@@ -128,7 +128,7 @@ export function BotDetails(props: BotDetailsProps) {
     }, []);
 
     // Make sure everything we need from Context is valid
-    // Otherwise do not rendger panel
+    // Otherwise do not render panel
     if (
         jaiaSystemContext === null ||
         globalContext.visibleDetails != NodeType.BOT ||
@@ -137,7 +137,7 @@ export function BotDetails(props: BotDetailsProps) {
         return <div></div>;
     }
 
-    // Pull Data from the Data Model Context
+    // Pull Data from the Context
     const DEFAULT_HUB_ID = 1;
     const hub = jaiaSystemContext.hubs.get(DEFAULT_HUB_ID);
 
@@ -172,7 +172,7 @@ export function BotDetails(props: BotDetailsProps) {
     /**
      * Provides data offload button
      *
-     * @returns {React.Fragment}
+     * @returns {React.Fragment} data offload button HTML
      */
     function dataOffloadButton() {
         // TODO This logic should be cleaned up and simplified
@@ -244,7 +244,7 @@ export function BotDetails(props: BotDetailsProps) {
     /**
      * Provides Health Row
      *
-     * @returns {React.Fragment}
+     * @returns {React.Fragment} Health row HTML
      */
     function healthRow(bot: Bot, allInfo: boolean) {
         let healthClassName =
