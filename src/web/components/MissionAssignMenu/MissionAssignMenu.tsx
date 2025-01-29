@@ -33,7 +33,7 @@ export default function MissionAssignMenu(props: Props) {
      * @returns {number} The MenuItem value which maps to `Bot-{BotID}` or "Unassigned"
      */
     const getMenuValue = () => {
-        return missionsManager.getBot(props.missionID);
+        return missionsManager.getBotID(props.missionID);
     };
 
     /**
@@ -69,7 +69,7 @@ export default function MissionAssignMenu(props: Props) {
      * This function is called each time the Select component calls the onChange handler
      */
     const generateMenuItems = (botID: number) => {
-        const botAssignment = missionsManager.getMission(botID);
+        const botAssignment = missionsManager.getMissionID(botID);
 
         if (botAssignment === UNASSIGNED_ID || botAssignment === props.missionID) {
             return <MenuItem key={botID} value={botID}>{`Bot-${botID}`}</MenuItem>;

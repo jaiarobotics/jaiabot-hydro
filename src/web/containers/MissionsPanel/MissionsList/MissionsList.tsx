@@ -150,7 +150,7 @@ export default function MissionsList() {
 }
 
 function MissionAccordionTitle(props: MissionAccordionTitleProps) {
-    const assignedBotID = missionsManager.getBot(props.missionID) ?? -1;
+    const assignedBotID = missionsManager.getBotID(props.missionID) ?? -1;
     return (
         <div className="mission-accordion-title">
             <p>{`Mission-${props.missionID}`}</p>
