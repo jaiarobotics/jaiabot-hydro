@@ -27,7 +27,7 @@ export default function DepthContourPlot3D(props: Props) {
     }, []);
 
     return (
-        <div className="depth-contour-plot-container">
+        <div className="depth-contour-plot-container centered rounded shadowed">
             {topBar}
             {div}
         </div>
