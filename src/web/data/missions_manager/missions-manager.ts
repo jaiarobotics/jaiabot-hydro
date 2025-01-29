@@ -1,6 +1,5 @@
-import { missions } from "../missions/missions";
 import { bots } from "../bots/bots";
-
+import { missions } from "../missions/missions";
 import { convertMicrosecondsToSeconds } from "../../shared/Utilities";
 
 class MissionsManager {
@@ -15,19 +14,38 @@ class MissionsManager {
         this.missionsToBots = new Map<number, number>();
     }
 
-    getMission(botID: number) {
+    /**
+     * Provides the mission ID associated with a Bot
+     *
+     * @param {number} botID Used in search for mission assoicated with Bot
+     * @returns {number} Mission ID associated with a Bot or (-1) if the Bot is not assigned to a mission
+     */
+    getMissionID(botID: number) {
         return this.botsToMissions.get(botID) ?? this.UNASSIGNED_ID;
     }
 
-    getBot(missionID: number) {
+    /**
+     * Provides the Bot ID associated with a mission
+     *
+     * @param {number} missionID Used in search for Bot associated with mission
+     * @returns {number} Bot ID associated with a mission or (-1) if the mission is not assigned to a Bot
+     */
+    getBotID(missionID: number) {
         return this.missionsToBots.get(missionID) ?? this.UNASSIGNED_ID;
     }
 
+    /**
+     * Connects Bots and missions
+     *
+     * @param {number} botID Used in assignment
+     * @param {number} missionID Used in assignment
+     * @returns {void}
+     */
     assign(botID: number, missionID: number) {
         // Reset Bot previously assigned to mission
-        const previousBotAssignment = this.getBot(missionID);
+        const previousBotAssignment = this.getBotID(missionID);
 
-        if (previousBotAssignment) {
+        if (previousBotAssignment !== this.UNASSIGNED_ID) {
             this.botsToMissions.set(previousBotAssignment, this.UNASSIGNED_ID);
         }
 
@@ -46,7 +64,7 @@ class MissionsManager {
      */
     autoAssign() {
         for (let [missionID, mission] of missions.getMissions()) {
-            if (this.getBot(mission.getMissionID()) === this.UNASSIGNED_ID) {
+            if (this.getBotID(mission.getMissionID()) === this.UNASSIGNED_ID) {
                 if (this.getNextAvailableBotID() !== this.UNASSIGNED_ID) {
                     this.assign(this.getNextAvailableBotID(), mission.getMissionID());
                 }
@@ -57,12 +75,12 @@ class MissionsManager {
     /**
      * Finds the lowest Bot ID that is not assigned to a mission
      *
-     * @returns {number} Bot ID or (-1) if all Bots are already assigned to missions
+     * @returns {number} Bot ID or (-1) if all Bots are already assigned to missions or outside of comms range
      */
     getNextAvailableBotID() {
         for (let [botID, bot] of bots.getBots()) {
             if (
-                this.getMission(bot.getBotID()) === this.UNASSIGNED_ID &&
+                this.getMissionID(bot.getBotID()) === this.UNASSIGNED_ID &&
                 convertMicrosecondsToSeconds(bot.getStatusAge()) < this.STATUS_AGE_MAX_SECONDS
             ) {
                 return bot.getBotID();
@@ -71,6 +89,11 @@ class MissionsManager {
         return this.UNASSIGNED_ID;
     }
 
+    /**
+     * Resets the Bot and mission connections
+     *
+     * @returns {void}
+     */
     clear() {
         this.botsToMissions.clear();
         this.missionsToBots.clear();
