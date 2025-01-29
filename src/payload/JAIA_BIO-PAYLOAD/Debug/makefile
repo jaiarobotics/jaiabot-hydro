@@ -60,8 +60,8 @@ all: main-build
 main-build: JAIA_BIO-PAYLOAD.elf secondary-outputs
 
 # Tool invocations
-JAIA_BIO-PAYLOAD.elf JAIA_BIO-PAYLOAD.map: $(OBJS) $(USER_OBJS) /Users/nickmarshall/jaia/bio_board_development/JAIA_BIO-PAYLOAD/STM32L433RCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "JAIA_BIO-PAYLOAD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/nickmarshall/jaia/bio_board_development/JAIA_BIO-PAYLOAD/STM32L433RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="JAIA_BIO-PAYLOAD.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+JAIA_BIO-PAYLOAD.elf JAIA_BIO-PAYLOAD.map: $(OBJS) $(USER_OBJS) /Users/nickmarshall/jaia/jaiabot/src/payload/JAIA_BIO-PAYLOAD/STM32L433RCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "JAIA_BIO-PAYLOAD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/nickmarshall/jaia/jaiabot/src/payload/JAIA_BIO-PAYLOAD/STM32L433RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="JAIA_BIO-PAYLOAD.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -88,8 +88,6 @@ fail-specified-linker-script-missing:
 
 warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
-
-
 
 .PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
 

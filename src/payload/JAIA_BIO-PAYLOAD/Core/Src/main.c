@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 
 #include "ec_oem.h"
+#include "oem_library.h"
 #include "stdint.h"
 #include "stdio.h"
 
@@ -62,8 +63,9 @@ TIM_HandleTypeDef htim16;
 
 /* USER CODE BEGIN PV */
 
-EC_OEM acc;
-uint8_t accDataReady;
+OEM_CHIP ec;
+OEM_CHIP dOxy;  // do is a reserved keyword in C, so dissolved oxygen has to be something else
+OEM_CHIP ph;
 
 char tx_buff[32] = "Test!\r\n\ ";
 uint8_t count = 1;
@@ -237,16 +239,21 @@ int main(void)
   HAL_GPIO_WritePin(GPIOB,GPIO_PIN_2,GPIO_PIN_SET); // DO
   HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET); // EC
 
+  // Look for powered-up I2C devices on i2c bus 2
   I2C_Scan();
 
-  HAL_StatusTypeDef init_status = EC_OEM_Initialize( &acc, &hi2c2 );
-  if (init_status != HAL_OK) {
-    sprintf(tx_buff, "Init Err.: 0x%02X\r\n", init_status);
-    HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
-  } else {
-    sprintf(tx_buff, "Init good.: 0x%02X\r\n", init_status);
-    HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);  
-  }
+  // Assign the I2C address of each Atlas Scientific chip to its respective object
+  ec.devAddr = EC_OEM_I2C_ADDR;
+  ph.devAddr = PH_OEM_I2C_ADDR;
+  dOxy.devAddr = DO_OEM_I2C_ADDR;
+
+  // Activate our Atlas Scientific chips
+  HAL_StatusTypeDef ec_init_status = OEM_Init(&ec, &hi2c2);
+  HAL_StatusTypeDef do_init_status = OEM_Init(&dOxy, &hi2c2);
+  HAL_StatusTypeDef ph_init_status = OEM_Init(&ph, &hi2c2);
+
+  sprintf(tx_buff, "EC_Init Status: 0x%02X\r\n", ec_init_status);
+  HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
 
   /* USER CODE END 2 */
 
@@ -261,25 +268,13 @@ int main(void)
     HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_10);
     HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_11);
     HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_12);
-
-    HAL_StatusTypeDef devType_status = EC_OEM_GetDevType( &acc );
-    if (devType_status != HAL_OK) {
-      sprintf(tx_buff, "DevType Err.: 0x%02X\r\n", devType_status);
-      HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
-    } else {
-      sprintf(tx_buff, "DevType good.: 0x%02X\r\n", acc.devType);
-      HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);  
-    }
-
-    HAL_StatusTypeDef ec_read_status = EC_OEM_ReadEC( &acc );
-    if (ec_read_status != HAL_OK) {
-      sprintf(tx_buff, "Read Err.: 0x%02X\r\n\r\n", ec_read_status);
-      HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
-    } else {
-      sprintf(tx_buff, "READ OKAY: %d\r\n\r\n", acc.ec_mS);
-      HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
-    }
 	  
+    HAL_StatusTypeDef phReadStatus = OEM_ReadData(&ph);
+    HAL_StatusTypeDef doReadStatus = OEM_ReadData(&dOxy);
+    HAL_StatusTypeDef ecReadStatus = OEM_ReadData(&ec);
+
+    sprintf(tx_buff, "PH: 0x%02X, 0x%02X\r\nEC: 0x%02X, 0x%02X\r\n\r\n", phReadStatus, ph.reading, ecReadStatus, ec.reading);
+    HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

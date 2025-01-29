@@ -1,0 +1,7 @@
+../Core/Src/oem_library.c:4:19:OEM_Init	24	static
+../Core/Src/oem_library.c:25:19:OEM_Activate	24	static
+../Core/Src/oem_library.c:32:19:OEM_GetDeviceType	16	static
+../Core/Src/oem_library.c:36:19:OEM_ReadData	32	static
+../Core/Src/oem_library.c:65:19:OEM_ReadRegister	40	static
+../Core/Src/oem_library.c:69:19:OEM_ReadRegisters	48	static
+../Core/Src/oem_library.c:73:19:OEM_WriteRegister	40	static

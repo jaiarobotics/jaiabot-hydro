@@ -4,7 +4,7 @@
 set -e
 
 # Variables
-BUILD_DIR="/Users/nickmarshall/jaia/bio_board_development/JAIA_BIO-PAYLOAD/Debug"
+BUILD_DIR="/Users/nickmarshall/jaia/jaiabot/src/payload/JAIA_BIO-PAYLOAD/Debug"
 TARGET="JAIA_BIO-PAYLOAD"
 ELF="$BUILD_DIR/$TARGET.elf"
 BIN="$BUILD_DIR/$TARGET.bin"
@@ -37,4 +37,3 @@ sudo st-flash reset
 echo "Done."
 
 echo "Flashing complete!"
-
