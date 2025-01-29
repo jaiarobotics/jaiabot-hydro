@@ -19,6 +19,7 @@ import {
 import { sendBotCommand, sendBotRunCommand, sendBotRCCommand } from "../../utils/command";
 import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
 import { Missions } from "../../missions/missions";
+import { missionsManager } from "../../data/missions_manager/missions-manager";
 import { MissionStatus } from "../../types/jaia-system-types";
 import BotSensors from "../../data/bots/bot-sensors";
 import Bot from "../../data/bots/bot";
@@ -72,6 +73,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 
 // Utility Imports
 import { CustomAlert } from "../../shared/CustomAlert";
+import { missions } from "../../data/missions/missions";
 
 const rcMode = require("../../style/icons/controller.svg");
 
@@ -148,11 +150,16 @@ export function BotDetails(props: BotDetailsProps) {
 
     // TODO some mission related code was changed to use the mission
     // from globalContext but the management of missions in globablContext
-    // is not complete known bugs affected by this include
+    // is not complete.  getMissionID will return -1 untill it is done
+    // known bugs affected by this include
     // Edit Mode Toggle, Play Button etc
-    const mission: Mission = bot.getMission();
-    const missionStatus: MissionStatus = bot.getMissionStatus();
+    let mission: Mission;
+    const missionID = missionsManager.getMissionID(botID);
+    if (missionID != missionsManager.UNASSIGNED_ID) {
+        mission = missions.getMission(missionID);
+    }
 
+    const missionStatus: MissionStatus = bot.getMissionStatus();
     const botSensors: BotSensors = bot.getBotSensors();
     const botGPS: GPS = botSensors?.getGPS();
     const botIMU: IMU = botSensors?.getIMU();
