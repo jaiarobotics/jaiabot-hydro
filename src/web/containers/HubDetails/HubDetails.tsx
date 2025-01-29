@@ -87,7 +87,7 @@ export function HubDetails() {
     function handleAccordionClick(accordionName: HubAccordionNames) {
         globalDispatch({
             type: GlobalActions.CLICKED_HUB_ACCORDION,
-            botAccordionName: accordionName,
+            hubAccordionName: accordionName,
         });
     }
 
