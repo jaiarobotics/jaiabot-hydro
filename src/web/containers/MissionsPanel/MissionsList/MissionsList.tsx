@@ -1,4 +1,7 @@
+// React
 import React, { useContext } from "react";
+
+// Jaia
 import { GlobalContext, GlobalDispatchContext } from "../../../context/Global/GlobalContext";
 import {
     JaiaSystemContext,
@@ -6,12 +9,12 @@ import {
 } from "../../../context/JaiaSystem/JaiaSystemContext";
 import { GlobalActions } from "../../../context/Global/GlobalActions";
 import { JaiaSystemActions } from "../../../context/JaiaSystem/jaia-system-actions";
-
 import MissionAssignMenu from "../../../components/MissionAssignMenu/MissionAssignMenu";
 
 import { missionsManager } from "../../../data/missions_manager/missions-manager";
 import { missions } from "../../../data/missions/missions";
 
+// MUI | MDI
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Icon from "@mdi/react";
 import { mdiContentDuplicate, mdiDelete } from "@mdi/js";
@@ -41,20 +44,31 @@ export default function MissionsList() {
     const jaiaSystemContext = useContext(JaiaSystemContext);
     const jaiaSystemDispatch = useContext(JaiaSystemDispatchContext);
 
-    const globalDispatchContext = useContext(GlobalDispatchContext);
-
     if (!globalContext || !jaiaSystemContext) {
         return <div></div>;
     }
 
+    /**
+     * Triggered when the expand/collapse state is changed on the Accordion component
+     *
+     * @param {number} missionID Signals which mission accordion the operator clicked
+     * @param  {boolean} isExpanded Expanded state of the accordion after the click
+     * @returns {void}
+     */
     const handleAccordionChange = (missionID: number, isExpanded: boolean) => {
-        globalDispatchContext({
+        globalDispatch({
             type: GlobalActions.CLICKED_MISSION_ACCORDION,
             missionID: missionID,
             isMissionAccordionExpanded: isExpanded,
         });
     };
 
+    /**
+     * Provides the expand/collapse state of the mission accordion when the component renders
+     *
+     * @param {number} missionID Determines which mission accordion state to check
+     * @returns {void}
+     */
     const isMissionAccordionExpanded = (missionID: number) => {
         if (missionID in globalContext.missionAccordionStates) {
             return globalContext.missionAccordionStates[missionID];
@@ -62,11 +76,26 @@ export default function MissionsList() {
         return false;
     };
 
+    /**
+     * Triggered when the operator clicks the duplicate mission button
+     *
+     * @param {number} missionID ID of the mission to be duplicated
+     * @returns {void}
+     *
+     * @notes
+     * To be implemented in a separate ticket
+     */
     const handleDuplicateMissionClick = (missionID: number) => {
         globalDispatch({ type: GlobalActions.DESELECT_POD_ELEMENT });
         // missions.duplicateMission(missionID);
     };
 
+    /**
+     * Triggered when the operator clicks the delete mission button
+     *
+     * @param {number} missionID ID of the mission to be deleted
+     * @returns {void}
+     */
     const handleDeleteMissionClick = (missionID: number) => {
         // Update data model
         missions.deleteMission(missionID);
