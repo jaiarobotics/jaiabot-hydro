@@ -63,6 +63,12 @@ function setupDepthContourPlot3D(taskPackets: TaskPacket[]) {
             y: divePackets.map((dive) => dive.start_location?.lat),
             z: depths,
             intensity: intensity,
+            showscale: false,
+            contour: {
+                color: "black",
+                show: true,
+                width: 2,
+            },
         },
     ];
 
