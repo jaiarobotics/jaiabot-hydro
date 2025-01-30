@@ -212,7 +212,7 @@ SD_IMAGE_PATH="$OUTPUT_IMAGE_PATH"
 if [[ "$MINDISK" == "1" ]]; then
     dd if=/dev/zero of="$SD_IMAGE_PATH" bs=1048576 count=13000 conv=sparse status=none
     sfdisk --quiet "$SD_IMAGE_PATH" <<EOF
-label: dos 
+label: gpt
 device: /dev/sdc
 unit: sectors
 
@@ -224,7 +224,7 @@ EOF
 else
     dd if=/dev/zero of="$SD_IMAGE_PATH" bs=1048576 count=17000 conv=sparse status=none
     sfdisk --quiet "$SD_IMAGE_PATH" <<EOF
-label: dos 
+label: gpt
 device: /dev/sdc
 unit: sectors
 
@@ -242,7 +242,7 @@ DISK_DEV=$(echo "$BOOT_DEV" | sed 's|mapper/\(loop[0-9]*\).*|\1|')
 
 # Format the partitions
 sudo mkfs.vfat -F 32 -n boot "$BOOT_DEV"
-sudo mkfs.ext4 -L rootfs "$ROOTFS_DEV"
+sudo mkfs.btrfs -L rootfs "$ROOTFS_DEV"
 sudo mkfs.btrfs -L overlay "$OVERLAY_DEV"
 sudo mkfs.btrfs -L data "$DATA_DEV"
 
@@ -355,7 +355,7 @@ dtoverlay=spi1-3cs
 
 EOF
 cat > "$BOOT_PARTITION"/cmdline.txt <<EOF
-console=tty1 root=LABEL=rootfs rootfstype=ext4 fsck.repair=yes rootwait fixrtc net.ifnames=0 dwc_otg.lpm_enable=0
+console=tty1 root=LABEL=rootfs rootfstype=btrfs fsck.repair=yes rootwait fixrtc net.ifnames=0 dwc_otg.lpm_enable=0
 EOF
 
 # Flash the kernel
