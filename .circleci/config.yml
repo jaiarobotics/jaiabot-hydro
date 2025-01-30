@@ -462,7 +462,7 @@ jobs:
       image: ubuntu-2404:current
     resource_class: medium
     environment:
-      CREATE_IMAGE_ARGS: "--virtualbox --mindisk"
+      CREATE_IMAGE_ARGS: "--virtualbox"
       DISTRO_RELEASE_CODENAME: "noble"
       DEBIAN_FRONTEND: "noninteractive"
     steps:
