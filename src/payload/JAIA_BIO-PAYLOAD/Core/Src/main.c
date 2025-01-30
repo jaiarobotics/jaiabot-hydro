@@ -236,8 +236,8 @@ int main(void)
 
   // Turn on Atlas Sensors
   HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET); // pH
-  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_2,GPIO_PIN_SET); // DO
-  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET); // EC
+  //HAL_GPIO_WritePin(GPIOB,GPIO_PIN_2,GPIO_PIN_SET); // DO
+  //HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET); // EC
 
   // Look for powered-up I2C devices on i2c bus 2
   I2C_Scan();
@@ -266,14 +266,14 @@ int main(void)
 
     /* LEDs */
     HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_10);
-    HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_11);
+    //HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_11);
     HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_12);
 	  
     HAL_StatusTypeDef phReadStatus = OEM_ReadData(&ph);
     HAL_StatusTypeDef doReadStatus = OEM_ReadData(&dOxy);
     HAL_StatusTypeDef ecReadStatus = OEM_ReadData(&ec);
 
-    sprintf(tx_buff, "PH: 0x%02X, 0x%02X\r\nEC: 0x%02X, 0x%02X\r\n\r\n", phReadStatus, ph.reading, ecReadStatus, ec.reading);
+    sprintf(tx_buff, "PH: 0x%02X, 0x%02X\r\n", phReadStatus, ph.reading);
     HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
     /* USER CODE END WHILE */
 
