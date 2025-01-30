@@ -142,6 +142,8 @@ class HubManager : public ApplicationBase
 
     // set of Bot IDs with bot_to_gps in use
     std::set<int> bot_to_gps_ids_;
+
+    std::map<int, goby::time::MicroTime> known_bots_;
 };
 } // namespace apps
 } // namespace jaiabot
@@ -477,6 +479,14 @@ void jaiabot::apps::HubManager::loop()
         latest_hub_status_.add_error(protobuf::ERROR__NOT_RESPONDING__JAIABOT_HEALTH);
     }
 
+    latest_hub_status_.clear_known_bot();
+    for (const auto& known_bot_p : known_bots_)
+    {
+        auto* known_bot = latest_hub_status_.add_known_bot();
+        known_bot->set_id(known_bot_p.first);
+        known_bot->set_last_status_time_with_units(known_bot_p.second);
+    }
+
     if (latest_hub_status_.IsInitialized())
     {
         glog.is_debug1() &&
@@ -543,9 +553,11 @@ void jaiabot::apps::HubManager::handle_bot_nav(const jaiabot::protobuf::BotStatu
     node_status.set_name("BOT" + std::to_string(dccl_nav.bot_id()));
 
     // rewarp the time if needed
-    node_status.set_time_with_units(goby::time::convert<goby::time::MicroTime>(
+    auto rewarped_dccl_nav_time = goby::time::convert<goby::time::MicroTime>(
         goby::time::SystemClock::warp(goby::time::convert<std::chrono::system_clock::time_point>(
-            dccl_nav.time_with_units()))));
+            dccl_nav.time_with_units())));
+
+    node_status.set_time_with_units(rewarped_dccl_nav_time);
 
     if (dccl_nav.attitude().has_heading())
         node_status.mutable_pose()->set_heading_with_units(
@@ -578,6 +590,8 @@ void jaiabot::apps::HubManager::handle_bot_nav(const jaiabot::protobuf::BotStatu
     }
 
     latest_bot_mission_state_[dccl_nav.bot_id()] = dccl_nav.mission_state();
+
+    known_bots_[dccl_nav.bot_id()] = rewarped_dccl_nav_time;
 
     // publish for opencpn interface
     if (node_status.IsInitialized())
