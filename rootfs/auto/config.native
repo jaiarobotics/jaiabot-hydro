@@ -6,7 +6,7 @@ lb config noauto \
  --apt-indices none \
  --architectures arm64 \
  --archive-areas 'main universe multiverse restricted' \
- --binary-filesystem ext4 \
+ --binary-filesystem btrfs \
  --binary-images tar \
  --chroot-filesystem none \
  --compression none \
