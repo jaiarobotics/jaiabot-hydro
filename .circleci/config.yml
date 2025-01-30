@@ -188,6 +188,7 @@ filter-template-debian-builds: &filter-template-debian-builds
     branches:
       only:
         - "1.y"
+        - "task/rework-first-boot-as-cloud-init/jaia-1806"
 
 # which branches to run the normal source build
 filter-template-normal-builds: &filter-template-normal-builds
@@ -204,6 +205,7 @@ filter-template-rootfs-builds: &filter-template-rootfs-builds
     branches:
       only:
         - "1.y"
+        - "task/rework-first-boot-as-cloud-init/jaia-1806"
 
 # which branches to run the AWS virtual machine conversion (must be same as or subset of filter-template-rootfs-builds)
 filter-template-aws-rootfs-builds: &filter-template-aws-rootfs-builds
@@ -213,6 +215,7 @@ filter-template-aws-rootfs-builds: &filter-template-aws-rootfs-builds
     branches:
       only:
         - "1.y"
+        - "task/rework-first-boot-as-cloud-init/jaia-1806"
 
 # which branches to build Docker simulator
 filter-template-docker-sim-builds: &filter-template-docker-sim-builds
@@ -291,14 +294,6 @@ workflows:
             - upload
 
       # rootfs jobs - require upload first so we install the same release (not previous release) onto the rootfs
-      - raspi-image-create-focal:
-          <<: *filter-template-rootfs-builds
-          requires:
-            - upload
-      - virtualbox-image-create-focal:
-          <<: *filter-template-rootfs-builds
-          requires:
-            - upload
       - raspi-image-create-jammy:
           <<: *filter-template-rootfs-builds
           requires:
@@ -542,36 +537,6 @@ jobs:
           root: /tmp
           paths:
             - "vbox/*.ova"
-
-  raspi-image-create-focal:
-    machine:
-      image: ubuntu-2004:current
-    resource_class: arm.medium
-    environment:
-      CREATE_IMAGE_ARGS: "--native"
-      DISTRO_RELEASE_CODENAME: "focal"
-      DEBIAN_FRONTEND: "noninteractive"
-    steps:
-      - checkout
-      - run: *run-install-apt-raspi
-      - run: *run-create-image
-      - run: *run-compress-image-raspi
-      - store_artifacts: *store-raspi
-
-  virtualbox-image-create-focal:
-    machine:
-      image: ubuntu-2004:current
-    resource_class: medium
-    environment:
-      CREATE_IMAGE_ARGS: "--virtualbox --mindisk"
-      DISTRO_RELEASE_CODENAME: "focal"
-      DEBIAN_FRONTEND: "noninteractive"
-    steps:
-      - checkout
-      - run: *run-install-apt-vbox
-      - run: *run-create-image
-      - run: *run-move-vbox
-      - store_artifacts: *store-vbox
 
   aws-sync:
     docker:
