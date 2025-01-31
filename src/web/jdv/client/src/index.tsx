@@ -32,6 +32,7 @@ import "./styles/styles.css";
 import { CustomAlert, CustomAlertProps } from "./shared/CustomAlert";
 
 import "./index.css";
+import { Feature } from "ol";
 
 function exceptionCatcher(exception: Error) {
     CustomAlert.presentAlert({
@@ -390,7 +391,12 @@ class LogApp extends React.Component {
 
     componentDidMount() {
         this.getElements();
-        this.map = new JaiaMap("openlayers-map");
+        this.map = new JaiaMap("openlayers-map", this.didSelectFeature);
+    }
+
+    didSelectFeature(feature: Feature) {
+        console.log(`did select feature:`)
+        console.log(feature)
     }
 
     getElements() {

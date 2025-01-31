@@ -7,7 +7,7 @@ import LayerGroup from "ol/layer/Group";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { fromLonLat, Projection } from "ol/proj";
-import Feature from "ol/Feature";
+import Feature, { FeatureLike } from "ol/Feature";
 import { Geometry, LineString, Point } from "ol/geom";
 import { createEmpty, extend, isEmpty } from "ol/extent";
 import Stroke from "ol/style/Stroke";
@@ -128,6 +128,8 @@ export default class JaiaMap {
     task_packets: LogTaskPacket[] = [];
     map: Map;
     projection: Projection;
+    didSelectFeature: (feature: FeatureLike | null) => void;
+    selectedFeature?: FeatureLike | null = null
 
     divePacketLayer: VectorLayer<VectorSource<Feature<Geometry>>> = new VectorLayer({
         properties: {
@@ -155,8 +157,9 @@ export default class JaiaMap {
     command_dict: { [key: number]: LogCommand[] };
     depthContourFeatures: Feature[];
 
-    constructor(openlayersMapDivId: string) {
+    constructor(openlayersMapDivId: string, didSelectFeature?: (feature: Feature | null) => void) {
         this.setupOpenlayersMap(openlayersMapDivId);
+        this.didSelectFeature = didSelectFeature
 
         OlLayerSwitcher.renderPanel(this.map, document.getElementById("layerSwitcher"), {});
     }
@@ -194,15 +197,25 @@ export default class JaiaMap {
 
         // Dispatch click events to the feature, if it has an "onclick" property set
         this.map.on("click", (e) => {
-            this.map.forEachFeatureAtPixel(
+            const feature = this.map.forEachFeatureAtPixel(
                 e.pixel,
                 function (feature, layer) {
-                    feature.get("onclick")?.(e);
+                    return feature
                 },
                 {
                     hitTolerance: 20,
                 },
             );
+
+            feature.get("onclick")?.(e);
+            if (this.selectedFeature == feature) {
+                this.selectedFeature = null
+                this.didSelectFeature(null)
+            }
+            else {
+                this.selectedFeature = feature
+                this.didSelectFeature(feature)
+            }
         });
 
         // Change cursor to hand pointer, when hovering over a feature with an onclick property
