@@ -96,7 +96,6 @@ fi
 
 function unmount_bind_mounts {
     sudo umount -q "$ROOTFS_PARTITION"/boot/firmware
-    sudo umount -q "$ROOTFS_PARTITION"/boot/efi
     sudo umount -q "$ROOTFS_PARTITION"/dev/pts
     sudo umount -q "$ROOTFS_PARTITION"/dev
     sudo umount -q "$ROOTFS_PARTITION"/proc
@@ -375,7 +374,9 @@ if [ ! -z "$VIRTUALBOX" ]; then
     # install grub boot loader
     sudo chroot rootfs update-grub
     sudo chroot rootfs grub-install "$DISK_DEV" --no-uefi-secure-boot --removable
-
+    
+    sudo umount "$ROOTFS_PARTITION"/boot/efi
+    
     # unmount all the image partitions first
     finish
     
