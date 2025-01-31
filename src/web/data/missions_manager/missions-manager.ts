@@ -90,6 +90,20 @@ class MissionsManager {
     }
 
     /**
+     * Removes connection between a Bot and a deleted mission
+     *
+     * @param {number} missionID ID of deleted mission
+     * @returns {void}
+     */
+    removeAssignment(missionID: number) {
+        const botAssignment = this.getBotID(missionID);
+
+        if (botAssignment !== this.UNASSIGNED_ID) {
+            this.botsToMissions.set(botAssignment, this.UNASSIGNED_ID);
+        }
+    }
+
+    /**
      * Resets the Bot and mission connections
      *
      * @returns {void}

@@ -99,6 +99,7 @@ export default function MissionsList() {
     const handleDeleteMissionClick = (missionID: number) => {
         // Update data model
         missions.deleteMission(missionID);
+        missionsManager.removeAssignment(missionID);
 
         // Update OpenLayers
 
@@ -128,6 +129,7 @@ export default function MissionsList() {
                                 <MissionAssignMenu missionID={mission.getMissionID()} />
                                 <Button
                                     className="jaia-button"
+                                    aria-label="duplicate-mission"
                                     onClick={() =>
                                         handleDuplicateMissionClick(mission.getMissionID())
                                     }
@@ -136,6 +138,7 @@ export default function MissionsList() {
                                 </Button>
                                 <Button
                                     className="jaia-button"
+                                    aria-label="delete-mission"
                                     onClick={() => handleDeleteMissionClick(mission.getMissionID())}
                                 >
                                     <Icon path={mdiDelete} />

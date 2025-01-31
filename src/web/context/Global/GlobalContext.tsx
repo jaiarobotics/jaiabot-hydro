@@ -106,6 +106,8 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
                 action.missionID,
                 action.isMissionAccordionExpanded,
             );
+        case GlobalActions.CLICKED_DELETE_ALL_MISSIONS:
+            return handleClickedDeleteAllMissions(mutableState);
 
         case GlobalActions.DESELECT_POD_ELEMENT:
             return handleDeselectPodElement(mutableState);
@@ -296,6 +298,17 @@ function handleClickedMissionAccordion(
     isMissionAccordionExpanded: boolean,
 ) {
     mutableState.missionAccordionStates[missionID] = isMissionAccordionExpanded;
+    return mutableState;
+}
+
+/**
+ * Resets the mission accordion expand/collapse states when operator clicks delete all missions
+ *
+ * @param {GlobalContextType} mutableState State object ref for making modifications
+ * @returns {GlobalContextType} Updated mutable state object
+ */
+function handleClickedDeleteAllMissions(mutableState: GlobalContextType) {
+    mutableState.missionAccordionStates = {};
     return mutableState;
 }
 

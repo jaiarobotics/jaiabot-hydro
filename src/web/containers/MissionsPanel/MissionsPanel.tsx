@@ -65,7 +65,8 @@ export default function MissionsPanel() {
 
         // Update OpenLayers
 
-        // Update JaiaSystemContext
+        // Update Context
+        globalDispatch({ type: GlobalActions.CLICKED_DELETE_ALL_MISSIONS });
         jaiaSystemDispatch({ type: JaiaSystemActions.SYNC_REQUESTED });
     };
 
