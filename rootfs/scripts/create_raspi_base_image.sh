@@ -95,11 +95,11 @@ if [ "$UID" -ne 0 ]; then
 fi
 
 function unmount_bind_mounts {
-    sudo umount -q "$ROOTFS_PARTITION"/boot/firmware
-    sudo umount -q "$ROOTFS_PARTITION"/dev/pts
-    sudo umount -q "$ROOTFS_PARTITION"/dev
-    sudo umount -q "$ROOTFS_PARTITION"/proc
-    sudo umount -q "$ROOTFS_PARTITION"/sys
+    sudo umount "$ROOTFS_PARTITION"/boot/firmware || true
+    sudo umount "$ROOTFS_PARTITION"/dev/pts || true
+    sudo umount "$ROOTFS_PARTITION"/dev || true
+    sudo umount "$ROOTFS_PARTITION"/proc || true
+    sudo umount "$ROOTFS_PARTITION"/sys || true
 }
 
 
