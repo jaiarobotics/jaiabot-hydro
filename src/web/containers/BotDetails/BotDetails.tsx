@@ -128,10 +128,9 @@ export function BotDetails(props: BotDetailsProps) {
         addDropdownListener("accordionContainer", "botDetailsAccordionContainer", 30);
     }, []);
 
-    // Make sure everything we need from Context is valid
-    // Otherwise do not render panel
     if (
         jaiaSystemContext === null ||
+        globalContext === null ||
         globalContext.visibleDetails != NodeType.BOT ||
         globalContext.selectedNode.type != NodeType.BOT
     ) {

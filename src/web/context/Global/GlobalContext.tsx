@@ -8,14 +8,14 @@ import { GlobalActions } from "./GlobalActions";
 export interface GlobalContextType {
     clientID: string;
     controllingClientID: string;
-    selectedNode: SelectedPodElement;
+    selectedNode: SelectedNode;
     visibleDetails: NodeType;
     hubAccordionStates: HubAccordionStates;
     botAccordionStates: BotAccordionStates;
     isRCMode: boolean;
 }
 
-export interface SelectedPodElement {
+export interface SelectedNode {
     type: NodeType;
     id: number;
 }

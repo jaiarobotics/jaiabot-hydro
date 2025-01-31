@@ -2,13 +2,13 @@ import { act, render, screen, fireEvent } from "@testing-library/react";
 import CommandControl, { Props } from "../CommandControl";
 import {
     GlobalContextType,
-    SelectedPodElement,
+    SelectedNode,
     NodeType,
     HubAccordionStates,
     BotAccordionStates,
 } from "../../../context/Global/GlobalContext";
 
-const mockSelectedPodElement1: SelectedPodElement = {
+const mockSelectedNode1: SelectedNode = {
     type: NodeType.HUB,
     id: 1,
 };
@@ -33,7 +33,7 @@ const mockBotAccordionStates: BotAccordionStates = {
 const mockGlobalContext1: GlobalContextType = {
     clientID: "",
     controllingClientID: "",
-    selectedNode: mockSelectedPodElement1,
+    selectedNode: mockSelectedNode1,
     visibleDetails: NodeType.NONE,
     hubAccordionStates: mockHubAccordionStates1,
     botAccordionStates: mockBotAccordionStates,
