@@ -156,9 +156,7 @@ export function BotDetails(props: BotDetailsProps) {
     // Edit Mode Toggle, Play Button etc
     let mission: Mission;
     const missionID = missionsManager.getMissionID(botID);
-    if (missionID != missionsManager.UNASSIGNED_ID) {
-        mission = missions.getMission(missionID);
-    }
+    mission = missions.getMission(missionID);
 
     const missionStatus: MissionStatus = bot.getMissionStatus();
     const botSensors: BotSensors = bot.getBotSensors();

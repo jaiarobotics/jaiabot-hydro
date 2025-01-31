@@ -76,13 +76,10 @@ export function getDistToHub(bot: Bot, hub: Hub) {
  *         until more functionality is add to the mission management
  */
 export function getWaypontHelperText(mission: Mission) {
-    let editString = "";
-    if (mission?.getCanEdit()) {
-        editString = "Click on the map to create waypoints";
-    } else {
-        editString = "Click edit toggle to create waypoint";
+    if (!mission || mission.getCanEdit()) {
+        return "Click on the map to create waypoints";
     }
-    return editString;
+    return "Click edit toggle to create waypoint";
 }
 
 /**
