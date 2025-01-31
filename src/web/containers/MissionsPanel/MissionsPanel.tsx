@@ -99,19 +99,39 @@ export default function MissionsPanel() {
             <div className="jaia-panel-title">Mission Set</div>
             <MissionSpeedSettings />
             <div className="jaia-button-row">
-                <Button className="jaia-button" onClick={() => handleAddMissionClick()}>
+                <Button
+                    className="jaia-button"
+                    aria-label="add-mission"
+                    onClick={() => handleAddMissionClick()}
+                >
                     <Icon path={mdiPlus} title="Add mission" />
                 </Button>
-                <Button className="jaia-button" onClick={() => handleDeleteAllMissionsClick()}>
+                <Button
+                    className="jaia-button"
+                    aria-label="delete-all-missions"
+                    onClick={() => handleDeleteAllMissionsClick()}
+                >
                     <Icon path={mdiDelete} title="Delete all missions" />
                 </Button>
-                <Button className="jaia-button" onClick={() => handleLoadMissionsClick()}>
+                <Button
+                    className="jaia-button"
+                    aria-label="load-missions"
+                    onClick={() => handleLoadMissionsClick()}
+                >
                     <Icon path={mdiFolderOpen} title="Load missions" />
                 </Button>
-                <Button className="jaia-button" onClick={() => handleSaveMissionsClick()}>
+                <Button
+                    className="jaia-button"
+                    aria-label="save-missions"
+                    onClick={() => handleSaveMissionsClick()}
+                >
                     <Icon path={mdiContentSave} title="Save missions" />
                 </Button>
-                <Button className="jaia-button" onClick={() => handleAutoAssignClick()}>
+                <Button
+                    className="jaia-button"
+                    aria-label="auto-assign-bots"
+                    onClick={() => handleAutoAssignClick()}
+                >
                     <Icon path={mdiAutoFix} title="Auto assign Bots" />
                 </Button>
             </div>
