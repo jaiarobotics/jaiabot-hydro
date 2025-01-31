@@ -455,6 +455,7 @@ jobs:
           root: /tmp
           paths:
             - "images/*.img.gz"
+            - "images/*.tar.gz"
             - "images/*.metadata.txt"
 
   virtualbox-image-create-noble:

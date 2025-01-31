@@ -230,6 +230,12 @@ ROOTFS_PARTITION="$WORKDIR"/rootfs
 sudo mount "$BOOT_DEV" "$BOOT_PARTITION"
 sudo mount "$ROOTFS_DEV" "$ROOTFS_PARTITION"
 
+if command -v pigz >/dev/null 2>&1; then
+    COMPRESSOR="pigz"
+else
+    COMPRESSOR="gzip"
+fi
+
 if [ -z "$ROOTFS_TARBALL" ]; then
     # Build the rootfs
     mkdir rootfs-build
@@ -258,11 +264,6 @@ if [ -z "$ROOTFS_TARBALL" ]; then
     
     lb build
     # Need xattrs for ping setcap
-    if command -v pigz >/dev/null 2>&1; then
-        COMPRESSOR="pigz"
-    else
-        COMPRESSOR="gzip"
-    fi
     tar --xattrs --xattrs-include="*" -cf - binary | $COMPRESSOR > binary-tar-xattrs.tar.gz
     cd ..
     ROOTFS_TARBALL=rootfs-build/binary-tar-xattrs.tar.gz
@@ -342,10 +343,7 @@ sudo mount -o bind /dev/pts "$ROOTFS_PARTITION"/dev/pts
 sudo mount -o bind /proc "$ROOTFS_PARTITION"/proc
 sudo mount -o bind /sys "$ROOTFS_PARTITION"/sys
 
-# Persist the rootfs in case we want it
-OUTPUT_ROOTFS_TARBALL=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.tar.gz/")
-OUTPUT_METADATA=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.metadata.txt/")
-cp "${ROOTFS_TARBALL}" "${OUTPUT_ROOTFS_TARBALL}"
+OUTPUT_METADATA=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.metadata\.txt/")
 
 # Copy the preseed example on the boot partition
 sudo mkdir -p "$BOOT_PARTITION"/jaiabot/init
@@ -397,5 +395,16 @@ else
     # Noble flash-kernel added FK_IGNORE_EFI
     sudo chroot rootfs /bin/bash -c "export FK_FORCE=yes; export FK_IGNORE_EFI=yes; flash-kernel"
     
-    echo "Raspberry Pi image created at $OUTPUT_IMAGE_PATH"
+    # Persist the rootfs and boot for release upgrades
+    OUTPUT_ROOTFS_TARBALL=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.rootfs\.tar\.gz/")
+    OUTPUT_BOOT_TARBALL=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.boot\.tar\.gz/")
+
+    cd rootfs
+    # Need xattrs for ping setcap
+    tar --xattrs --xattrs-include="*" -cf - . | $COMPRESSOR > ${OUTPUT_ROOTFS_TARBALL}
+    cd ../boot
+    tar -cf - . | $COMPRESSOR > ${OUTPUT_BOOT_TARBALL}
+    cd ..
+    
+    echo "Raspberry Pi image created at $OUTPUT_IMAGE_PATH (also a copy of rootfs at $OUTPUT_ROOTFS_TARBALL and boot at $OUTPUT_BOOT_TARBALL)"
 fi
