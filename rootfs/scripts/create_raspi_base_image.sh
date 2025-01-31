@@ -94,6 +94,15 @@ if [ "$UID" -ne 0 ]; then
     exit 1
 fi
 
+function unmount_bind_mounts {
+    sudo umount -q "$ROOTFS_PARTITION"/boot/firmware
+    sudo umount -q "$ROOTFS_PARTITION"/boot/efi
+    sudo umount -q "$ROOTFS_PARTITION"/dev/pts
+    sudo umount -q "$ROOTFS_PARTITION"/dev
+    sudo umount -q "$ROOTFS_PARTITION"/proc
+    sudo umount -q "$ROOTFS_PARTITION"/sys
+}
+
 
 # Set up an exit handler to clean up after ourselves
 function finish {
@@ -105,11 +114,7 @@ function finish {
   
     # Unmount the partitions
     [ -z "$DEBUG" ] &&
-        ( sudo umount "$ROOTFS_PARTITION"/boot/firmware
-          sudo umount "$ROOTFS_PARTITION"/dev/pts
-          sudo umount "$ROOTFS_PARTITION"/dev
-          sudo umount "$ROOTFS_PARTITION"/proc
-          sudo umount "$ROOTFS_PARTITION"/sys
+        ( unmount_bind_mounts
           sudo umount "$ROOTFS_PARTITION"
           sudo umount "$BOOT_PARTITION"
           
@@ -355,7 +360,7 @@ echo "export JAIABOT_VERSION='$JAIABOT_VERSION'" >> ${OUTPUT_METADATA}
 echo "export GOBY_VERSION='$GOBY_VERSION'" >> ${OUTPUT_METADATA}
 
 if [ ! -z "$VIRTUALBOX" ]; then
-    sudo chroot rootfs apt-get -y install linux-image-generic
+    sudo chroot rootfs apt-get -y install linux-image-virtual grub-efi-amd64
     
     # ensure VM uses eth0, etc. naming like Raspi
     sudo chroot rootfs sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/' /etc/default/grub
@@ -364,9 +369,12 @@ if [ ! -z "$VIRTUALBOX" ]; then
     sudo chroot rootfs sed -i 's/GRUB_TIMEOUT_STYLE=\(.*\)/#GRUB_TIMEOUT_STYLE=\1/' /etc/default/grub
     sudo chroot rootfs sed -i 's/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=3\nGRUB_RECORDFAIL_TIMEOUT=3/' /etc/default/grub
 
+    sudo mkdir -p "$ROOTFS_PARTITION"/boot/efi
+    sudo mount -o bind "$BOOT_PARTITION" "$ROOTFS_PARTITION"/boot/efi
+    
     # install grub boot loader
     sudo chroot rootfs update-grub
-    sudo chroot rootfs grub-install "$DISK_DEV"
+    sudo chroot rootfs grub-install "$DISK_DEV" --no-uefi-secure-boot --removable
 
     # unmount all the image partitions first
     finish
@@ -399,6 +407,9 @@ else
     OUTPUT_ROOTFS_TARBALL=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.rootfs\.tar\.gz/")
     OUTPUT_BOOT_TARBALL=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.boot\.tar\.gz/")
 
+
+    # Create tarball variants of image
+    unmount_bind_mounts   
     cd rootfs
     # Need xattrs for ping setcap
     tar --xattrs --xattrs-include="*" -cf - . | $COMPRESSOR > ${OUTPUT_ROOTFS_TARBALL}
