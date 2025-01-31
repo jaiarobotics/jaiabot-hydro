@@ -271,6 +271,17 @@ export class LogApi {
         return downloadURL(url.toString(), "moos.csv", "text/csv");
     }
 
+    static async getPowerDensitySpectrum(logs: string[], time_range: number[]) {
+        var url = new URL("power-density-spectrum", window.location.origin);
+        url.searchParams.append("log", logs.join(","));
+        url.searchParams.append("t_start", String(time_range[0]));
+        url.searchParams.append("t_end", String(time_range[1]));
+
+        console.log(url)
+
+        return this.getJSON(url.toString()) as Promise<Plot>
+    }
+ 
     /**
      * Initiates a conversion from .goby to .h5 on the backend, if necessary, and responds with the conversion status
      *

@@ -157,6 +157,29 @@ def getInterpolatedDrifts():
     return Response(pyjaia.drift_interpolation.taskPacketsToDriftMarkersGeoJSON(taskPackets))
 
 
+@app.route('/power-density-spectrum', methods=['GET'])
+def getPowerDensitySpectrum():
+    '''Get the power density spectrum of a drift'''
+    log_names = parseFilenames(request.args.get('log'))
+
+    if log_names is None:
+        return JSONErrorResponse("Missing log filename")
+    
+    start_time = int(request.args.get('t_start'))
+    end_time = int(request.args.get('t_end'))
+
+    plot = {
+        "title": "Title",
+        "y_axis_title": "y axis",
+        "_utime_": [],
+        "series_y": [],
+        "hovertext": [],
+        "path": "path"
+    }
+
+    return JSONResponse(plot)
+
+
 @app.route('/h5', methods=['GET'])
 def getH5():
     '''Download a Jaia HDF5 file'''

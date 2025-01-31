@@ -33,6 +33,8 @@ import { CustomAlert, CustomAlertProps } from "./shared/CustomAlert";
 
 import "./index.css";
 import { Feature } from "ol";
+import { DriftPacket, TaskPacket } from "./shared/JAIAProtobuf";
+import { FeatureLike } from "ol/Feature";
 
 function exceptionCatcher(exception: Error) {
     CustomAlert.presentAlert({
@@ -86,12 +88,15 @@ interface State {
 
     // Custom Alert shown, if any
     customAlert?: React.JSX.Element;
+
+    shouldShowPDSButton: boolean;
 }
 
 class LogApp extends React.Component {
     state: State;
     map: JaiaMap;
     plot_div_element: any;
+    selectedFeature: FeatureLike | null = null;
 
     constructor(props: LogAppProps) {
         super(props);
@@ -116,6 +121,8 @@ class LogApp extends React.Component {
             isOpenPlotSetDisplayed: false,
             isBusy: false,
             customAlert: null,
+
+            shouldShowPDSButton: false
         };
 
         CustomAlert.setPresenter((props: CustomAlertProps | null) => {
@@ -141,6 +148,16 @@ class LogApp extends React.Component {
                 <img src={loadingImage} className="busy-icon"></img>
             </div>
         ) : null;
+
+        const pdsButton = this.state.shouldShowPDSButton ? (
+            <button id="pdsButton"
+                className="mapButton"
+                onClick={() => {
+                    this.addPowerDensitySpectrum();
+                }}>
+                Power Density Spectrum
+            </button>
+        ) : null
 
         return (
             <Router>
@@ -216,6 +233,7 @@ class LogApp extends React.Component {
                                 >
                                     <Icon path={mdiTrashCan} size={1}></Icon>
                                 </button>
+                                { pdsButton }
                             </div>
 
                             <div
@@ -389,14 +407,16 @@ class LogApp extends React.Component {
         }
     }
 
-    componentDidMount() {
-        this.getElements();
-        this.map = new JaiaMap("openlayers-map", this.didSelectFeature);
+    didSelectFeature(feature: FeatureLike | null) {
+        console.log(feature?.get('type') == 'drift')
+        this.setState({shouldShowPDSButton: feature?.get('type') == 'drift'})
     }
 
-    didSelectFeature(feature: Feature) {
-        console.log(`did select feature:`)
-        console.log(feature)
+    componentDidMount() {
+        this.getElements();
+        this.map = new JaiaMap("openlayers-map", (feature: FeatureLike | null) => {
+            this.didSelectFeature(feature)
+        });
     }
 
     getElements() {
@@ -827,6 +847,22 @@ class LogApp extends React.Component {
 
         let pathNames = this.state.plots.map((series) => series.path);
         PlotProfiles.save_profile(plotSetName, pathNames);
+    }
+
+    addPowerDensitySpectrum() {
+        const selectedFeature = this.map.selectedFeature
+        const taskPacket: TaskPacket | null = selectedFeature?.get('taskPacket')
+        const drift = taskPacket?.drift
+
+        if (drift == null) {
+            return
+        }
+
+        LogApi.getPowerDensitySpectrum(this.state.chosenLogs, [taskPacket.start_time, taskPacket.end_time]).then((plot: Plot) => {
+            this.setState({plots: this.state.plots.concat(plot)})
+        })
+
+        console.log(`Add PDS for drift ${taskPacket.start_time} - ${taskPacket.end_time}`)
     }
 }
 

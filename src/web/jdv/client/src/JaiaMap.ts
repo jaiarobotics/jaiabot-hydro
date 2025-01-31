@@ -157,7 +157,7 @@ export default class JaiaMap {
     command_dict: { [key: number]: LogCommand[] };
     depthContourFeatures: Feature[];
 
-    constructor(openlayersMapDivId: string, didSelectFeature?: (feature: Feature | null) => void) {
+    constructor(openlayersMapDivId: string, didSelectFeature?: (feature: FeatureLike | null) => void) {
         this.setupOpenlayersMap(openlayersMapDivId);
         this.didSelectFeature = didSelectFeature
 
@@ -210,11 +210,11 @@ export default class JaiaMap {
             feature.get("onclick")?.(e);
             if (this.selectedFeature == feature) {
                 this.selectedFeature = null
-                this.didSelectFeature(null)
+                this.didSelectFeature?.(null)
             }
             else {
                 this.selectedFeature = feature
-                this.didSelectFeature(feature)
+                this.didSelectFeature?.(feature)
             }
         });
 
