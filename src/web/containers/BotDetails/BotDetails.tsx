@@ -24,13 +24,10 @@ import { missionsManager } from "../../data/missions_manager/missions-manager";
 import { MissionStatus } from "../../types/jaia-system-types";
 import BotSensors from "../../data/bots/bot-sensors";
 import Bot from "../../data/bots/bot";
-import GPS from "../../data/sensors/gps";
-import IMU from "../../data/sensors/imu";
 
 import { GlobalSettings } from "../../missions/settings";
 import { warning, info } from "../../notifications/notifications";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
-import Mission from "../../data/missions/mission";
 import { Command, MissionState, GeographicCoordinate } from "../../utils/protobuf-types";
 
 import {
@@ -103,7 +100,7 @@ export interface BotDetailsProps {
 }
 
 export function BotDetails(props: BotDetailsProps) {
-    // TODO We will replace of these old objects from Props with ones from context
+    // TODO We will replace these old objects from Props with ones from context
     const missionFromProps = props.mission;
 
     const takeControl = props.takeControl;
@@ -131,8 +128,7 @@ export function BotDetails(props: BotDetailsProps) {
     if (
         jaiaSystemContext === null ||
         globalContext === null ||
-        globalContext.visibleDetails != NodeType.BOT ||
-        globalContext.selectedNode.type != NodeType.BOT
+        globalContext.visibleDetails != NodeType.BOT
     ) {
         return <div></div>;
     }
@@ -144,6 +140,9 @@ export function BotDetails(props: BotDetailsProps) {
     const botID = globalContext.selectedNode.id;
     const bot = jaiaSystemContext.bots.get(botID);
 
+    const missionID = missionsManager.getMissionID(botID);
+    const mission = jaiaSystemContext.missions.get(missionID);
+
     // Make sure we have a bot
     if (!bot) {
         return <div></div>;
@@ -154,16 +153,8 @@ export function BotDetails(props: BotDetailsProps) {
     // is not complete.  getMissionID will return -1 untill it is done
     // known bugs affected by this include
     // Edit Mode Toggle, Play Button etc
-    let mission: Mission;
-    const missionID = missionsManager.getMissionID(botID);
-    mission = missions.getMission(missionID);
-
     const missionStatus: MissionStatus = bot.getMissionStatus();
     const botSensors: BotSensors = bot.getBotSensors();
-    const botGPS: GPS = botSensors?.getGPS();
-    const botIMU: IMU = botSensors?.getIMU();
-
-    const missionState = missionStatus?.missionState;
 
     let displayPrecision = 2;
 
@@ -183,7 +174,7 @@ export function BotDetails(props: BotDetailsProps) {
         let dataOffloadButton = (
             <Button
                 className={
-                    disableButton(botCommands.recover, missionState).isDisabled ||
+                    disableButton(botCommands.recover, missionStatus?.missionState).isDisabled ||
                     !linkQualityPercentage
                         ? "inactive button-jcc"
                         : "button-jcc"
@@ -191,7 +182,7 @@ export function BotDetails(props: BotDetailsProps) {
                 onClick={() => {
                     let disableMessage = disableButton(
                         botCommands.recover,
-                        missionState,
+                        missionStatus?.missionState,
                     ).disableMessage;
 
                     if (!linkQualityPercentage) {
@@ -208,19 +199,19 @@ export function BotDetails(props: BotDetailsProps) {
             </Button>
         );
 
-        if (disableButton(botCommands.recover, missionState).isDisabled) {
+        if (disableButton(botCommands.recover, missionStatus?.missionState).isDisabled) {
             dataOffloadButton = (
                 <Button
                     className={
-                        disableButton(botCommands.retryDataOffload, missionState).isDisabled ||
-                        !linkQualityPercentage
+                        disableButton(botCommands.retryDataOffload, missionStatus?.missionState)
+                            .isDisabled || !linkQualityPercentage
                             ? "inactive button-jcc"
                             : "button-jcc"
                     }
                     onClick={() => {
                         let disableMessage = disableButton(
                             botCommands.retryDataOffload,
-                            missionState,
+                            missionStatus?.missionState,
                         ).disableMessage;
 
                         if (!linkQualityPercentage) {
@@ -323,7 +314,7 @@ export function BotDetails(props: BotDetailsProps) {
         issueCommand(
             botID,
             botCommands.active,
-            disableButton(botCommands.active, missionState).disableMessage,
+            disableButton(botCommands.active, missionStatus?.missionState).disableMessage,
         );
     }
 
@@ -336,7 +327,7 @@ export function BotDetails(props: BotDetailsProps) {
         issueCommand(
             botID,
             botCommands.stop,
-            disableButton(botCommands.stop, missionState).disableMessage,
+            disableButton(botCommands.stop, missionStatus?.missionState).disableMessage,
             props.setRcMode,
         );
     }
@@ -352,8 +343,12 @@ export function BotDetails(props: BotDetailsProps) {
             await runRCMode(bot),
             props.isRCModeActive,
             props.setRcMode,
-            disableButton(botCommands.rcMode, missionState, botID, props.downloadQueue)
-                .disableMessage,
+            disableButton(
+                botCommands.rcMode,
+                missionStatus?.missionState,
+                botID,
+                props.downloadQueue,
+            ).disableMessage,
         );
     }
 
@@ -366,7 +361,7 @@ export function BotDetails(props: BotDetailsProps) {
         issueCommand(
             botID,
             botCommands.nextTask,
-            disableButton(botCommands.nextTask, missionState).disableMessage,
+            disableButton(botCommands.nextTask, missionStatus?.missionState).disableMessage,
         );
     }
 
@@ -394,7 +389,7 @@ export function BotDetails(props: BotDetailsProps) {
                           botID,
                           mission,
                           botCommands.play,
-                          missionState,
+                          missionStatus?.missionState,
                           props.downloadQueue,
                       ).disableMessage,
                   )
@@ -408,7 +403,7 @@ export function BotDetails(props: BotDetailsProps) {
                     botID,
                     mission,
                     botCommands.play,
-                    missionState,
+                    missionStatus?.missionState,
                     props.downloadQueue,
                 ).disableMessage,
             );
@@ -429,16 +424,24 @@ export function BotDetails(props: BotDetailsProps) {
                 ? issueCommand(
                       botID,
                       botCommands.shutdown,
-                      disableButton(botCommands.shutdown, missionState, botID, props.downloadQueue)
-                          .disableMessage,
+                      disableButton(
+                          botCommands.shutdown,
+                          missionStatus?.missionState,
+                          botID,
+                          props.downloadQueue,
+                      ).disableMessage,
                   )
                 : false;
         } else {
             issueCommand(
                 botID,
                 botCommands.shutdown,
-                disableButton(botCommands.shutdown, missionState, botID, props.downloadQueue)
-                    .disableMessage,
+                disableButton(
+                    botCommands.shutdown,
+                    missionStatus?.missionState,
+                    botID,
+                    props.downloadQueue,
+                ).disableMessage,
             );
         }
     }
@@ -457,16 +460,24 @@ export function BotDetails(props: BotDetailsProps) {
                 ? issueCommand(
                       botID,
                       botCommands.reboot,
-                      disableButton(botCommands.reboot, missionState, botID, props.downloadQueue)
-                          .disableMessage,
+                      disableButton(
+                          botCommands.reboot,
+                          missionStatus?.missionState,
+                          botID,
+                          props.downloadQueue,
+                      ).disableMessage,
                   )
                 : false;
         } else {
             issueCommand(
                 botID,
                 botCommands.reboot,
-                disableButton(botCommands.reboot, missionState, botID, props.downloadQueue)
-                    .disableMessage,
+                disableButton(
+                    botCommands.reboot,
+                    missionStatus?.missionState,
+                    botID,
+                    props.downloadQueue,
+                ).disableMessage,
             );
         }
     }
@@ -487,7 +498,7 @@ export function BotDetails(props: BotDetailsProps) {
                       botCommands.restartServices,
                       disableButton(
                           botCommands.restartServices,
-                          missionState,
+                          missionStatus?.missionState,
                           botID,
                           props.downloadQueue,
                       ).disableMessage,
@@ -497,8 +508,12 @@ export function BotDetails(props: BotDetailsProps) {
             issueCommand(
                 botID,
                 botCommands.restartServices,
-                disableButton(botCommands.restartServices, missionState, botID, props.downloadQueue)
-                    .disableMessage,
+                disableButton(
+                    botCommands.restartServices,
+                    missionStatus?.missionState,
+                    botID,
+                    props.downloadQueue,
+                ).disableMessage,
             );
         }
     }
@@ -621,8 +636,8 @@ export function BotDetails(props: BotDetailsProps) {
             return null;
         }
 
-        const botLat = bot.getBotSensors()?.getGPS()?.getLat();
-        const botLon = bot.getBotSensors()?.getGPS()?.getLon();
+        const botLat = botSensors.getGPS().getLat();
+        const botLon = botSensors.getGPS().getLon();
 
         let datumLocation: GeographicCoordinate = { lat: botLat, lon: botLon };
 
@@ -660,7 +675,8 @@ export function BotDetails(props: BotDetailsProps) {
                     <div className="botDetailsToolbar">
                         <Button
                             className={
-                                disableButton(botCommands.stop, missionState).isDisabled
+                                disableButton(botCommands.stop, missionStatus?.missionState)
+                                    .isDisabled
                                     ? "inactive button-jcc"
                                     : " button-jcc stopMission"
                             }
@@ -676,7 +692,7 @@ export function BotDetails(props: BotDetailsProps) {
                                     botID,
                                     mission,
                                     botCommands.play,
-                                    missionState,
+                                    missionStatus?.missionState,
                                     props.downloadQueue,
                                 ).isDisabled
                                     ? "inactive button-jcc"
@@ -781,7 +797,7 @@ export function BotDetails(props: BotDetailsProps) {
                                         <tr>
                                             <td>Data Logging</td>
                                             <td>
-                                                {isBotLogging(missionState)
+                                                {isBotLogging(missionStatus?.missionState)
                                                     .toString()
                                                     .toUpperCase()}
                                             </td>
@@ -810,7 +826,10 @@ export function BotDetails(props: BotDetailsProps) {
                             <AccordionDetails className="botDetailsCommands">
                                 <Button
                                     className={
-                                        disableButton(botCommands.active, missionState).isDisabled
+                                        disableButton(
+                                            botCommands.active,
+                                            missionStatus?.missionState,
+                                        ).isDisabled
                                             ? "inactive button-jcc"
                                             : "button-jcc"
                                     }
@@ -826,7 +845,16 @@ export function BotDetails(props: BotDetailsProps) {
 
                                 <Button
                                     className={`
-                                        ${disableButton(botCommands.rcMode, missionState, botID, props.downloadQueue).isDisabled ? "inactive button-jcc" : "button-jcc"} 
+                                        ${
+                                            disableButton(
+                                                botCommands.rcMode,
+                                                missionStatus?.missionState,
+                                                botID,
+                                                props.downloadQueue,
+                                            ).isDisabled
+                                                ? "inactive button-jcc"
+                                                : "button-jcc"
+                                        } 
                                         ${props.isRCModeActive(botID) ? "rc-active" : "rc-inactive"}
                                         `}
                                     onClick={async () => {
@@ -838,7 +866,10 @@ export function BotDetails(props: BotDetailsProps) {
 
                                 <Button
                                     className={
-                                        disableButton(botCommands.nextTask, missionState).isDisabled
+                                        disableButton(
+                                            botCommands.nextTask,
+                                            missionStatus?.missionState,
+                                        ).isDisabled
                                             ? "inactive button-jcc"
                                             : "button-jcc"
                                     }
@@ -871,7 +902,7 @@ export function BotDetails(props: BotDetailsProps) {
                                             className={
                                                 disableButton(
                                                     botCommands.shutdown,
-                                                    missionState,
+                                                    missionStatus?.missionState,
                                                     botID,
                                                     props.downloadQueue,
                                                 ).isDisabled
@@ -888,7 +919,7 @@ export function BotDetails(props: BotDetailsProps) {
                                             className={
                                                 disableButton(
                                                     botCommands.reboot,
-                                                    missionState,
+                                                    missionStatus?.missionState,
                                                     botID,
                                                     props.downloadQueue,
                                                 ).isDisabled
@@ -905,7 +936,7 @@ export function BotDetails(props: BotDetailsProps) {
                                             className={
                                                 disableButton(
                                                     botCommands.restartServices,
-                                                    missionState,
+                                                    missionStatus?.missionState,
                                                     botID,
                                                     props.downloadQueue,
                                                 ).isDisabled
@@ -984,33 +1015,44 @@ export function BotDetails(props: BotDetailsProps) {
                                                 <tbody>
                                                     <tr>
                                                         <td>Latitude</td>
-                                                        <td>{formatLatitude(botGPS?.getLat())}</td>
+                                                        <td>
+                                                            {formatLatitude(
+                                                                botSensors.getGPS().getLat(),
+                                                            )}
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td>Longitude</td>
-                                                        <td>{formatLongitude(botGPS?.getLon())}</td>
+                                                        <td>
+                                                            {formatLongitude(
+                                                                botSensors.getGPS().getLon(),
+                                                            )}
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td>HDOP</td>
                                                         <td>
-                                                            {botGPS
-                                                                ?.getHDOP()
+                                                            {botSensors
+                                                                .getGPS()
+                                                                .getHDOP()
                                                                 ?.toFixed(displayPrecision)}
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td>PDOP</td>
                                                         <td>
-                                                            {botGPS
-                                                                ?.getPDOP()
+                                                            {botSensors
+                                                                .getGPS()
+                                                                .getPDOP()
                                                                 ?.toFixed(displayPrecision)}
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td>Ground Speed</td>
                                                         <td>
-                                                            {botGPS
-                                                                ?.getSpeedOverGround()
+                                                            {botSensors
+                                                                .getGPS()
+                                                                .getSpeedOverGround()
                                                                 ?.toFixed(displayPrecision)}{" "}
                                                             m/s
                                                         </td>
@@ -1018,8 +1060,9 @@ export function BotDetails(props: BotDetailsProps) {
                                                     <tr>
                                                         <td>Course Over Ground</td>
                                                         <td>
-                                                            {botGPS
-                                                                ?.getCourseOverGround()
+                                                            {botSensors
+                                                                .getGPS()
+                                                                .getCourseOverGround()
                                                                 ?.toFixed(displayPrecision)}
                                                         </td>
                                                     </tr>
@@ -1051,7 +1094,7 @@ export function BotDetails(props: BotDetailsProps) {
                                                         <td>Heading</td>
                                                         <td>
                                                             {formatAttitudeAngle(
-                                                                botIMU?.getHeading(),
+                                                                botSensors.getIMU().getHeading(),
                                                             )}
                                                         </td>
                                                     </tr>
@@ -1059,13 +1102,17 @@ export function BotDetails(props: BotDetailsProps) {
                                                         <td>Pitch</td>
                                                         <td>
                                                             {formatAttitudeAngle(
-                                                                botIMU?.getPitch(),
+                                                                botSensors.getIMU().getPitch(),
                                                             )}
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td>IMU Cal</td>
-                                                        <td>{botIMU?.getCalibrationStatus()}</td>
+                                                        <td>
+                                                            {botSensors
+                                                                .getIMU()
+                                                                .getCalibrationStatus()}
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -1095,8 +1142,8 @@ export function BotDetails(props: BotDetailsProps) {
                                                         <td>Temperature</td>
                                                         <td>
                                                             {botSensors
-                                                                ?.getTemperatureSensor()
-                                                                ?.getTemperature()
+                                                                .getTemperatureSensor()
+                                                                .getTemperature()
                                                                 ?.toFixed(displayPrecision)}{" "}
                                                             °C
                                                         </td>
@@ -1105,8 +1152,8 @@ export function BotDetails(props: BotDetailsProps) {
                                                         <td>Depth</td>
                                                         <td>
                                                             {botSensors
-                                                                ?.getPressureSensor()
-                                                                ?.getDepth()
+                                                                .getPressureSensor()
+                                                                .getDepth()
                                                                 ?.toFixed(displayPrecision)}{" "}
                                                             m
                                                         </td>
