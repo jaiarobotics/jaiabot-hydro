@@ -205,7 +205,7 @@ SD_IMAGE_PATH="$OUTPUT_IMAGE_PATH"
 dd if=/dev/zero of="$SD_IMAGE_PATH" bs=1048576 count=17000 conv=sparse status=none
 sfdisk "$SD_IMAGE_PATH" <<EOF
 label: gpt
-size=256MiB, type=uefi
+size=256MiB, type=EBD0A0A2-B9E5-4433-87C0-68B6B72699C7
 size=8GiB,   type=linux
 size=8GiB,   type=linux
 size=200MiB, type=linux
