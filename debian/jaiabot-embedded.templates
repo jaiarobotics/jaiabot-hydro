@@ -127,3 +127,9 @@ Type: select
 Choices: bar02, bar30, none
 Default: bar30
 Description: What pressure sensor do you have?
+
+Template: jaiabot-embedded/aml_x2change_sensor_type
+Type: select
+Choices: ct, none
+Default: none
+Description: Do you have a AML X2Change sensor?

@@ -60,8 +60,9 @@ parser.add_argument('--arduino_type', choices=['spi', 'usb', 'none'], help='If s
 parser.add_argument('--bot_type', choices=['hydro', 'echo', 'none'], help='If set, configure services for bot type')
 parser.add_argument('--data_offload_ignore_type', choices=['goby', 'taskpacket', 'none'], help='If set, configure services for arduino type')
 parser.add_argument('--motor_harness_type', choices=['rpm_and_thermistor', 'none'], help='If set, configure services for motor harness type')
-parser.add_argument('--temperature_sensor_type', choices=['bar02', 'bar30', 'tsys01', 'none'], help='If set, configure services for temperature sensor')
+parser.add_argument('--temperature_sensor_type', choices=['bar02', 'bar30', 'tsys01', 'alm_x2change', 'none'], help='If set, configure services for temperature sensor')
 parser.add_argument('--pressure_sensor_type', choices=['bar02', 'bar30', 'none'], help='If set, configure services for pressure sensor')
+parser.add_argument('--aml_x2change_sensor_type', choices=['ct', 'none'], help='If set, configure services for AML X2Change sensor')
 
 args=parser.parse_args()
 
@@ -113,11 +114,16 @@ class TEMPERATURE_SENSOR_TYPE(Enum):
     BAR02 = 'bar02'
     BAR30 = 'bar30'
     TSYS01 = 'tsys01'
+    ALM_X2CHANGE = "alm_x2change"
     NONE = 'none'
 
 class PRESSURE_SENSOR_TYPE(Enum):
     BAR02 = 'bar02'
     BAR30 = 'bar30'
+    NONE = 'none'
+
+class ALM_X2CHANGE_SENSOR_TYPE(Enum):
+    CT = 'ct'
     NONE = 'none'
 
 # Set the arduino type based on the argument
@@ -197,6 +203,11 @@ if args.pressure_sensor_type == 'bar02':
 else:
     jaia_pressure_sensor_type = PRESSURE_SENSOR_TYPE.BAR30
 
+if args.aml_x2change_sensor_type == 'ct':
+    jaia_aml_x2change_sensor_type = ALM_X2CHANGE_SENSOR_TYPE.CT
+else:
+    jaia_aml_x2change_sensor_type = ALM_X2CHANGE_SENSOR_TYPE.NONE
+
 # make the output directories, if they don't exist
 os.makedirs(os.path.dirname(args.env_file), exist_ok=True)
 
@@ -248,6 +259,7 @@ subprocess.run('bash -ic "' +
                'export jaia_motor_harness_type=' + str(jaia_motor_harness_type.value) + '; ' +
                'export jaia_temperature_sensor_type=' + str(jaia_temperature_sensor_type.value) + '; ' +
                'export jaia_pressure_sensor_type=' + str(jaia_pressure_sensor_type.value) + '; ' +
+               'export jaia_aml_x2change_sensor_type=' + str(jaia_aml_x2change_sensor_type.value) + '; ' +
                'source ' + args.gen_dir + '/../preseed.goby; env | egrep \'^jaia|^LD_LIBRARY_PATH\' > /tmp/runtime.env; cp --backup=numbered /tmp/runtime.env ' + args.env_file + '; rm /tmp/runtime.env"',
                check=True, shell=True)
 
@@ -597,6 +609,17 @@ if jaia_temperature_sensor_type.value == 'tsys01':
         'restart': 'on-failure'},
     ]
     jaiabot_apps.extend(jaiabot_apps_tsys01)
+
+if jaia_aml_x2change_sensor_type.value == 'ct':
+    jaiabot_apps_alm_x2change = [
+        {'exe': 'jaiabot_alm_ctx2change_sensor_driver',
+        'description': 'JaiaBot ALM CT-X2Change is a Conductivity and Temperature Sensor Driver',
+        'template': 'goby-app.service.in',
+        'error_on_fail': 'ERROR__FAILED__JAIABOT_ALM_CTX2CHANGE_SENSOR_DRIVER',
+        'runs_on': Type.BOT,
+        'wanted_by': 'jaiabot_health.service'},
+    ]
+    jaiabot_apps.extend(jaiabot_apps_alm_x2change)
 
 jaia_firmware = [
     {'exe': 'hub-button-led-poweroff.py',
