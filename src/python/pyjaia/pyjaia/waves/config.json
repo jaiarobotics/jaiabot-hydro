@@ -1,0 +1,15 @@
+{
+    "glitchy": false,
+    "sampleFreq": 4.0,
+    "bandPassFilter": {
+        "type": "cos^2",
+        "minZeroPeriod": 0.25,
+        "minPeriod": 0.5,
+        "maxPeriod": 20.0,
+        "maxZeroPeriod": 25.0
+    },
+    "analysis": {
+        "type": "welch",
+        "segmentLength": 256
+    }
+}
