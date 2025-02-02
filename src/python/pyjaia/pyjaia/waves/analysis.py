@@ -105,6 +105,37 @@ def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
     return drift
 
 
+def doDriftAnalysisFromFile(h5File: h5py.File, timeRange: List[int], config: DriftAnalysisConfig):
+    seriesSet = SeriesSet.loadFromH5File(h5File)
+    seriesSetsFilteredByTime = seriesSet.split(lambda i, seriesSet: seriesSet.accelerationVertical.utime[i] in range(timeRange[0], timeRange[1]))
+
+    if len(seriesSetsFilteredByTime) != 1:
+        return None
+
+    driftSeriesSet = seriesSetsFilteredByTime[0]
+
+    drift = Drift()
+    drift.rawVerticalAcceleration = driftSeriesSet.accelerationVertical.makeUniform(config.sampleFreq)
+    drift.filteredVerticalAcceleration = filterAcceleration(drift.rawVerticalAcceleration, config.sampleFreq, config.bandPassFilter)
+    drift.elevation = calculateElevationSeries(drift.rawVerticalAcceleration, config.sampleFreq, config.bandPassFilter)
+
+    if config.analysis.type == 'counting':
+        drift = doWaveCounting(drift, config)
+    elif config.analysis.type == 'fft':
+        drift = doFFT(drift, config)
+    elif config.analysis.type == 'welch':
+        drift = doWelch(drift, config)
+    elif config.analysis.type == 'periodogram':
+        drift = doPeriodogram(drift, config)
+    elif config.analysis.type == 'burg':
+        drift = doBurg(drift, config)
+    else:
+        print(f'Unknown analysis type: {config.analysis.type}')
+        exit(1)
+
+    return drift
+
+
 def doWaveCounting(drift: Drift, config: DriftAnalysisConfig):
     drift.waves = getSortedWaves(drift.elevation)
     drift.significantWaveHeight = significantWaveHeightFromWaveList(drift.waves)
@@ -147,3 +178,6 @@ def doBurg(drift: Drift, config: DriftAnalysisConfig):
     
     return drift
 
+
+def getPowerDensitySpectrumFrequencies(N: int, sampleFrequency: float):
+    return [i * sampleFrequency / 2 / N for i in range(N)]
