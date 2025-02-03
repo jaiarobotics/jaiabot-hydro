@@ -674,6 +674,8 @@ export default class JaiaMap {
                 continue;
             }
 
+            const actual_duration = ((task_packet.end_time ?? 0.0) - (task_packet.start_time ?? 0.0)) / 1e6
+
             const diveFeature = createDivePacketFeature(this.map, task_packet);
             if (diveFeature) {
                 diveFeature.set('logFilename', jdv_task_packet.logFilename)
@@ -684,6 +686,7 @@ export default class JaiaMap {
                 <table>
                     <tbody>
                         <tr><th>Bot ID</th><td>${task_packet.bot_id}</td></tr>
+                        <tr><th>Duration</th><td>${actual_duration.toFixed(2)} seconds</td></tr>
                         <tr><th>Depth</th><td>${dive.depth_achieved?.toFixed(2) ?? "?"} m</td></tr>
                         <tr><th>Bottom Dive</th><td>${(dive.bottom_dive ?? false) ? "Yes" : "No"}</td></tr>
                         <tr><th>Dive Rate</th><td>${dive.dive_rate?.toFixed(2) ?? "?"} m/s</td></tr>
@@ -701,7 +704,6 @@ export default class JaiaMap {
             if (driftFeature) {
                 driftFeature.set('logFilename', jdv_task_packet.logFilename)
                 const drift = task_packet.drift;
-                const actual_duration = ((task_packet.end_time ?? 0.0) - (task_packet.start_time ?? 0.0)) / 1e6
 
                 // Add popup
                 const html = `
