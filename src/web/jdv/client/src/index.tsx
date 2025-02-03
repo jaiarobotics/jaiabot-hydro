@@ -35,6 +35,8 @@ import "./index.css";
 import { Feature } from "ol";
 import { DriftPacket, TaskPacket } from "./shared/JAIAProtobuf";
 import { FeatureLike } from "ol/Feature";
+import { JDVPowerDensitySpectrumData } from "./JDVTypes";
+import { PowerDensitySpectrumWindow } from "./PowerDensitySpectrumWindow";
 
 function exceptionCatcher(exception: Error) {
     CustomAlert.presentAlert({
@@ -90,6 +92,7 @@ interface State {
     customAlert?: React.JSX.Element;
 
     shouldShowPDSButton: boolean;
+    powerDensitySpectrumData: JDVPowerDensitySpectrumData | null;
 }
 
 class LogApp extends React.Component {
@@ -122,7 +125,8 @@ class LogApp extends React.Component {
             isBusy: false,
             customAlert: null,
 
-            shouldShowPDSButton: false
+            shouldShowPDSButton: false,
+            powerDensitySpectrumData: null
         };
 
         CustomAlert.setPresenter((props: CustomAlertProps | null) => {
@@ -158,6 +162,13 @@ class LogApp extends React.Component {
                 Power Density Spectrum
             </button>
         ) : null
+
+        var powerDensitySpectrumWindow = null
+        if (this.state.powerDensitySpectrumData != null) {
+            powerDensitySpectrumWindow = <PowerDensitySpectrumWindow powerDensitySpectrumData={this.state.powerDensitySpectrumData} onClose={() => {
+                this.setState({powerDensitySpectrumData: null})
+            }}></PowerDensitySpectrumWindow>
+        }
 
         return (
             <Router>
@@ -267,6 +278,7 @@ class LogApp extends React.Component {
 
                     {log_selector}
                     {busyOverlay}
+                    {powerDensitySpectrumWindow}
 
                     {this.state.customAlert}
                 </div>
@@ -864,11 +876,13 @@ class LogApp extends React.Component {
             return
         }
 
-        LogApi.getPowerDensitySpectrum(logFilename, [taskPacket.start_time, taskPacket.end_time]).then((response) => {
-            console.debug(response)
-        })
+        this.startBusyIndicator()
 
-        console.log(`Add PDS for drift ${taskPacket.start_time} - ${taskPacket.end_time}`)
+        LogApi.getPowerDensitySpectrum(logFilename, [taskPacket.start_time, taskPacket.end_time]).then((powerDensitySpectrumData) => {
+            this.setState({powerDensitySpectrumData})
+        }).finally(() => {
+            this.stopBusyIndicator()
+        })
     }
 }
 

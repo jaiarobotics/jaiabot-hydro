@@ -3,7 +3,7 @@ import { Log } from "./Log";
 import download from "downloadjs";
 import { Plot } from "./Plot";
 import { GeoJSONFeatureCollection } from "ol/format/GeoJSON";
-import { JDVTaskPacket } from "./JDVTypes";
+import { JDVPowerDensitySpectrumData, JDVTaskPacket } from "./JDVTypes";
 
 export type ActiveGoals = {
     [key: string]: {
@@ -50,10 +50,6 @@ interface JDVTaskPacketResponse {
     taskPackets: JDVTaskPacket[]
 }
 
-interface JDVPowerDensitySpectrumResponse {
-    frequency: number[]
-    powerDensity: number[]
-}
 
 
 export class LogApi {
@@ -283,13 +279,13 @@ export class LogApi {
         return downloadURL(url.toString(), "moos.csv", "text/csv");
     }
 
-    static async getPowerDensitySpectrum(log: string, time_range: number[]): Promise<JDVPowerDensitySpectrumResponse> {
+    static async getPowerDensitySpectrum(log: string, time_range: number[]): Promise<JDVPowerDensitySpectrumData> {
         var url = new URL("power-density-spectrum", window.location.origin);
         url.searchParams.append("log", log);
         url.searchParams.append("t_start", String(time_range[0]));
         url.searchParams.append("t_end", String(time_range[1]));
 
-        return this.getJSON<JDVPowerDensitySpectrumResponse>(url.toString())
+        return this.getJSON<JDVPowerDensitySpectrumData>(url.toString())
     }
  
     /**

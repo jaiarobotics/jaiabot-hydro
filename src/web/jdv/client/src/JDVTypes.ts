@@ -5,3 +5,7 @@ export interface JDVTaskPacket {
     taskPacket: LogTaskPacket
 }
 
+export interface JDVPowerDensitySpectrumData {
+    frequency: number[]
+    powerDensity: number[]
+}
