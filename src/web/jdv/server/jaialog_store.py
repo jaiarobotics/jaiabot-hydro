@@ -21,6 +21,8 @@ from dataclasses_json import dataclass_json
 
 # JAIA message types as python dataclasses
 from jaia_messages import *
+from jdv_types import *
+
 
 
 def itemsmatching(file: h5py.File, regular_expression: re.Pattern):
@@ -293,6 +295,14 @@ class JaialogStore:
                     results.append(task_packet)
 
         return results
+
+
+    def getJDVTaskPackets(self, log_filenames: List[str], scheme=1):
+        taskPackets: List[JDVTaskPacket] = []
+        for log_filename in log_filenames:
+            for taskPacket in self.getTaskPacketsFromLogFile(log_filename):
+                taskPackets.append(JDVTaskPacket(log_filename, taskPacket))
+        return taskPackets
 
 
     def getTaskPacketDicts(self, log_filenames: List[str], scheme=1):

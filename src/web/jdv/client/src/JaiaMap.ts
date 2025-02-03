@@ -49,6 +49,8 @@ import { CustomAlert } from "./shared/CustomAlert";
 
 import { getBotPathColor } from "./shared/BotPathColors";
 
+import { JDVTaskPacket } from './JDVTypes';
+
 // Get date description from microsecond timestamp
 function dateStringFromMicros(timestamp_micros?: number): string | null {
     if (timestamp_micros == null) {
@@ -125,7 +127,7 @@ export default class JaiaMap {
     tMin?: number = null;
     tMax?: number = null;
     timestamp?: number = null;
-    task_packets: LogTaskPacket[] = [];
+    jdv_task_packets: JDVTaskPacket[] = [];
     map: Map;
     projection: Projection;
     didSelectFeature: (feature: FeatureLike | null) => void;
@@ -488,8 +490,8 @@ export default class JaiaMap {
         this.command_dict = command_dict;
     }
 
-    updateWithTaskPackets(task_packets: LogTaskPacket[]) {
-        this.task_packets = task_packets;
+    updateWithTaskPackets(task_packets: JDVTaskPacket[]) {
+        this.jdv_task_packets = task_packets;
         this.updateTaskAnnotations();
     }
 
@@ -528,7 +530,7 @@ export default class JaiaMap {
     clear() {
         this.botIdToMapSeries = {};
         this.command_dict = {};
-        this.task_packets = [];
+        this.jdv_task_packets = [];
         this.active_goal_dict = {};
 
         this.updateAll();
@@ -664,7 +666,9 @@ export default class JaiaMap {
         this.divePacketLayer.getSource().clear();
         this.driftPacketLayer.getSource().clear();
 
-        for (const task_packet of this.task_packets ?? []) {
+        for (const jdv_task_packet of this.jdv_task_packets ?? []) {
+            const task_packet = jdv_task_packet.taskPacket
+
             // Discard the lower-precision DCCL task packets
             if (task_packet._scheme_ == 2) {
                 continue;
@@ -672,6 +676,7 @@ export default class JaiaMap {
 
             const diveFeature = createDivePacketFeature(this.map, task_packet);
             if (diveFeature) {
+                diveFeature.set('logFilename', jdv_task_packet.logFilename)
                 const dive = task_packet.dive;
                 // Add popup
                 const html = `
@@ -694,6 +699,7 @@ export default class JaiaMap {
 
             const driftFeature = createDriftPacketFeature(this.map, task_packet);
             if (driftFeature) {
+                driftFeature.set('logFilename', jdv_task_packet.logFilename)
                 const drift = task_packet.drift;
                 // Add popup
                 const html = `
@@ -721,7 +727,7 @@ export default class JaiaMap {
 
     exportKml() {
         const kmz = new KMLDocument();
-        kmz.setTaskPackets(this.task_packets);
+        kmz.setTaskPackets(this.jdv_task_packets.map(jdv_task_packet => jdv_task_packet.taskPacket ));
 
         kmz.getKMZ()
             .then((kml) => {

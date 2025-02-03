@@ -16,6 +16,8 @@ import pyjaia.drift_interpolation
 
 
 from pathlib import *
+from jdv_types import *
+import dataclasses
 
 
 # Parsing the arguments
@@ -116,9 +118,10 @@ def getTaskPackets():
     if log_names is None:
         return JSONErrorResponse("Missing log filename")
 
-    results: Dict[str, List[Dict]] = {log_name: jaialogStore.getTaskPacketsFromLogFile(log_name) for log_name in log_names}
+    jdvTaskPackets = jaialogStore.getJDVTaskPackets(log_names)
+    response = JSONResponse(dataclasses.asdict(JDVTaskPacketResponse(jdvTaskPackets)))
 
-    return JSONResponse(results)
+    return response
 
 
 @app.route('/moos', methods=['GET'])
@@ -165,16 +168,14 @@ def getInterpolatedDrifts():
 @app.route('/power-density-spectrum', methods=['GET'])
 def getPowerDensitySpectrum():
     '''Get the power density spectrum of a drift'''
-    log_names = parseFilenames(request.args.get('log'))
-    if log_names is None:
+    log_name = request.args.get('log')
+    if log_name is None:
         return JSONErrorResponse("Missing log filename")
-    if len(log_names) != 1:
-        return JSONErrorResponse(f"Exactly one log filename required, you provided: {log_names}")
     
     start_time = int(request.args.get('t_start'))
     end_time = int(request.args.get('t_end'))
 
-    log = jaialogStore.openLog(log_names[0])
+    log = jaialogStore.openLog(log_name)
 
     driftAnalysisConfig = DriftAnalysisConfig.fromDict({
         'analysis': {'segmentLength': 256, 'type': 'welch'},
@@ -184,7 +185,7 @@ def getPowerDensitySpectrum():
                             'minZeroPeriod': 0.25,
                             'type': 'cos^2'},
         'glitchy': False,
-        'sampleFreq': 10.0})
+        'sampleFreq': 4.0})
 
     driftAnalysis = doDriftAnalysisFromFile(log, [start_time, end_time], driftAnalysisConfig)
     response = {

@@ -362,8 +362,8 @@ class LogApp extends React.Component {
 
                 // Get the task packets
                 const getTaskPacketsJob = LogApi.getTaskPackets(this.state.chosenLogs).then(
-                    (task_packets) => {
-                        this.map.updateWithTaskPackets(task_packets);
+                    (response) => {
+                        this.map.updateWithTaskPackets(response.taskPackets);
                     },
                 );
 
@@ -858,8 +858,14 @@ class LogApp extends React.Component {
             return
         }
 
-        LogApi.getPowerDensitySpectrum(this.state.chosenLogs, [taskPacket.start_time, taskPacket.end_time]).then((plot: Plot) => {
-            this.setState({plots: this.state.plots.concat(plot)})
+        const logFilename = selectedFeature.get('logFilename')
+        if (logFilename == null) {
+            console.warn(`Task Packet has no "logFilename" property.`)
+            return
+        }
+
+        LogApi.getPowerDensitySpectrum(logFilename, [taskPacket.start_time, taskPacket.end_time]).then((response) => {
+            console.debug(response)
         })
 
         console.log(`Add PDS for drift ${taskPacket.start_time} - ${taskPacket.end_time}`)

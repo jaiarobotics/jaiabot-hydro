@@ -107,12 +107,7 @@ def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
 
 def doDriftAnalysisFromFile(h5File: h5py.File, timeRange: List[int], config: DriftAnalysisConfig):
     seriesSet = SeriesSet.loadFromH5File(h5File)
-    seriesSetsFilteredByTime = seriesSet.split(lambda i, seriesSet: seriesSet.accelerationVertical.utime[i] in range(timeRange[0], timeRange[1]))
-
-    if len(seriesSetsFilteredByTime) != 1:
-        return None
-
-    driftSeriesSet = seriesSetsFilteredByTime[0]
+    driftSeriesSet = seriesSet.slice(TimeRange(start=timeRange[0], end=timeRange[1]))
 
     drift = Drift()
     drift.rawVerticalAcceleration = driftSeriesSet.accelerationVertical.makeUniform(config.sampleFreq)
