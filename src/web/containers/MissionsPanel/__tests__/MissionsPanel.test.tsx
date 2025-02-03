@@ -22,7 +22,7 @@ const botStatusMock2: PortalBotStatus = {
 bots.addBot(botStatusMock1);
 bots.addBot(botStatusMock2);
 
-test("Exercising top level buttons in Missions panel", async () => {
+beforeEach(() => {
     render(
         <GlobalContextProvider>
             <JaiaSystemContextProvider>
@@ -31,9 +31,13 @@ test("Exercising top level buttons in Missions panel", async () => {
         </GlobalContextProvider>,
     );
 
-    const addMissionButton = screen.getByRole("button", { name: "add-mission" });
+    // Reset Missions panel
     const deleteAllMissionsButton = screen.getByRole("button", { name: "delete-all-missions" });
-    const autoAssignButton = screen.getByRole("button", { name: "auto-assign-bots" });
+    userEvent.click(deleteAllMissionsButton);
+});
+
+test("Adding two missions to Missions panel", async () => {
+    const addMissionButton = screen.getByRole("button", { name: "add-mission" });
     const missionsList = screen.getByTestId("missions-list");
 
     // Add first mission
@@ -53,30 +57,41 @@ test("Exercising top level buttons in Missions panel", async () => {
     expect(mission2AccordionChildren[1].textContent).toBe("Unassigned");
     expect(Array.from(missionsList.children).length).toBe(2);
     expect(missions.getMission(2).getMissionID()).toBe(2);
+});
 
-    // Auto assign Bots
-    await userEvent.click(autoAssignButton);
-    expect(mission1AccordionChildren[0].textContent).toBe("Mission-1");
-    expect(mission1AccordionChildren[1].textContent).toBe("Bot-1");
-    expect(mission2AccordionChildren[0].textContent).toBe("Mission-2");
-    expect(mission2AccordionChildren[1].textContent).toBe("Bot-2");
+test("Delete all missions", async () => {
+    const addMissionButton = screen.getByRole("button", { name: "add-mission" });
+    const deleteAllMissionsButton = screen.getByRole("button", { name: "delete-all-missions" });
+    const missionsList = screen.getByTestId("missions-list");
 
-    // Delete all missions
+    await userEvent.click(addMissionButton);
+    await userEvent.click(addMissionButton);
     await userEvent.click(deleteAllMissionsButton);
     expect(Array.from(missionsList.children).length).toBe(0);
     expect(missions.getMission(1)).toBeUndefined();
     expect(missions.getMission(2)).toBeUndefined();
 });
 
-test("Opening and closing a mission accordion", async () => {
-    render(
-        <GlobalContextProvider>
-            <JaiaSystemContextProvider>
-                <MissionsPanel />
-            </JaiaSystemContextProvider>
-        </GlobalContextProvider>,
-    );
+test("Auto assign two Bots to two missions", async () => {
+    const addMissionButton = screen.getByRole("button", { name: "add-mission" });
 
+    await userEvent.click(addMissionButton);
+    await userEvent.click(addMissionButton);
+    const autoAssignButton = screen.getByRole("button", { name: "auto-assign-bots" });
+    await userEvent.click(autoAssignButton);
+
+    const mission1Accordion = screen.getByText("Mission-1").parentElement;
+    const mission1AccordionChildren = Array.from(mission1Accordion.children);
+    const mission2Accordion = screen.getByText("Mission-2").parentElement;
+    const mission2AccordionChildren = Array.from(mission2Accordion.children);
+
+    expect(mission1AccordionChildren[0].textContent).toBe("Mission-1");
+    expect(mission1AccordionChildren[1].textContent).toBe("Bot-1");
+    expect(mission2AccordionChildren[0].textContent).toBe("Mission-2");
+    expect(mission2AccordionChildren[1].textContent).toBe("Bot-2");
+});
+
+test("Opening and closing a mission accordion", async () => {
     const addMissionButton = screen.getByRole("button", { name: "add-mission" });
     await userEvent.click(addMissionButton);
     const mission1Accordion = screen.getByText("Mission-1").parentElement;
@@ -88,14 +103,6 @@ test("Opening and closing a mission accordion", async () => {
 });
 
 test("Clicking delete mission button inside mission accordion", async () => {
-    render(
-        <GlobalContextProvider>
-            <JaiaSystemContextProvider>
-                <MissionsPanel />
-            </JaiaSystemContextProvider>
-        </GlobalContextProvider>,
-    );
-
     const addMissionButton = screen.getByRole("button", { name: "add-mission" });
     await userEvent.click(addMissionButton);
     const mission1Accordion = screen.getByText("Mission-1").parentElement;
@@ -107,18 +114,6 @@ test("Clicking delete mission button inside mission accordion", async () => {
 });
 
 test("Assigning and unassigning a Bot to a mission", async () => {
-    render(
-        <GlobalContextProvider>
-            <JaiaSystemContextProvider>
-                <MissionsPanel />
-            </JaiaSystemContextProvider>
-        </GlobalContextProvider>,
-    );
-
-    // Reset Missions panel
-    const deleteAllMissionsButton = screen.getByRole("button", { name: "delete-all-missions" });
-    userEvent.click(deleteAllMissionsButton);
-
     // Add mission
     const addMissionButton = screen.getByRole("button", { name: "add-mission" });
     await userEvent.click(addMissionButton);
@@ -149,18 +144,6 @@ test("Assigning and unassigning a Bot to a mission", async () => {
 });
 
 test("Auto-assigning, deleting, auto-assigning", async () => {
-    render(
-        <GlobalContextProvider>
-            <JaiaSystemContextProvider>
-                <MissionsPanel />
-            </JaiaSystemContextProvider>
-        </GlobalContextProvider>,
-    );
-
-    // Reset Missions panel
-    const deleteAllMissionsButton = screen.getByRole("button", { name: "delete-all-missions" });
-    userEvent.click(deleteAllMissionsButton);
-
     // Add mission
     const addMissionButton = screen.getByRole("button", { name: "add-mission" });
     await userEvent.click(addMissionButton);
