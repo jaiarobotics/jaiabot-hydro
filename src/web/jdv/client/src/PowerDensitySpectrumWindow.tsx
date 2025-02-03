@@ -13,9 +13,22 @@ interface Props {
 
 export function PowerDensitySpectrumWindow(props: Props) {
     useEffect(() => {
+        const text: string[] = []
+
+        for (var index = 0; index < props.powerDensitySpectrumData.frequency.length; index++) {
+            const frequency = props.powerDensitySpectrumData.frequency[index]
+            const period = 1.0 / frequency
+            const powerDensity = props.powerDensitySpectrumData.powerDensity[index]
+            const pointText = `Frequency: ${frequency.toFixed(4)} Hz<br />` +
+                `Period: ${period.toFixed(2)} seconds<br />` +
+                `Power density: ${powerDensity.toFixed(3)} m^2/Hz`
+            text.push(pointText)
+        }
+
         const trace = {
             x: props.powerDensitySpectrumData.frequency,
             y: props.powerDensitySpectrumData.powerDensity,
+            text: text
         }
 
         const layout = {
