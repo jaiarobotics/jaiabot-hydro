@@ -1,16 +1,15 @@
 // Jaia Imports
 import { CommandInfo } from "../../types/commands";
-import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
 import { MissionState } from "../../utils/protobuf-types";
 import { MissionStatus } from "../../types/jaia-system-types";
+import { MissionInterface } from "../CommandControl/CommandControl";
+import { convertMicrosecondsToSeconds } from "../../shared/Utilities";
+import Hub from "../../data/hubs/hub";
+import GPS from "../../data/sensors/gps";
 import Mission from "../../data/missions/mission";
 import Waypoint from "../../data/waypoints/waypoint";
-import Bot from "../../data/bots/bot";
-import GPS from "../../data/sensors/gps";
-import Hub from "../../data/hubs/hub";
 
-// Utility Imports
-import * as turf from "@turf/turf";
+import { point, rhumbDistance, Units } from "@turf/turf";
 
 interface DisableInfo {
     isDisabled: boolean;
@@ -18,62 +17,57 @@ interface DisableInfo {
 }
 
 /**
- * Provides a bots status age in seconds
+ * Provides a class name that corresponds to styles illustrating comms health
  *
- * @param {Bot} bot Bot object
- * @returns {number} status age in seconds
+ * @param {number} portalStatusAge Time since last communication between Bot and Hub
+ * @returns {string} Class name that dictates the style of the status age
  */
-export function getStatusAgeSeconds(bot: Bot) {
-    return Math.max(0.0, bot.getStatusAge() / 1e6);
-}
+export function getStatusAgeClassName(portalStatusAge: number) {
+    const healthFailedTimeout = 30;
+    const healthDegradedTimeout = 10;
+    const statusAgeSeconds = convertMicrosecondsToSeconds(portalStatusAge);
 
-/**
- * Provides class name for status age
- *
- * @param {Bot} bot Bot object
- * @returns {string} status age class name
- */
-export function getStatusAgeClass(bot: Bot) {
-    const statusAge = getStatusAgeSeconds(bot);
-    let statusAgeClassName: string;
-
-    if (statusAge > 30) {
-        statusAgeClassName = "healthFailed";
-    } else if (statusAge > 10) {
-        statusAgeClassName = "healthDegraded";
+    if (statusAgeSeconds > healthFailedTimeout) {
+        return "healthFailed";
     }
-    return statusAgeClassName;
-}
 
-/**
- * Provides distance from hub
- *
- * @param {Bot} bot Bot object
- * @param {Hub} hub Hub object
- * @returns {string} Distance between bot and hub in meters
- */
-export function getDistToHub(bot: Bot, hub: Hub) {
-    const botGPS: GPS = bot.getBotSensors().getGPS();
-    const hubGPS: GPS = hub.getHubSensors().getGPS();
-
-    let distToHub = "N/A";
-    if (botGPS && hubGPS) {
-        const botLocation = turf.point([botGPS.getLat(), botGPS.getLon()]);
-        const hubLocation = turf.point([hubGPS.getLat(), hubGPS.getLon()]);
-        const options = { units: "meters" as turf.Units };
-        distToHub = turf.rhumbDistance(botLocation, hubLocation, options).toFixed(1);
+    if (statusAgeSeconds > healthDegradedTimeout) {
+        return "healthDegraded";
     }
-    return distToHub;
+
+    return "";
 }
 
 /**
- * Provides helper text for creating waypoints
+ * Calculates the distance between a Bot and Hub
  *
- * @param {Mission} mission object
- * @returns {string} Message describing how to create waypoints
+ * @param {GPS} botGPS Contains the lat/lon data for distance calculation
+ * @param {GPS} hubGPS Contains the lat/lon data for distance calculation
+ * @returns {string} Distance between Bot and Hub in meters
+ */
+export function getDistanceToHub(botGPS: GPS, hubGPS: GPS) {
+    if (!(botGPS.getLat() && botGPS.getLon())) {
+        return "N/A";
+    }
+
+    if (!(hubGPS.getLat() && hubGPS.getLon())) {
+        return "N/A";
+    }
+
+    const botLocation = point([botGPS.getLat(), botGPS.getLon()]);
+    const hubLocation = point([hubGPS.getLat(), hubGPS.getLon()]);
+    const options = { units: "meters" as Units };
+    return rhumbDistance(botLocation, hubLocation, options).toFixed(1);
+}
+
+/**
+ * Provides helper text to operators for creating waypoints
  *
- * @notes Edit mode toggle and related items not functional
- *         until more functionality is add to the mission management
+ * @param {Mission} mission Determines what message to display based on properties
+ * @returns {string} Helper text for adding waypoints
+ *
+ * @notes Edit mode toggle and related items will not be functional
+ * until mission management refactor is complete
  */
 export function getWaypontHelperText(mission: Mission) {
     if (!mission || mission.getCanEdit()) {
@@ -83,12 +77,11 @@ export function getWaypontHelperText(mission: Mission) {
 }
 
 /**
- * Provides off load percentage
+ * Provides data offload percentage
  *
- * @param {number} botID Id of bot
- * @param {Hub} hub Hub object
- *
- * @returns {string} Offload progress in percent
+ * @param {number} botID Used to grab the correct offload data from the Hub
+ * @param {Hub} hub Contains the bot offload progress
+ * @returns {string} Data offload percentage
  */
 export function getBotOffloadPercent(botID: number, hub: Hub) {
     let botOffloadPercentage = "";
@@ -96,56 +89,55 @@ export function getBotOffloadPercent(botID: number, hub: Hub) {
     if (botID === hub.getBotOffload()?.bot_id) {
         botOffloadPercentage = " " + hub.getBotOffload().data_offload_percentage + "%";
     }
+
     return botOffloadPercentage;
 }
 
 /**
- * Provides repeat progress message
+ * Formats repeat progress text
  *
- * @param {Mission} mission Mission object
- * @param {MissionStatus} missionStatus Mission Status object
- *
- * @returns {string} Repeat progress
+ * @param {number} repeats Total number of times a mission will play itself back
+ * @param {MissionStatus} missionStatus Contains the in progress data of the mission from the Bot
+ * @returns {string} "N/A" if repeats not set or "x of y" if mission includes repeats
  */
-export function getRepeatProgress(mission: Mission, missionStatus: MissionStatus) {
-    let repeatProgressString = "N/A";
-    if (missionStatus?.repeat_index != null) {
-        repeatProgressString = `${missionStatus.repeat_index + 1}`;
-        repeatProgressString = repeatProgressString + ` of ${mission?.getRepeats()}`;
+export function getRepeatProgress(repeats: number, missionStatus: MissionStatus) {
+    let repeatProgress = "N/A";
+
+    if (missionStatus?.repeatIndex) {
+        repeatProgress = `${missionStatus.repeatIndex + 1} of ${repeats}`;
     }
-    return repeatProgressString;
+
+    return repeatProgress;
 }
 
 /**
- * Checks if bot is logging
+ * Checks if Bot is logging
  *
- * @param {MissionState} missionState Mission State object
- *
- * @returns {boolean} The bot logging status
+ * @param {MissionState} missionState Contains the state of the Bot
+ * @returns {boolean} Whether or not the Bot is logging
  */
 export function isBotLogging(missionState: MissionState) {
-    let botLogging = true;
     if (
         missionState == "PRE_DEPLOYMENT__IDLE" ||
         missionState == "PRE_DEPLOYMENT__FAILED" ||
         missionState?.startsWith("POST_DEPLOYMENT__")
     ) {
-        botLogging = false;
+        return false;
     }
-    return botLogging;
+
+    return true;
 }
 
 /**
- * Provides Active wapoint name and distance
- * @param {MissionStatus} missionStatus Mission Status object
+ * Provides active wapoint number and the Bot's distance to that point
  *
- * @returns {string , string} Tuple containg the active goal and distance to it
+ * @param {MissionStatus} missionStatus Contains the active waypoint and Bot's distance to that waypoint
+ * @returns {string, string} Tuple containg the active waypoint and distance to it
  *
  * @notes When Mission Status is reworked to remove Runs from the vocabulary
- *        We should add logic to the new Mission Status to make this simpler
- *        alleviating need to return a tuple
+ * we should add logic to the new Mission Status to make this simpler
+ * alleviating need to return a tuple
  */
-
 export function getActiveWptStrings(missionStatus: MissionStatus) {
     let activeWptString = missionStatus.activeGoal ?? "N/A";
     let distToWpt = missionStatus.distanceToActiveGoal ?? "N/A";
@@ -161,16 +153,9 @@ export function getActiveWptStrings(missionStatus: MissionStatus) {
 
     return { activeWptString, distToWpt };
 }
+
 /**
- * Creates a run command
- *
- * @param {number} botId Bot ID
- * @param {MissionInterface} Mission Mission Interface object
- *
- * @returns {Command} Command to run the mission
- *
- * @notes This is based on RunInterface which is likely to change
- *        and this will be reworked
+ * @notes Refactor comming after new mission management implementation
  */
 export function runMission(botId: number, mission: MissionInterface) {
     let runs = mission.runs;
@@ -188,13 +173,7 @@ export function runMission(botId: number, mission: MissionInterface) {
 }
 
 /**
- * Checks if a details button should be disabled
- *
- * @param bot
- * @returns boolean
- *
- * @notes Look for ways to simplify this when working
- *        on the Notifications processing
+ * @notes Refactor comming with notification management story
  */
 export function disableButton(
     command: CommandInfo,
@@ -257,12 +236,7 @@ export function disableButton(
 }
 
 /**
- * Checks if clear run button should be disabled
- *
- * @param bot
- * @returns boolean
- *
- * @notes Runs are no longer defined in JCC data model, this will need rework
+ * @notes Refactor comming with notification management story
  */
 export function disableClearRunButton(mission: Mission) {
     let disableInfo: DisableInfo;
@@ -281,17 +255,7 @@ export function disableClearRunButton(mission: Mission) {
 }
 
 /**
- * Checks if play button should be disabled
- *
- * @param {number} botID ID of selected bot
- * @param {Mission} mission Current mission
- * @param {CommandInfo} command Command and information associated with it
- * @param {MissionState} missionState State of current mission
- * @param {number[]} downloadQueue Download Queue for selected bot
- *
- * @returns boolean
- *
- * @notes Runs are no longer defined in JCC data model, this will need rework
+ * @notes Refactor comming with notification management story
  */
 export function disablePlayButton(
     botID: number,
@@ -332,16 +296,13 @@ export function disablePlayButton(
     return disableInfo;
 }
 /**
- * Toggles edit mode of a mission
- * @param {Mission} mission Mission object
- * @returns {void}
- *
- * @notes function will not work until Mission Management is refactored
- *         missions are not being added to bots in the data model yet
+ * @notes Refactor comming with new mission management implementation
  */
 export function toggleEditMode(mission: Mission) {
     if (!mission) return;
+
     const canEdit = mission.getCanEdit();
+
     if (canEdit) {
         // if toggling off reset all waypoint move status
         const waypoints: Waypoint[] = mission.getWaypoints();

@@ -4,5 +4,5 @@ export interface MissionStatus {
     missionState?: MissionState;
     activeGoal?: number;
     distanceToActiveGoal?: number;
-    repeat_index?: number;
+    repeatIndex?: number;
 }

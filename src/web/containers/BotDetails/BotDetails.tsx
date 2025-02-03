@@ -3,9 +3,8 @@ import React, { useContext, useState, useEffect } from "react";
 // Jaia Imports
 import { CommandInfo, botCommands } from "../../types/commands";
 import {
-    getStatusAgeSeconds,
-    getStatusAgeClass,
-    getDistToHub,
+    getDistanceToHub,
+    getStatusAgeClassName,
     getWaypontHelperText,
     getBotOffloadPercent,
     getRepeatProgress,
@@ -35,6 +34,7 @@ import {
     formatLongitude,
     formatAttitudeAngle,
     addDropdownListener,
+    convertMicrosecondsToSeconds,
 } from "../../shared/Utilities";
 import {
     GlobalContext,
@@ -748,9 +748,14 @@ export function BotDetails(props: BotDetailsProps) {
                             <AccordionDetails>
                                 <table>
                                     <tbody>
-                                        <tr className={getStatusAgeClass(bot)}>
+                                        <tr className={getStatusAgeClassName(bot.getStatusAge())}>
                                             <td>Status Age</td>
-                                            <td>{getStatusAgeSeconds(bot).toFixed(0)} s</td>
+                                            <td>
+                                                {convertMicrosecondsToSeconds(
+                                                    bot.getStatusAge(),
+                                                ).toFixed(0)}{" "}
+                                                s
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td>Mission State</td>
@@ -771,7 +776,10 @@ export function BotDetails(props: BotDetailsProps) {
                                         <tr>
                                             <td>Repeat Number</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {getRepeatProgress(mission, missionStatus)}
+                                                {getRepeatProgress(
+                                                    mission?.getRepeats(),
+                                                    missionStatus,
+                                                )}
                                             </td>
                                         </tr>
                                         <tr>
@@ -788,7 +796,13 @@ export function BotDetails(props: BotDetailsProps) {
                                         </tr>
                                         <tr>
                                             <td>Distance from Hub</td>
-                                            <td>{getDistToHub(bot, hub)} m</td>
+                                            <td>
+                                                {getDistanceToHub(
+                                                    bot.getBotSensors().getGPS(),
+                                                    hub.getHubSensors().getGPS(),
+                                                )}{" "}
+                                                m
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td>Wi-Fi Link Quality</td>

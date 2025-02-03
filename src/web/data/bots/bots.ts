@@ -88,7 +88,7 @@ class Bots {
         }
 
         if (botStatus.repeat_index) {
-            missionStatus.repeat_index = botStatus.repeat_index;
+            missionStatus.repeatIndex = botStatus.repeat_index;
         }
 
         bot.setMissionStatus(missionStatus);
