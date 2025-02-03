@@ -153,7 +153,7 @@ class LogApp extends React.Component {
             <button id="pdsButton"
                 className="mapButton"
                 onClick={() => {
-                    this.addPowerDensitySpectrum();
+                    this.openPowerDensitySpectrum();
                 }}>
                 Power Density Spectrum
             </button>
@@ -849,7 +849,7 @@ class LogApp extends React.Component {
         PlotProfiles.save_profile(plotSetName, pathNames);
     }
 
-    addPowerDensitySpectrum() {
+    openPowerDensitySpectrum() {
         const selectedFeature = this.map.selectedFeature
         const taskPacket: TaskPacket | null = selectedFeature?.get('taskPacket')
         const drift = taskPacket?.drift

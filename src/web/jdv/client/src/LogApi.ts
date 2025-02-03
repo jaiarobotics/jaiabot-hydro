@@ -215,7 +215,7 @@ export class LogApi {
         var url = new URL("task-packet", window.location.origin);
         url.searchParams.append("log", logs.join(","));
 
-        return (await this.getJSON(url.toString())) as LogTaskPacket[];
+        return (await this.getJSON(url.toString())) as {[key: string]: LogTaskPacket};
     }
 
     /**

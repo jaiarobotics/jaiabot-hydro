@@ -116,7 +116,9 @@ def getTaskPackets():
     if log_names is None:
         return JSONErrorResponse("Missing log filename")
 
-    return JSONResponse(jaialogStore.getTaskPacketDicts(log_names))
+    results: Dict[str, List[Dict]] = {log_name: jaialogStore.getTaskPacketsFromLogFile(log_name) for log_name in log_names}
+
+    return JSONResponse(results)
 
 
 @app.route('/moos', methods=['GET'])
