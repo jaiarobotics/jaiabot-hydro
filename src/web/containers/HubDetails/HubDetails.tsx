@@ -72,7 +72,7 @@ export function HubDetails() {
     }
 
     /**
-     * Dispatches an action to close the HubDetails panel
+     * Dispatches an action to close the Hub details panel
      *
      * @returns {void}
      */

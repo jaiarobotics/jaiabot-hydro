@@ -175,7 +175,7 @@ function handleExitedRCMode(mutableState: GlobalContextType) {
 }
 
 /**
- * Closes the HubDetails or BotDetails panel
+ * Closes the Bot or Hub details panel
  *
  * @param {GlobalContextType} mutableState State object ref for making modifications
  * @returns {GlobalContextType} Updated mutable state object
@@ -186,23 +186,23 @@ function handleClosedDetails(mutableState: GlobalContextType) {
 }
 
 /**
- * Handles click events for the hub and bot icons on the map and in bots drawer
+ * Handles click events for the Bot and Hub icons on the map and in the NodeList component
  *
  * @param {GlobalContextType} mutableState State object ref for making modifications
- * @param {NodeType} type What type of elemetnt was clicked (HUB or BOT)
+ * @param {NodeType} type Type of node clicked
  * @param {number} id ID of Bot or Hub clicked
  * @returns {GlobalContextType} Updated mutable state object
  */
 function handleClickedNode(mutableState: GlobalContextType, type: NodeType, id: number) {
     if (isNaN(id)) throw new Error("Invalid hub or bot id");
 
-    // Clicked currently selected element
+    // Clicked currently selected node
     if (mutableState.selectedNode.type == type && mutableState.selectedNode.id == id) {
         // Close details and deselect node
         mutableState.visibleDetails = NodeType.NONE;
         mutableState.selectedNode.type = NodeType.NONE;
     } else {
-        // Clicked non-selected element, select and show details
+        // Clicked non-selected node, select and show details
         mutableState.selectedNode = { type: type, id: id };
         mutableState.visibleDetails = type;
     }
@@ -210,10 +210,10 @@ function handleClickedNode(mutableState: GlobalContextType, type: NodeType, id: 
 }
 
 /**
- * Opens and closes the HubDetails accordion tabs
+ * Opens and closes the Hub details accordions
  *
  * @param {GlobalContextType} mutableState State object ref for making modifications
- * @param {string} accordionName Which accordion to open or close
+ * @param {string} accordionName Accordion to open or close
  * @returns {GlobalContextType} Updated mutable state object
  */
 function handleClickedHubAccordion(
@@ -238,7 +238,7 @@ function handleClickedHubAccordion(
 }
 
 /**
- * Opens and closes the BotDetails accordion tabs
+ * Opens and closes the Bot details accordions
  *
  * @param {GlobalContextType} mutableState State object ref for making modifications
  * @param {string} accordionName Which accordion to open or close
@@ -275,6 +275,7 @@ function handleClickedBotAccordion(
             break;
         case BotAccordionNames.SENSOR:
             botAccordionStates.sensor = !botAccordionStates.sensor;
+            break;
     }
     return mutableState;
 }
