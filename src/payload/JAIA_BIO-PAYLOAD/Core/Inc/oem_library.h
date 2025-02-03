@@ -20,7 +20,7 @@
 #define OEM_REG_LED                         0x05
 #define OEM_REG_ACTIVATE                    0x06    // Send command 0x01 to activate, 0x00 to hibernate.
 
-    /* EC Chip registers */
+    /* EC Chip registers */ 
 #define EC_OEM_DEV_TYPE                     0x04    // EC device type
 #define EC_OEM_REG_EC_MSB					0x18
 #define EC_OEM_REG_EC_HIGH_BYTE				0x19
@@ -83,6 +83,9 @@ HAL_StatusTypeDef OEM_ReadAllChips(OEM_CHIP *ec, OEM_CHIP *ph, OEM_CHIP *dOxy); 
 HAL_StatusTypeDef OEM_ReadData(OEM_CHIP *dev);                                  // Universal read function for OEM chips
 HAL_StatusTypeDef OEM_GetDeviceType(OEM_CHIP *dev);
 
+
+/* CALIBRATION */
+//HAL_StatusTypeDef OEM_Set
 
 /* LOW-LEVEL FUNCTIONS */
 HAL_StatusTypeDef OEM_ReadRegister(OEM_CHIP *dev, uint8_t reg, uint8_t *data);

@@ -27,7 +27,7 @@
 	/* DEVICE TYPE REGISTER */
 #define EC_OEM_REG_DEV_TYPE					0x00
 #define EC_OEM_DEV_TYPE 					0x04
-
+ 
 	/* EC REGISTERS */
 #define EC_OEM_REG_LED						0x05
 #define EC_OEM_REG_ACTIVE					0x06	// send 0x01 to activate, 0x00 to hibernate

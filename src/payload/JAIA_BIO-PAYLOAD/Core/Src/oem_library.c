@@ -27,7 +27,10 @@ HAL_StatusTypeDef OEM_Activate(OEM_CHIP *dev) {
     return OEM_WriteRegister(dev, OEM_REG_ACTIVATE, &activate_command);
 }
 
-
+HAL_StatusTypeDef OEM_Hiobernate(OEM_CHIP *dev) {
+    uint8_t activate_command = 0x00;
+    return OEM_WriteRegister(dev, OEM_REG_ACTIVATE, &activate_command);
+}
 /* COLLECT DATA */
 HAL_StatusTypeDef OEM_GetDeviceType(OEM_CHIP *dev) {
     return OEM_ReadRegister(dev, OEM_REG_DEV_TYPE, &dev->devType);
@@ -44,7 +47,7 @@ HAL_StatusTypeDef OEM_ReadData(OEM_CHIP *dev) {
             divFactor = 1000.0f;    // PH sensor datasheet calls for division of register value by 1000 while DO and EC call for 100.
             break;
         case DO:
-            status = OEM_ReadRegisters(dev, DO_OEM_REG_DO_MSB, &regData[0], 4);
+            status = OEM_ReadRegisters(dev, DO_OEM_REG_DO_MSB, &regData[0], 4); 
             divFactor = 100.0f;
             break; 
         case EC:

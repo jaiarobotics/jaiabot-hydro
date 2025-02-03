@@ -67,7 +67,7 @@ OEM_CHIP ec;
 OEM_CHIP dOxy;  // do is a reserved keyword in C, so dissolved oxygen has to be something else
 OEM_CHIP ph;
 
-char tx_buff[32] = "Test!\r\n\ ";
+char tx_buff[32] = "Test!\r\n";
 uint8_t count = 1;
 
 /* USER CODE END PV */
@@ -126,10 +126,10 @@ void I2C_Scan(void) {
 // Set RAM to our flag (random number) and reset the MCU
 void RebootIntoDFU()
 {
-	*((uint32_t *)0x20000000) = 0xFFFFFFFF;
-	NVIC_SystemReset();
+	//*((uint32_t *)0x20000000) = 0xFFFFFFFF;
+	//NVIC_SystemReset();
 
-	/*
+	
 	HAL_FLASH_Unlock();
 
 	// Flash Erase Configuration
@@ -185,9 +185,33 @@ void RebootIntoDFU()
 
 	// Jump to app firmware
 	BOOTVTAB->Reset_Handler();
-	*/
-
 }
+
+
+void startAtlasChips() {
+  
+  // Turn on Atlas Sensors
+  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET); // pH
+  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_2,GPIO_PIN_SET); // DO
+  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET); // EC  
+
+  // Look for powered-up I2C devices on i2c bus 2
+  I2C_Scan();
+
+  // Assign the I2C address of each Atlas Scientific chip to its respective object
+  ec.devAddr = EC_OEM_I2C_ADDR;
+  ph.devAddr = PH_OEM_I2C_ADDR;
+  dOxy.devAddr = DO_OEM_I2C_ADDR;
+
+  // Activate our Atlas Scientific chips
+  HAL_StatusTypeDef ec_init_status = OEM_Init(&ec, &hi2c2);
+  HAL_StatusTypeDef do_init_status = OEM_Init(&dOxy, &hi2c2);
+  HAL_StatusTypeDef ph_init_status = OEM_Init(&ph, &hi2c2);
+
+  sprintf(tx_buff, "EC Init Status: 0x%02X\r\nDO Init Status: 0x%02X\r\npH Init Status: 0x%02X\r\n\r\n", ec_init_status, do_init_status, ph_init_status);
+  HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
+}
+
 
 /* USER CODE END 0 */
 
@@ -232,32 +256,13 @@ int main(void)
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
 
-  //RebootIntoDFU();
-
-  // Turn on Atlas Sensors
-  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET); // pH
-  //HAL_GPIO_WritePin(GPIOB,GPIO_PIN_2,GPIO_PIN_SET); // DO
-  //HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET); // EC
-
-  // Look for powered-up I2C devices on i2c bus 2
-  I2C_Scan();
-
-  // Assign the I2C address of each Atlas Scientific chip to its respective object
-  ec.devAddr = EC_OEM_I2C_ADDR;
-  ph.devAddr = PH_OEM_I2C_ADDR;
-  dOxy.devAddr = DO_OEM_I2C_ADDR;
-
-  // Activate our Atlas Scientific chips
-  HAL_StatusTypeDef ec_init_status = OEM_Init(&ec, &hi2c2);
-  HAL_StatusTypeDef do_init_status = OEM_Init(&dOxy, &hi2c2);
-  HAL_StatusTypeDef ph_init_status = OEM_Init(&ph, &hi2c2);
-
-  sprintf(tx_buff, "EC_Init Status: 0x%02X\r\n", ec_init_status);
-  HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
+  RebootIntoDFU();
+  //HAL_NVIC_SystemReset();
+  startAtlasChips();
 
   /* USER CODE END 2 */
 
-  /* Infinite loop */
+  /* Infinite loop */ 
   /* USER CODE BEGIN WHILE */
 
   while (1)
@@ -266,14 +271,14 @@ int main(void)
 
     /* LEDs */
     HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_10);
-    //HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_11);
+    HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_11);
     HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_12);
 	  
     HAL_StatusTypeDef phReadStatus = OEM_ReadData(&ph);
     HAL_StatusTypeDef doReadStatus = OEM_ReadData(&dOxy);
     HAL_StatusTypeDef ecReadStatus = OEM_ReadData(&ec);
 
-    sprintf(tx_buff, "PH: 0x%02X, 0x%02X\r\n", phReadStatus, ph.reading);
+    sprintf(tx_buff, "PH: 0x%02X, %d\r\nDO: 0x%02X, %d\r\nEC: 0x%02X, %d\r\n\r\n", phReadStatus, ph.reading, doReadStatus, dOxy.reading, ecReadStatus, ec.reading);
     HAL_UART_Transmit(&huart2, tx_buff, strlen(tx_buff), HAL_MAX_DELAY);
     /* USER CODE END WHILE */
 

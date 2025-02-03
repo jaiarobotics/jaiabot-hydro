@@ -31,7 +31,7 @@ HAL_StatusTypeDef EC_OEM_Initialize( EC_OEM *dev, I2C_HandleTypeDef *i2cHandle )
 	errNum += ( status != HAL_OK );
 
 	if ( regData != EC_OEM_DEV_TYPE ) {
-		return HAL_ERROR; 
+		return HAL_ERROR;  
 	} else if ( status != HAL_OK ) {
 		return status;
 	}
