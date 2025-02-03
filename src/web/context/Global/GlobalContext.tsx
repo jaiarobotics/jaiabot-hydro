@@ -11,6 +11,7 @@ export interface GlobalContextType {
     selectedPodElement: SelectedPodElement;
     showHubDetails: boolean;
     hubAccordionStates: HubAccordionStates;
+    missionAccordionStates: { [missionID: number]: boolean };
     isRCMode: boolean;
 }
 
@@ -29,7 +30,9 @@ export interface GlobalAction {
     type: GlobalActions;
     clientID?: string;
     hubID?: number;
+    missionID?: number;
     hubAccordionName?: string;
+    isMissionAccordionExpanded?: boolean;
 }
 
 interface GlobalContextProviderProps {
@@ -53,6 +56,7 @@ export const globalDefaultContext: GlobalContextType = {
     selectedPodElement: null,
     showHubDetails: false,
     hubAccordionStates: defaultHubAccordionStates,
+    missionAccordionStates: {},
     isRCMode: false,
 };
 
@@ -95,6 +99,18 @@ function globalReducer(state: GlobalContextType, action: GlobalAction) {
 
         case GlobalActions.CLICKED_HUB_ACCORDION:
             return handleClickedHubAccordion(mutableState, action.hubAccordionName);
+
+        case GlobalActions.CLICKED_MISSION_ACCORDION:
+            return handleClickedMissionAccordion(
+                mutableState,
+                action.missionID,
+                action.isMissionAccordionExpanded,
+            );
+        case GlobalActions.CLICKED_DELETE_ALL_MISSIONS:
+            return handleClickedDeleteAllMissions(mutableState);
+
+        case GlobalActions.DESELECT_POD_ELEMENT:
+            return handleDeselectPodElement(mutableState);
 
         default:
             return state;
@@ -265,6 +281,45 @@ function handleClickedHubAccordion(mutableState: GlobalContextType, accordionNam
             hubAccordionStates.links = !hubAccordionStates.links;
             break;
     }
+    return mutableState;
+}
+
+/**
+ * Updates the missionAccordionStates object based on the provided missionID and expand/collapse state
+ *
+ * @param {GlobalContextType} mutableState State object ref for making modifications
+ * @param {number} missionID Determines which mission accordion state to modify
+ * @param {boolean} isMissionAccordionExpanded New expand/collapse state of the accordion
+ * @returns {GlobalContextType} Updated mutable state object
+ */
+function handleClickedMissionAccordion(
+    mutableState: GlobalContextType,
+    missionID: number,
+    isMissionAccordionExpanded: boolean,
+) {
+    mutableState.missionAccordionStates[missionID] = isMissionAccordionExpanded;
+    return mutableState;
+}
+
+/**
+ * Resets the mission accordion expand/collapse states when operator clicks delete all missions
+ *
+ * @param {GlobalContextType} mutableState State object ref for making modifications
+ * @returns {GlobalContextType} Updated mutable state object
+ */
+function handleClickedDeleteAllMissions(mutableState: GlobalContextType) {
+    mutableState.missionAccordionStates = {};
+    return mutableState;
+}
+
+/**
+ * Deselects the currently selected pod element
+ *
+ * @param {GlobalContextType} mutableState State object ref for making modifications
+ * @returns {GlobalContextType} Updated mutable state object
+ */
+function handleDeselectPodElement(mutableState: GlobalContextType) {
+    mutableState.selectedPodElement = null;
     return mutableState;
 }
 
