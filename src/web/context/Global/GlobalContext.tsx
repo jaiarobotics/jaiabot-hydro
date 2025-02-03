@@ -32,12 +32,6 @@ export interface HubAccordionStates {
     links: boolean;
 }
 
-const defaultHubAccordionStates = {
-    quickLook: false,
-    commands: false,
-    links: false,
-};
-
 export const enum BotAccordionNames {
     QUICKLOOK = "quickLook",
     COMMANDS = "commands",
@@ -59,18 +53,6 @@ export interface BotAccordionStates {
     imu: boolean;
     sensor: boolean;
 }
-
-const defaultBotAccordionStates = {
-    quickLook: false,
-    commands: false,
-    advancedCommands: false,
-    health: false,
-    data: false,
-    gps: false,
-    imu: false,
-    sensor: false,
-};
-
 export interface GlobalAction {
     type: GlobalActions;
     clientID?: string;
@@ -89,6 +71,23 @@ export enum NodeType {
     "BOT" = 1,
     "HUB" = 2,
 }
+
+const defaultHubAccordionStates = {
+    quickLook: false,
+    commands: false,
+    links: false,
+};
+
+const defaultBotAccordionStates = {
+    quickLook: false,
+    commands: false,
+    advancedCommands: false,
+    health: false,
+    data: false,
+    gps: false,
+    imu: false,
+    sensor: false,
+};
 
 export const globalDefaultContext: GlobalContextType = {
     clientID: "",

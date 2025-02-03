@@ -1,7 +1,22 @@
 import React, { useContext, useState, useEffect } from "react";
 
 // Jaia Imports
-import { CommandInfo, botCommands } from "../../types/commands";
+import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
+import {
+    GlobalContext,
+    GlobalDispatchContext,
+    GlobalAction,
+    BotAccordionNames,
+    NodeType,
+    GlobalContextType,
+} from "../../context/Global/GlobalContext";
+import { JaiaSystemContext } from "../../context/JaiaSystem/JaiaSystemContext";
+import { GlobalActions } from "../../context/Global/GlobalActions";
+import { CustomAlert } from "../../shared/CustomAlert";
+
+import BotSensors from "../../data/bots/bot-sensors";
+import Bot from "../../data/bots/bot";
+import { missionsManager } from "../../data/missions_manager/missions-manager";
 import {
     getDistanceToHub,
     getStatusAgeClassName,
@@ -16,19 +31,14 @@ import {
     runMission,
     toggleEditMode,
 } from "./bot-details";
-import { sendBotCommand, sendBotRunCommand, sendBotRCCommand } from "../../utils/command";
-import JaiaToggle from "../../components/JaiaToggle/JaiaToggle";
-import { Missions } from "../../missions/missions";
-import { missionsManager } from "../../data/missions_manager/missions-manager";
+import { CommandInfo, botCommands } from "../../types/commands";
 import { MissionStatus } from "../../types/jaia-system-types";
-import BotSensors from "../../data/bots/bot-sensors";
-import Bot from "../../data/bots/bot";
-
+import { sendBotCommand, sendBotRunCommand, sendBotRCCommand } from "../../utils/command";
+import { Command, MissionState, GeographicCoordinate } from "../../utils/protobuf-types";
+import { Missions } from "../../missions/missions";
 import { GlobalSettings } from "../../missions/settings";
 import { warning, info } from "../../notifications/notifications";
 import { MissionInterface, RunInterface } from "../CommandControl/CommandControl";
-import { Command, MissionState, GeographicCoordinate } from "../../utils/protobuf-types";
-
 import {
     formatLatitude,
     formatLongitude,
@@ -36,19 +46,8 @@ import {
     addDropdownListener,
     convertMicrosecondsToSeconds,
 } from "../../shared/Utilities";
-import {
-    GlobalContext,
-    GlobalDispatchContext,
-    GlobalAction,
-    BotAccordionNames,
-    NodeType,
-} from "../../context/Global/GlobalContext";
-import { JaiaSystemContext } from "../../context/JaiaSystem/JaiaSystemContext";
 
-import { GlobalActions } from "../../context/Global/GlobalActions";
-
-// Style Imports
-import "./BotDetails.less";
+// MDI and MUI
 import {
     mdiPlay,
     mdiStop,
@@ -60,7 +59,6 @@ import {
     mdiRestartAlert,
     mdiCheckboxMarkedCirclePlusOutline,
 } from "@mdi/js";
-
 import { Icon } from "@mdi/react";
 import { ThemeProvider, createTheme } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -70,10 +68,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 
-// Utility Imports
-import { CustomAlert } from "../../shared/CustomAlert";
-import { missions } from "../../data/missions/missions";
-
+import "./BotDetails.less";
 const rcMode = require("../../style/icons/controller.svg");
 
 export interface BotDetailsProps {
@@ -108,7 +103,7 @@ export function BotDetails(props: BotDetailsProps) {
     takeControlFunction = props.takeControl;
     // End Old code
 
-    const globalContext = useContext(GlobalContext);
+    const globalContext: GlobalContextType = useContext(GlobalContext);
     const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
 
     const jaiaSystemContext = useContext(JaiaSystemContext);
@@ -133,7 +128,6 @@ export function BotDetails(props: BotDetailsProps) {
         return <div></div>;
     }
 
-    // Pull Data from the Context
     const DEFAULT_HUB_ID = 1;
     const hub = jaiaSystemContext.hubs.get(DEFAULT_HUB_ID);
 
@@ -143,7 +137,6 @@ export function BotDetails(props: BotDetailsProps) {
     const missionID = missionsManager.getMissionID(botID);
     const mission = jaiaSystemContext.missions.get(missionID);
 
-    // Make sure we have a bot
     if (!bot) {
         return <div></div>;
     }
@@ -159,9 +152,7 @@ export function BotDetails(props: BotDetailsProps) {
     let displayPrecision = 2;
 
     /**
-     * Provides data offload button
-     *
-     * @returns {React.Fragment} data offload button HTML
+     * @notes Needs refactor
      */
     function dataOffloadButton() {
         // TODO This logic should be cleaned up and simplified
@@ -231,9 +222,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Provides Health Row
-     *
-     * @returns {React.Fragment} Health row HTML
+     * @notes Needs refactor / to be combined with HealthStatusLine
      */
     function healthRow(bot: Bot, allInfo: boolean) {
         let healthClassName =
@@ -285,11 +274,11 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Dispatches an action to close the BotDetails panel
+     * Dispatches an action to close the Bot details panel
      *
      * @returns {void}
      */
-    function handleClosePanel() {
+    function handleCloseDetailsPanel() {
         globalDispatch({ type: GlobalActions.CLOSED_DETAILS });
     }
 
@@ -306,7 +295,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Handles System Check Button Click
+     * Makes a call to send the system check command
      *
      * @returns {void}
      */
@@ -319,7 +308,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Handles Stop Mission Button Click
+     * Makes a call to send the stop command
      *
      * @returns {void}
      */
@@ -333,7 +322,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Handles Activate RC Button Click
+     * Makes a call to send the command to enter RC mode
      *
      * @returns {void}
      */
@@ -353,7 +342,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Handles Next Task Button Click
+     * Makes a call to send the next task command
      *
      * @returns {void}
      */
@@ -366,7 +355,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Handles Play Button Click
+     * Makes a call to send the play mission command
      *
      * @returns {void}
      */
@@ -411,7 +400,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Handles Shut Down Bot Click
+     * Makes a call to send the shutdown command
      *
      * @returns {void}
      */
@@ -447,7 +436,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Handles Reboot Bot Click
+     * Makes a call to send the reboot command
      *
      * @returns {void}
      */
@@ -483,7 +472,7 @@ export function BotDetails(props: BotDetailsProps) {
     }
 
     /**
-     * Handles Restart Bot Services Click
+     * Makes a call to send the restart command
      *
      * @returns {void}
      */
@@ -665,7 +654,7 @@ export function BotDetails(props: BotDetailsProps) {
                         <div
                             className="closeButton"
                             onClick={() => {
-                                handleClosePanel();
+                                handleCloseDetailsPanel();
                             }}
                         >
                             ⨯
@@ -1011,7 +1000,7 @@ export function BotDetails(props: BotDetailsProps) {
                             <AccordionDetails>
                                 <ThemeProvider theme={accordionTheme}>
                                     <Accordion
-                                        expanded={globalContext.botAccordionStates.GPS}
+                                        expanded={globalContext.botAccordionStates.gps}
                                         onChange={() => {
                                             handleAccordionClick(BotAccordionNames.GPS);
                                         }}
