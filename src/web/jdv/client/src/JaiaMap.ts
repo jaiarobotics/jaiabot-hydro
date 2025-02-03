@@ -701,11 +701,14 @@ export default class JaiaMap {
             if (driftFeature) {
                 driftFeature.set('logFilename', jdv_task_packet.logFilename)
                 const drift = task_packet.drift;
+                const actual_duration = ((task_packet.end_time ?? 0.0) - (task_packet.start_time ?? 0.0)) / 1e6
+
                 // Add popup
                 const html = `
                 <h3>Drift</h3>
                 <table>
                     <tr><th>Bot ID</th><td>${task_packet.bot_id}</td></tr>
+                    <tr><th>Duration</th><td>${actual_duration.toFixed(2)} seconds</td></tr>
                     <tr><th>Speed</th><td>${drift.estimated_drift.speed.toFixed(2)} m/s</td></tr>
                     <tr><th>Direction</th><td>${drift.estimated_drift.heading?.toFixed(1) ?? "?"} deg</td></tr>
                     <tr><th>Significant Wave Height (Beta)</th><td>${drift.significant_wave_height ?? "?"} m</td></tr>
