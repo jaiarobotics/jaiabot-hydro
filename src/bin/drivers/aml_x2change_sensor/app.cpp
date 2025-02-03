@@ -83,31 +83,25 @@ jaiabot::apps::AMLX2ChangeSensorDriver::AMLX2ChangeSensorDriver()
     interthread().subscribe<serial_in>([this](const goby::middleware::protobuf::IOData& io) {
         try
         {
-
+            glog.is_debug2() && glog << group("main") << io.DebugString() << std::endl;
         }
-        catch (const std::exception& e) //all exceptions thrown by the standard*  library
+        catch (const std::exception& e)
         {
             glog.is_warn() && glog << group("arduino")
-                                   << "Arduino Response Parsing Failed: Exception Was Caught: "
+                                   << "AML X2Change Response Parsing Failed: Exception Was Caught: "
                                    << e.what() << std::endl;
         }
         catch (...)
         {
             glog.is_warn() && glog << group("arduino")
-                                   << "Arduino Response Parsing Failed: Exception Was Caught!"
+                                   << "AML X2Change Response Parsing Failed: Exception Was Caught!"
                                    << std::endl;
-        } // Catch all
+        }
     });
 }
 
 void jaiabot::apps::AMLX2ChangeSensorDriver::loop()
 {
-    // Publish interthread, so we can log it
-    //interprocess().publish<jaiabot::groups::arduino_from_pi>(arduino_cmd);
-
-    // Send the command to the Arduino
-    //auto raw_output = lora::serialize(arduino_cmd);
-    //interthread().publish<serial_out>(raw_output);
 }
 
 void jaiabot::apps::AMLX2ChangeSensorDriver::health(
