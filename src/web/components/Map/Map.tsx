@@ -59,7 +59,7 @@ export default function Map() {
         botLayer.updateFeatures();
 
         // Update React Context
-        globalDispatch({ type: GlobalActions.CLICKED_BOT_MAP_ICON, botID: botID });
+        globalDispatch({ type: GlobalActions.CLICKED_NODE, nodeID: botID });
     };
 
     const handleHubClick = (feature: Feature<Geometry>) => {
@@ -80,7 +80,7 @@ export default function Map() {
         hubLayer.updateFeatures();
 
         // Update React Context
-        globalDispatch({ type: GlobalActions.CLICKED_HUB_MAP_ICON, hubID: hubID });
+        globalDispatch({ type: GlobalActions.CLICKED_NODE, nodeID: hubID });
     };
 
     return <div id="map" data-testid="map"></div>;
