@@ -128,7 +128,7 @@ export class TaskData {
     }
 
     getTaskPackets() {
-        this.taskPackets;
+        return this.taskPackets;
     }
 
     setTaskPackets(taskPackets: TaskPacket[]) {

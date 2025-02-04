@@ -126,6 +126,7 @@ import "./CommandControl.less";
 // Utility
 import cloneDeep from "lodash.clonedeep";
 import { HelpWindow } from "../HelpWindow/HelpWindow";
+import DepthContourPlot3D from "../DepthContourPlot3D/DepthContourPlot3D";
 
 const rallyIcon = require("../../shared/rally.svg") as string;
 
@@ -254,6 +255,7 @@ interface State {
     taskPacketsTimeline: { [key: string]: string | boolean };
     isClusterModeOn: boolean;
     isHelpWindowDisplayed: boolean;
+    isDepthContourPlot3DDisplayed: boolean;
 
     disconnectionMessage?: string;
     viewportPadding: number[];
@@ -433,6 +435,7 @@ export default class CommandControl extends React.Component {
             },
             isClusterModeOn: true,
             isHelpWindowDisplayed: false,
+            isDepthContourPlot3DDisplayed: false,
 
             viewportPadding: [
                 viewportDefaultPadding,
@@ -2128,6 +2131,7 @@ export default class CommandControl extends React.Component {
                 "wpt",
                 "line",
                 "contact",
+                "depth-contour",
             ];
             const isCollection = feature.get("features");
 
@@ -2362,6 +2366,10 @@ export default class CommandControl extends React.Component {
                 }
 
                 return;
+            }
+
+            if (feature.get("type") === "depth-contour") {
+                this.setState({ isDepthContourPlot3DDisplayed: true });
             }
         }
 
@@ -4356,6 +4364,20 @@ export default class CommandControl extends React.Component {
                 break;
         }
 
+        var depthContourPlot = null;
+        if (this.state.isDepthContourPlot3DDisplayed) {
+            const closeContourPlot = () => {
+                this.setState({ isDepthContourPlot3DDisplayed: false }); // Come on JavaScript.  Leave this alone.
+            };
+
+            depthContourPlot = (
+                <DepthContourPlot3D
+                    taskPackets={taskData.taskPackets}
+                    onClose={closeContourPlot}
+                ></DepthContourPlot3D>
+            );
+        }
+
         return (
             <div
                 id="jcc_container"
@@ -4411,6 +4433,8 @@ export default class CommandControl extends React.Component {
                         }}
                     ></HelpWindow>
                 ) : null}
+
+                {depthContourPlot}
 
                 {this.state.customAlert}
             </div>
