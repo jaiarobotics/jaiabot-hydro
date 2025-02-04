@@ -33,6 +33,16 @@ class Drift:
 
 
 @dataclass
+class WindowConfig:
+    type: str
+    duration: float = None
+
+    @staticmethod
+    def fromDict(input: Dict):
+        return WindowConfig(**input)
+
+
+@dataclass
 class BandPassFilterConfig:
     type: str
     minZeroPeriod: float
@@ -60,12 +70,15 @@ class AnalysisConfig:
 class DriftAnalysisConfig:
     glitchy: bool = False
     sampleFreq: float = 4.0
+
+    window: WindowConfig = None
     bandPassFilter: BandPassFilterConfig = None
     analysis: AnalysisConfig = None
 
     @staticmethod
     def fromDict(input: Dict):
         config = DriftAnalysisConfig(**input)
+        config.window = WindowConfig.fromDict(config.window)
         config.bandPassFilter = BandPassFilterConfig.fromDict(config.bandPassFilter)
         config.analysis = AnalysisConfig.fromDict(config.analysis)
         return config
@@ -80,3 +93,27 @@ class DriftAnalysisConfig:
 
         configDict = json.load(open(configFilename))
         return DriftAnalysisConfig.fromDict(configDict)
+
+
+    @staticmethod
+    def default():
+        return DriftAnalysisConfig.fromDict({
+            "glitchy": False,
+            "sampleFreq": 4,
+            "window": {
+                "type": "tukey",
+                "duration": 10
+            },
+            "bandPassFilter": {
+                "type": "cos^2",
+                "minZeroPeriod": 0.75,
+                "minPeriod": 1.0,
+                "maxPeriod": 15.0,
+                "maxZeroPeriod": 20.0
+            },
+            "analysis": {
+                "type": "welch",
+                "segmentLength": 640
+            }
+        })
+

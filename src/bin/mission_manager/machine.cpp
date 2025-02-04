@@ -742,12 +742,15 @@ void jaiabot::statechart::inmission::underway::task::dive::PoweredDescent::depth
             context<Dive>().dive_packet().set_depth_achieved_with_units(ev.depth);
 
             // Set the max_acceration
-            context<Dive>().dive_packet().set_max_acceleration_with_units(
-                this->machine().latest_max_acceleration());
+            auto imu_data = this->machine().latest_imu_data();
+            auto max_acceleration = imu_data.has_max_acceleration()
+                                        ? imu_data.max_acceleration_with_units()
+                                        : 0.0 * boost::units::si::meters_per_second_squared;
+
+            context<Dive>().dive_packet().set_max_acceleration_with_units(max_acceleration);
 
             // Determine Hard/Soft
-            if (this->machine().latest_max_acceleration().value() >=
-                cfg().hard_bottom_type_acceleration())
+            if (max_acceleration.value() >= cfg().hard_bottom_type_acceleration())
             {
                 // Set the bottom_type Hard
                 context<Dive>().dive_packet().set_bottom_type(

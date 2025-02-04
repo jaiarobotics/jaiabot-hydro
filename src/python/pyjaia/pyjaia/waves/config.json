@@ -1,15 +1,19 @@
 {
     "glitchy": false,
-    "sampleFreq": 4.0,
+    "sampleFreq": 4,
+    "window": {
+        "type": "tukey",
+        "duration": 10
+    },
     "bandPassFilter": {
         "type": "cos^2",
-        "minZeroPeriod": 0.25,
-        "minPeriod": 0.5,
-        "maxPeriod": 20.0,
-        "maxZeroPeriod": 25.0
+        "minZeroPeriod": 0.75,
+        "minPeriod": 1.0,
+        "maxPeriod": 15.0,
+        "maxZeroPeriod": 20.0
     },
     "analysis": {
         "type": "welch",
-        "segmentLength": 256
+        "segmentLength": 640
     }
 }

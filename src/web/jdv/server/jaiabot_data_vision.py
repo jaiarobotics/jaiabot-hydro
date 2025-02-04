@@ -177,15 +177,7 @@ def getPowerDensitySpectrum():
 
     log = jaialogStore.openLog(log_name)
 
-    driftAnalysisConfig = DriftAnalysisConfig.fromDict({
-        'analysis': {'segmentLength': 256, 'type': 'welch'},
-        'bandPassFilter': {'maxPeriod': 15.0,
-                            'maxZeroPeriod': 20.0,
-                            'minPeriod': 0.5,
-                            'minZeroPeriod': 0.25,
-                            'type': 'cos^2'},
-        'glitchy': False,
-        'sampleFreq': 4.0})
+    driftAnalysisConfig = DriftAnalysisConfig.default()
 
     driftAnalysis = doDriftAnalysisFromFile(log, [start_time, end_time], driftAnalysisConfig)
     response = {
