@@ -15,15 +15,16 @@
     # TODO: Change these to the correct real URL to the hub upgrades ISO
   pre_tasks:
     - name: Check if hub_id is defined
-      ansible.builtin.assert:
+      assert:
         that:
           - hub_id is defined
           - hub_id | int | string == hub_id
         fail_msg: "Hub ID must be defined and must be an integer"
-
+        
     - include_tasks: ../tasks/read-debconf.yml
         
   tasks:
+
     - name: Create the upgrade working directory
       file:
         path: '{{ upgrade_dir }}'
@@ -32,13 +33,26 @@
     - name: Create the upgrade tmp directory
       file:
         path: '{{ upgrade_tmp_dir }}'
-        state: directory
-        
-    - include_tasks: tasks/fetch-version.yml
+        state: directory        
+    
+    - include_tasks: ../tasks/get-version.yml
+    - include_tasks: tasks/get-major-version.yml
+
+    - name: Debug version
+      debug:
+        msg: "Found major upgrade version: {{ jaiabot_major_version }}, current version: {{ jaiabot_current_version }}"
+      
+    - name: Check that upgrade version is greater than current version
+      assert:
+        that: "{{ jaiabot_major_version is version(jaiabot_current_version, '>') }}"
+        fail_msg: "New major version ({{ jaiabot_major_version }}) is not greater than current version ({{ jaiabot_current_version }})"
+      
     - include_tasks: tasks/check-disk-space.yml
+
+      
     - include_tasks: tasks/get-new-filesystems.yml
       
-    ## TODO Create a fleet config from the old image - for now download it
+    ## TODO Create a fleet config from the old image - for now download it assuming it exists on the USB flash key / ISO
     - name: Download the fleet config
       get_url:
         url: "http://{{ hub_ip }}/updates/major_upgrade/fleet{{ jaiabot_embedded_fleet_id }}.cfg"
@@ -50,8 +64,10 @@
     - name: Prepare new boot fs
       shell: |
         mkdir -p {{ upgrade_boot_dir }}
-        tar -xz -f {{ upgrade_dir }}/{{ major_version }}.boot.tar.gz -C {{ upgrade_boot_dir }}
+        tar -xz -f {{ upgrade_dir }}/{{ rootfs_major_version }}.boot.tar.gz -C {{ upgrade_boot_dir }}
         jaia admin fleet generate --bootdir {{ upgrade_boot_dir }} {{ upgrade_dir }}/fleet{{ jaiabot_embedded_fleet_id }}.cfg {{ jaiabot_embedded_type }} {{ jaiabot_embedded_hub_id if jaiabot_embedded_type == 'hub' else jaiabot_embedded_bot_id }}
+        # Don't configure VPN from scratch
+        rm {{ upgrade_boot_dir }}/jaiabot/init/id_vpn_tmp*
     
     - name: Generate upgrade script
       template:

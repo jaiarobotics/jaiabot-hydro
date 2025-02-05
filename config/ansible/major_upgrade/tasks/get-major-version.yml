@@ -29,9 +29,8 @@
 
 - name: Set fact for version content
   set_fact:
-    major_version: "{{ version_file.content | b64decode | trim }}"
+    rootfs_major_version: "{{ version_file.content | b64decode | trim }}"
 
-- name: Debug version
-  debug:
-    msg: "Found major upgrade version: {{ major_version }}"
-    
+- name: Extract version string
+  set_fact:
+    jaiabot_major_version: "{{ rootfs_major_version | regex_search('v(\\d+\\.\\d+\\.\\d+.*)$', '\\1') | first }}"

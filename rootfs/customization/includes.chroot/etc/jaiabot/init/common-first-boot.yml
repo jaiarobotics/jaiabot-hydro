@@ -62,6 +62,9 @@ runcmd:
   # Setup wireguard VPN (if temporary key is provided)
   - ifdown wlan0 && ifup wlan0
   - /etc/jaiabot/init/configure-wireguard-service-vpn.sh
+  # Format overlay to btrfs (if not already)
+  - mkfs.btrfs -f $(blkid -L rootfs) -L overlay
+
   
 # Reboot for overlay to take effect
 power_state:
