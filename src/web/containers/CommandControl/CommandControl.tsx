@@ -2340,6 +2340,8 @@ export default class CommandControl extends React.Component {
                     bot_id: { value: waveFeature.get("botId"), units: "" },
                     duration: { value: waveFeature.get("duration"), units: "s" },
                     sig_wave_height_beta: { value: waveFeature.get("sigWaveHeight"), units: "m" },
+                    max_wave_height_beta: { value: waveFeature.get("maxWaveHeight"), units: "m" },
+                    peak_period_beta: { value: waveFeature.get("peakPeriod"), units: "s" },
                     start_time: { value: startTime.toLocaleString(), units: "" },
                     end_time: { value: endTime.toLocaleString(), units: "" },
                 };

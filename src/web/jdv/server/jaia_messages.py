@@ -49,8 +49,8 @@ class DriftPacket:
     start_location: Optional[GeographicCoordinate] = None
     end_location: Optional[GeographicCoordinate] = None
     significant_wave_height: Optional[float] = None
-    wave_height: Optional[float] = None
-    wave_period: Optional[float] = None
+    maximum_wave_height: Optional[float] = None
+    peak_period: Optional[float] = None
 
 
 @dataclass_json

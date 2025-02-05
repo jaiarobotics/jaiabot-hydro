@@ -93,8 +93,8 @@ def kmlPlacemarkStringListFromTaskPacket(task_packet: TaskPacket) -> List[str]:
             Speed: {speed_string}<br />
             Heading: {drift.estimated_drift.heading or 0.0:.2f} deg<br />
             Significant-Wave-Height {drift.significant_wave_height or 0.0:.2f} m<br />
-            Wave-Height {drift.wave_height or 0.0:.2f} m<br />
-            Wave-Period {drift.wave_period or 0.0:.2f} s<br />
+            Maximum-Wave-Height {drift.maximum_wave_height or 0.0:.2f} m<br />
+            Peak-Period {drift.peak_period or 0.0:.2f} s<br />
         '''
 
         drift_placemark_string = f'''

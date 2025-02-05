@@ -59,6 +59,8 @@ export function createWavePacketFeature(map: Map, taskPacket: TaskPacket) {
         id: Math.random(),
         duration: Number(drift?.drift_duration?.toFixed(2)), // (s)
         sigWaveHeight: Number(drift?.significant_wave_height?.toFixed(2)),
+        maxWaveHeight: Number(drift?.maximum_wave_height?.toFixed(2)),
+        peakPeriod: Number(drift?.peak_period?.toFixed(2)),
         botId: taskPacket.bot_id,
         startTime: taskPacket.start_time,
         endTime: taskPacket.end_time,

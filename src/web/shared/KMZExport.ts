@@ -103,7 +103,8 @@ async function taskPacketToKMLPlacemarks(taskPacket: TaskPacket | LogTaskPacket)
             Speed: ${speedString}<br />
             Heading: ${drift.estimated_drift.heading?.toFixed(2)} deg<br />
             Significant-Wave-Height: ${drift.significant_wave_height?.toFixed(2)} m<br />
-            Wave-Period: N/A<br />
+            Maximum-Wave-Height: ${drift.maximum_wave_height?.toFixed(2)} m<br />
+            Peak-Period: ${drift.peak_period?.toFixed(2)} <br />
         `;
 
         placemarks.push(`

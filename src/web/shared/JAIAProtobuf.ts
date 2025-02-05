@@ -1038,6 +1038,8 @@ export interface DriftPacket {
     start_location?: GeographicCoordinate;
     end_location?: GeographicCoordinate;
     significant_wave_height?: number;
+    maximum_wave_height?: number;
+    peak_period?: number;
 }
 
 export interface Measurements {

@@ -49,6 +49,10 @@ export function TaskPacketPanel(props: Props) {
                                 let label = firstLetterUpper.join(" ");
                                 if (label === "Sig Wave Height Beta") {
                                     label = "Sig Wave Height (Beta)";
+                                } else if (label === "Max Wave Height Beta") {
+                                    label = "Max Wave Height (Beta)";
+                                } else if (label === "Peak Period Beta") {
+                                    label = "Peak Period (Beta)";
                                 }
                                 return <div className="task-packet-label">{label}:</div>;
                             } else if (item.type === "value") {
