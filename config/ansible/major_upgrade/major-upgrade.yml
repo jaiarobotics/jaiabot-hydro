@@ -1,0 +1,54 @@
+---
+- name: Jaiabot major upgrade
+  hosts: all
+  become: yes
+  gather_facts: yes
+  vars_files:
+    - vars/disk-space.yml
+  vars:
+    - upgrade_dir: /var/log/jaiabot/major_upgrade/v2
+    - upgrade_tmp_dir: '{{ upgrade_dir }}/tmp'
+    - upgrade_reuse_dir: '{{ upgrade_dir }}/reuse'
+    - upgrade_backup_dir: '{{ upgrade_dir }}/backup'
+      
+    # TODO: Change these to the correct real URL to the hub upgrades ISO
+  pre_tasks:
+    - name: Check if hub_id is defined
+      ansible.builtin.assert:
+        that:
+          - hub_id is defined
+          - hub_id | int | string == hub_id
+        fail_msg: "Hub ID must be defined and must be an integer"
+
+    - include_tasks: ../tasks/read-debconf.yml
+        
+  tasks:
+    - name: Create the upgrade working directory
+      file:
+        path: '{{ upgrade_dir }}'
+        state: directory
+
+    - name: Create the upgrade tmp directory
+      file:
+        path: '{{ upgrade_tmp_dir }}'
+        state: directory
+        
+    - include_tasks: tasks/fetch-version.yml
+    - include_tasks: tasks/check-disk-space.yml
+    # - include_tasks: tasks/get-new-filesystems.yml
+      
+    ## TODO Create a fleet config from the old image - for now download it
+    - name: Download the fleet config
+      get_url:
+        url: "http://{{ hub_ip }}/updates/major_upgrade/fleet{{ jaiabot_embedded_fleet_id }}.cfg"
+        dest: '{{ upgrade_dir }}'
+
+    - include_tasks: tasks/fetch-reuse-files.yml
+    # - include_tasks: tasks/backup-old-rootfs-overlay.yml
+
+    - name: Generate upgrade script
+      template:
+        src: templates/do-major-upgrade.sh.j2
+        dest: '{{ upgrade_dir }}/do-major-upgrade.sh'
+        mode: a=rwx
+        
