@@ -42,7 +42,7 @@ runcmd:
   - ln -s -f /dev/arduino /etc/jaiabot/dev/arduino
   - ln -s -f /dev/xbee /etc/jaiabot/dev/xbee
   # Install jaiabot embedded for unprivileged jaia user
-  - env USER=jaia DEBIAN_FRONTEND=noninteractive apt -y -o Dpkg::Options::="--force-confdef" install /opt/jaiabot-embedded*.deb
+  - env USER=jaia DEBIAN_FRONTEND=noninteractive dpkg -i --force-confdef /opt/jaiabot-embedded*.deb
   # Append first boot date to version file
   - echo "JAIABOT_FIRST_BOOT_DATE=\"`date -u`\"" >> /etc/jaiabot/version
   # Set overlay to take effect on next boot
