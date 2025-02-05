@@ -10,6 +10,7 @@ cloud-guest-utils
 gpg
 wpasupplicant
 apache2
-# for first boot script
+# for first boot
+cloud-init
 debconf-utils
 yubikey-manager

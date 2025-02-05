@@ -127,7 +127,6 @@ class HubManager : public ApplicationBase
     std::atomic<bool> offload_complete_{false};
     std::atomic<uint32_t> data_offload_percentage_{0};
 
-
     // map GPSD device name to contact ID
     struct Contact
     {
@@ -143,6 +142,8 @@ class HubManager : public ApplicationBase
 
     // set of Bot IDs with bot_to_gps in use
     std::set<int> bot_to_gps_ids_;
+
+    std::map<int, goby::time::MicroTime> known_bots_;
 };
 } // namespace apps
 } // namespace jaiabot
@@ -159,14 +160,13 @@ jaiabot::apps::HubManager::HubManager()
     latest_hub_status_.set_hub_id(cfg().hub_id());
     latest_hub_status_.set_fleet_id(cfg().fleet_id());
 
-    for (auto peer : cfg().xbee().peers())
+    auto add_expected_bot_id = [this](int id)
     {
-        if (peer.has_bot_id())
-        {
-            managed_bot_modem_ids_.insert(jaiabot::comms::modem_id_from_bot_id(peer.bot_id()));
-            latest_hub_status_.mutable_bot_ids_in_radio_file()->Add(peer.bot_id());
-        }
-    }
+        managed_bot_modem_ids_.insert(jaiabot::comms::modem_id_from_bot_id(id));
+        latest_hub_status_.mutable_bot_ids_in_radio_file()->Add(id);
+    };
+
+    for (auto id : cfg().expected_bots().id()) add_expected_bot_id(id);
 
     for (auto contact_gps : cfg().contact_gps())
     {
@@ -307,9 +307,8 @@ jaiabot::apps::HubManager::HubManager()
         { handle_subscription_report(report); });
 
     interprocess().subscribe<jaiabot::groups::linux_hardware_status>(
-        [this](const jaiabot::protobuf::LinuxHardwareStatus& hardware_status) {
-            handle_hardware_status(hardware_status);
-        });
+        [this](const jaiabot::protobuf::LinuxHardwareStatus& hardware_status)
+        { handle_hardware_status(hardware_status); });
 
     if (is_virtualhub_)
         update_vfleet_shutdown_time();
@@ -480,6 +479,14 @@ void jaiabot::apps::HubManager::loop()
         latest_hub_status_.add_error(protobuf::ERROR__NOT_RESPONDING__JAIABOT_HEALTH);
     }
 
+    latest_hub_status_.clear_known_bot();
+    for (const auto& known_bot_p : known_bots_)
+    {
+        auto* known_bot = latest_hub_status_.add_known_bot();
+        known_bot->set_id(known_bot_p.first);
+        known_bot->set_last_status_time_with_units(known_bot_p.second);
+    }
+
     if (latest_hub_status_.IsInitialized())
     {
         glog.is_debug1() &&
@@ -546,9 +553,11 @@ void jaiabot::apps::HubManager::handle_bot_nav(const jaiabot::protobuf::BotStatu
     node_status.set_name("BOT" + std::to_string(dccl_nav.bot_id()));
 
     // rewarp the time if needed
-    node_status.set_time_with_units(goby::time::convert<goby::time::MicroTime>(
+    auto rewarped_dccl_nav_time = goby::time::convert<goby::time::MicroTime>(
         goby::time::SystemClock::warp(goby::time::convert<std::chrono::system_clock::time_point>(
-            dccl_nav.time_with_units()))));
+            dccl_nav.time_with_units())));
+
+    node_status.set_time_with_units(rewarped_dccl_nav_time);
 
     if (dccl_nav.attitude().has_heading())
         node_status.mutable_pose()->set_heading_with_units(
@@ -581,6 +590,8 @@ void jaiabot::apps::HubManager::handle_bot_nav(const jaiabot::protobuf::BotStatu
     }
 
     latest_bot_mission_state_[dccl_nav.bot_id()] = dccl_nav.mission_state();
+
+    known_bots_[dccl_nav.bot_id()] = rewarped_dccl_nav_time;
 
     // publish for opencpn interface
     if (node_status.IsInitialized())
@@ -915,7 +926,8 @@ void jaiabot::apps::HubManager::start_dataoffload(int bot_id)
     std::string offload_command = cfg().data_offload_script() + " " + cfg().log_staging_dir() +
                                   " " + cfg().log_offload_dir() + " " + bot_ip + " 2>&1";
 
-    auto offload_func = [this, offload_command]() {
+    auto offload_func = [this, offload_command]()
+    {
         // reset data offload global variables
         offload_complete_ = false;
         offload_success_ = false;

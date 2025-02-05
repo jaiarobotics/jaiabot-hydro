@@ -69,7 +69,6 @@ jaia_motor_harness_type="NONE"
 if "jaia_motor_harness_type" in os.environ:
     jaia_motor_harness_type=os.environ['jaia_motor_harness_type']
 
-
 try:
     bot_index=int(os.environ['jaia_bot_index'])
 except:
@@ -114,6 +113,7 @@ verbosities = \
   'jaiabot_engineering':                          { 'runtime': { 'tty': 'WARN', 'log': 'QUIET' },  'simulation': { 'tty': 'QUIET', 'log': 'DEBUG1' }},
   'goby_terminate':                               { 'runtime': { 'tty': 'WARN', 'log': 'QUIET' },  'simulation': { 'tty': 'WARN', 'log': 'QUIET' }},
   'jaiabot_failure_reporter':                     { 'runtime': { 'tty': 'WARN', 'log': 'QUIET' },  'simulation': { 'tty': 'WARN', 'log': 'QUIET' }},
+  'jaiabot_mission_repeater':                     { 'runtime': { 'tty': 'WARN', 'log': 'VERBOSE' },  'simulation': { 'tty': 'DEBUG2', 'log': 'DEBUG2' }},
   'jaiabot_tsys01_temperature_sensor_driver':     { 'runtime': { 'tty': 'WARN', 'log': 'WARN' },  'simulation': { 'tty': 'WARN', 'log': 'QUIET' }}
 }
 
@@ -142,13 +142,20 @@ if common.jaia_comms_mode == common.CommsMode.XBEE:
     else:
         xbee_serial_port='/dev/xbee'
 
+    try:
+        xbee_encryption_password=os.environ['jaia_rf_encryption_password']
+    except:    
+        xbee_encryption_password=""
+        
     link_block = config.template_substitute(templates_dir+'/link_xbee.pb.cfg.in',
                                             subnet_mask=common.comms.subnet_mask,                                            
                                             modem_id=common.comms.xbee_modem_id(node_id),
                                             mac_slots=common.comms.xbee_mac_slots(node_id),
                                             serial_port=xbee_serial_port,
-                                            xbee_config=common.comms.xbee_config(),
                                             xbee_hub_id='',
+                                            use_encryption='true' if xbee_encryption_password else 'false',
+                                            encryption_password=xbee_encryption_password,
+                                            fleet_id=fleet_index,
                                             sub_buffer=sub_buffer_config,
                                             ack_timeout=ack_timeout)
 
@@ -350,14 +357,22 @@ elif common.app == 'moos_pmv':
                                      moos_community='BOT' + str(bot_index),
                                      warp=common.sim.warp))
 elif common.app == 'jaiabot_metadata':
-    print(config.template_substitute(templates_dir+'/bot/jaiabot_metadata.pb.cfg.in',
+    print(config.template_substitute(templates_dir+'/jaiabot_metadata.pb.cfg.in',
                                      app_block=app_common,
                                      interprocess_block = interprocess_common,
-                                     xbee_info=xbee_info))
+                                     xbee_info=xbee_info,
+                                     is_simulation=str(is_simulation()).lower(),
+                                     node_id=f'bot_id: {bot_index}',
+                                     fleet_id=fleet_index))
 elif common.app == 'frontseat_sim':
     print(common.vehicle.simulator_port(vehicle_id))
 elif common.app == 'log_file':
     print(log_file_dir)
+elif common.app == 'jaiabot_mission_repeater':
+    print(config.template_substitute(templates_dir+'/bot/jaiabot_mission_repeater.pb.cfg.in',
+                                     app_block=app_common,
+                                     interprocess_block = interprocess_common,
+                                     bot_id=bot_index))
 else:
     print(config.template_substitute(templates_dir+f'/bot/{common.app}.pb.cfg.in',
                                      app_block=app_common,

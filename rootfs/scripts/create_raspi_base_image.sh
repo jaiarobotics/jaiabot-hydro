@@ -263,7 +263,7 @@ if [ -z "$ROOTFS_TARBALL" ]; then
     sed -i "s/@JAIABOT_REPO@/${JAIABOT_REPO}/" config/archives/jaiabot.list.chroot
     sed -i "s/@JAIABOT_VERSION@/${JAIABOT_VERSION}/" config/archives/jaiabot.list.chroot
 
-    # Do not include cloud packages in Raspi image - cloud-init seems to cause long hangs on first-boot
+    # Do not include cloud packages in Raspi image - no need for s3fs 
     [ -z "$VIRTUALBOX" ] && rm config/package-lists/cloud.list.chroot
     
     lb build
@@ -336,7 +336,7 @@ dtoverlay=spi1-3cs
 
 EOF
 cat > "$BOOT_PARTITION"/cmdline.txt <<EOF
-console=tty1 root=LABEL=rootfs rootfstype=btrfs fsck.repair=yes rootwait fixrtc net.ifnames=0 dwc_otg.lpm_enable=0
+console=serial0,115200 console=tty1 root=LABEL=rootfs rootfstype=btrfs fsck.repair=yes rootwait fixrtc net.ifnames=0 dwc_otg.lpm_enable=0 ds=nocloud;s=file:///etc/jaiabot/init/ network-config=disabled
 EOF
 
 # Flash the kernel
@@ -349,9 +349,9 @@ sudo mount -o bind /sys "$ROOTFS_PARTITION"/sys
 
 OUTPUT_METADATA=$(echo $OUTPUT_IMAGE_PATH | sed "s/\.img$/\.metadata\.txt/")
 
-# Copy the preseed example on the boot partition
+# Copy the cloud init info to the boot partition where it is more easily modified on a Windows machine
 sudo mkdir -p "$BOOT_PARTITION"/jaiabot/init
-sudo cp "$ROOTFS_PARTITION"/etc/jaiabot/init/first-boot.preseed.ex "$BOOT_PARTITION"/jaiabot/init
+sudo cp "$ROOTFS_PARTITION"/etc/jaiabot/init/first-boot.preseed.yml.j2 "$BOOT_PARTITION"/jaiabot/init
 
 # Write metadata
 echo "export JAIABOT_ROOTFS_GEN_TAG='$ROOTFS_BUILD_TAG'" > ${OUTPUT_METADATA}
@@ -362,7 +362,7 @@ if [ ! -z "$VIRTUALBOX" ]; then
     sudo chroot rootfs apt-get -y install linux-image-virtual grub-efi-amd64
     
     # ensure VM uses eth0, etc. naming like Raspi
-    sudo chroot rootfs sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"/' /etc/default/grub
+    sudo chroot rootfs sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"|' /etc/default/grub
 
     # reduce grub timeout
     sudo chroot rootfs sed -i 's/GRUB_TIMEOUT_STYLE=\(.*\)/#GRUB_TIMEOUT_STYLE=\1/' /etc/default/grub
@@ -377,6 +377,8 @@ if [ ! -z "$VIRTUALBOX" ]; then
     
     sudo umount "$ROOTFS_PARTITION"/boot/efi
     
+    # use ipv6 and ipv4 resolv.conf for VirtualBox and AWS instances
+    sudo chroot rootfs /bin/bash -c "cat /etc/resolv.conf.ipv6 /etc/resolv.conf.ipv4 > /etc/resolv.conf"
     # unmount all the image partitions first
     finish
     
