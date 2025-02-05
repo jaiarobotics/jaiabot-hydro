@@ -144,7 +144,6 @@ def powerSpectrumBurg(elevation: List[float], config: DriftAnalysisConfig):
 def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
     drift = Drift()
     drift.rawVerticalAcceleration = verticalAcceleration.makeUniform(config.sampleFreq)
-
     drift.filteredVerticalAcceleration = drift.rawVerticalAcceleration
 
     # Trim the series to avoid motor-induce noise
@@ -171,6 +170,13 @@ def doDriftAnalysis(verticalAcceleration: Series, config: DriftAnalysisConfig):
         exit(1)
 
     return drift
+
+
+def doDriftAnalysisFromFile(h5File: h5py.File, timeRange: List[int], config: DriftAnalysisConfig):
+    seriesSet = SeriesSet.loadFromH5File(h5File)
+    driftSeriesSet = seriesSet.slice(TimeRange(start=timeRange[0], end=timeRange[1]))
+
+    return doDriftAnalysis(driftSeriesSet.accelerationVertical, config)
 
 
 def doWaveCounting(drift: Drift, config: DriftAnalysisConfig):
@@ -219,3 +225,6 @@ def doBurg(drift: Drift, config: DriftAnalysisConfig):
     
     return drift
 
+
+def getPowerDensitySpectrumFrequencies(N: int, sampleFrequency: float):
+    return [i * sampleFrequency / 2 / N for i in range(N)]

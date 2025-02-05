@@ -88,6 +88,7 @@ export function createDriftPacketFeature(map: Map, taskPacket: TaskPacket) {
     const feature = new Feature({ geometry: new Point(fromLonLat(midpoint, projection)) });
     feature.setProperties({
         drift: drift,
+        taskPacket: taskPacket,
         type: "drift",
         id: Math.random(),
         duration: Number(drift?.drift_duration?.toFixed(2)), // (s)

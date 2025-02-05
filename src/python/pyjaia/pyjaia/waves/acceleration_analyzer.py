@@ -19,7 +19,7 @@ from .analysis import doDriftAnalysis
 from .types import DriftAnalysisConfig
 from .processing import *
 from .filters import *
-from .analysis_html import *
+# from .analysis_html import *
 
 import os
 
