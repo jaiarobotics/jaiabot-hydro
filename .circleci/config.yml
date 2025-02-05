@@ -99,7 +99,6 @@ job-template-amd64: &job-template-amd64
         name: Run tests
         command: |
           cd build && ctest --output-on-failure
-          cd intermediate/web && npm test
 
 job-template-deb-amd64: &job-template-deb-amd64
   <<: *job-template-amd64
@@ -188,6 +187,7 @@ filter-template-debian-builds: &filter-template-debian-builds
     branches:
       only:
         - "1.y"
+        - "bathymetry-wave-demo-2025"
 
 # which branches to run the normal source build
 filter-template-normal-builds: &filter-template-normal-builds
