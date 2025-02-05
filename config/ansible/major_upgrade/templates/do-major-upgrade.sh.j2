@@ -42,19 +42,10 @@ tar -xz -f {{ upgrade_dir }}/{{ major_version }}.rootfs.tar.gz -C ${new_ro_rootf
 rsync -aP {{ upgrade_reuse_dir }}/ ${new_ro_rootfs_mountpoint}/
 
 ###############################
-# Extract new boot fs
+# Write new boot dir
 ###############################
 
-mount -o remount,rw ${boot_mountpoint}
-rm -rf ${boot_mountpoint}/*
-tar -xz -f {{ upgrade_dir }}/{{ major_version }}.boot.tar.gz -C ${boot_mountpoint}
-
-###############################
-# Generate fleet data        
-###############################
-
-mount -o bind ${boot_mountpoint} ${new_ro_rootfs_mountpoint}${boot_mountpoint}
-chroot ${new_ro_rootfs_mountpoint} jaia admin fleet generate --bootdir ${boot_mountpoint} {{ upgrade_dir }}/fleet{{ jaiabot_embedded_fleet_id }}.cfg {{ jaiabot_embedded_type }} {{ jaiabot_embedded_hub_id if jaiabot_embedded_type == 'hub' else jaiabot_embedded_bot_id }} 
+rsync -aP --delete {{ upgrade_boot_dir }}/ ${boot_mountpoint}/ 
 
 ###############################
 # Swap rootfs/overlay labels     

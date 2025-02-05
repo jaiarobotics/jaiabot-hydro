@@ -10,6 +10,7 @@
     - upgrade_tmp_dir: '{{ upgrade_dir }}/tmp'
     - upgrade_reuse_dir: '{{ upgrade_dir }}/reuse'
     - upgrade_backup_dir: '{{ upgrade_dir }}/backup'
+    - upgrade_boot_dir: '{{ upgrade_dir }}/boot'
       
     # TODO: Change these to the correct real URL to the hub upgrades ISO
   pre_tasks:
@@ -35,7 +36,7 @@
         
     - include_tasks: tasks/fetch-version.yml
     - include_tasks: tasks/check-disk-space.yml
-    # - include_tasks: tasks/get-new-filesystems.yml
+    - include_tasks: tasks/get-new-filesystems.yml
       
     ## TODO Create a fleet config from the old image - for now download it
     - name: Download the fleet config
@@ -46,9 +47,17 @@
     - include_tasks: tasks/fetch-reuse-files.yml
     # - include_tasks: tasks/backup-old-rootfs-overlay.yml
 
+    - name: Prepare new boot fs
+      shell: |
+        mkdir -p {{ upgrade_boot_dir }}
+        tar -xz -f {{ upgrade_dir }}/{{ major_version }}.boot.tar.gz -C {{ upgrade_boot_dir }}
+        jaia admin fleet generate --bootdir {{ upgrade_boot_dir }} {{ upgrade_dir }}/fleet{{ jaiabot_embedded_fleet_id }}.cfg {{ jaiabot_embedded_type }} {{ jaiabot_embedded_hub_id if jaiabot_embedded_type == 'hub' else jaiabot_embedded_bot_id }}
+    
     - name: Generate upgrade script
       template:
         src: templates/do-major-upgrade.sh.j2
         dest: '{{ upgrade_dir }}/do-major-upgrade.sh'
         mode: a=rwx
+
+
         
