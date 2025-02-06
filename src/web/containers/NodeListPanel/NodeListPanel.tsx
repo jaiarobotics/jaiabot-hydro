@@ -4,136 +4,107 @@ import {
     GlobalDispatchContext,
     GlobalAction,
     NodeType,
+    GlobalContextType,
+    SelectedNode,
 } from "../../context/Global/GlobalContext";
+import { JaiaSystemContext } from "../../context/JaiaSystem/JaiaSystemContext";
+
 import { GlobalActions } from "../../context/Global/GlobalActions";
 
-import { HubStatus, BotStatus, HealthState } from "../../shared/JAIAProtobuf";
-import { PodStatus, PortalBotStatus } from "../../shared/PortalStatus";
+import { HealthState } from "../../shared/JAIAProtobuf";
+import sortBy from "lodash/sortBy";
 
 interface Props {
-    podStatus: PodStatus | null;
-    selectedBotId: number | null;
-    selectedHubId: number | null;
-    trackedBotId: string | number | null;
     didClickBot: (bot_id: number) => void;
     didClickHub: (hub_id: number) => void;
 }
 
-function faultLevel(health_state: HealthState) {
-    return (
-        {
-            HEALTH__OK: 0,
-            HEALTH__DEGRADED: 1,
-            HEALTH__FAILED: 2,
-        }[health_state] ?? 0
-    );
-}
+const faultLevel: Map<HealthState, number> = new Map([
+    [HealthState.HEALTH__OK, 0],
+    [HealthState.HEALTH__DEGRADED, 1],
+    [HealthState.HEALTH__FAILED, 2],
+]);
 
 export function NodeListPanel(props: Props) {
-    if (props.podStatus == null) return null;
+    /**
+     * Triggered when a node is clicked.  Dispatches GlobalAction
+     * to handle the event
+     *
+     * @param {NodeType} nodeType Indicates if hub or bot
+     * @param {number} nodeID Hub or Bot ID
+     *
+     * @returns {void}
+     *
+     * @notes Remove calls to functions from props once CommandControl is updated
+     */
+    const handleClick = (nodeType: NodeType, nodeID: number) => {
+        globalDispatch({
+            type: GlobalActions.CLICKED_NODE,
+            nodeType: nodeType,
+            nodeID: nodeID,
+        });
+        if (nodeType == NodeType.BOT) props.didClickBot(nodeID);
+        if (nodeType == NodeType.HUB) props.didClickHub(nodeID);
+    };
 
-    function compareByHubId(hub1: HubStatus, hub2: HubStatus) {
-        return hub1.hub_id - hub2.hub_id;
-    }
-
-    function compareByBotId(bot1: BotStatus, bot2: BotStatus) {
-        return bot1.bot_id - bot2.bot_id;
-    }
-
-    let bots = Object.values(props.podStatus?.bots ?? {}).sort(compareByBotId);
-    let hubs = Object.values(props.podStatus?.hubs ?? {}).sort(compareByHubId);
-
-    function BotTab(bot: PortalBotStatus) {
-        const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
-
-        var key = "bot-" + bot.bot_id;
-        var botClass = "bot-item";
-
-        let faultLevelClass = "faultLevel" + faultLevel(bot.health_state);
-        let selected = bot.bot_id == props.selectedBotId ? "selected" : "";
-        let tracked = bot.bot_id == props.trackedBotId ? "tracked" : "";
-        let disconnected = Math.max(0.0, bot.portalStatusAge / 1e6) > 30 ? "disconnected" : "";
-
-        /**
-         * Triggers the handling logic in CommandControl and dispatches the event to GlobalContext
-         *
-         * @returns {void}
-         *
-         * @notes
-         * This is an instance where we are beginning to migrate from CommandControl state to context
-         */
-        const handleClick = () => {
-            globalDispatch({
-                type: GlobalActions.CLICKED_NODE,
-                nodeType: NodeType.BOT,
-                nodeID: bot.bot_id,
-            });
-            props.didClickBot(bot.bot_id);
-        };
-
-        return (
-            <div
-                key={key}
-                onClick={handleClick}
-                className={`${botClass} ${faultLevelClass} ${selected} ${tracked} ${disconnected}`}
-            >
-                {bot.bot_id}
-            </div>
-        );
-    }
-
-    function HubTab(hub: HubStatus) {
-        const globalContext = useContext(GlobalContext);
-        const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
-
-        var key = "hub-" + hub.hub_id;
-        var bothubClass = "hub-item";
-
-        let faultLevelClass = "faultLevel" + faultLevel(hub.health_state);
-
+    function getClassName(
+        nodeType: NodeType,
+        nodeID: number,
+        selectedNode: SelectedNode,
+        healthState: HealthState,
+    ) {
+        let botHubClass = "node-item";
         let selected = "";
-
-        if (
-            globalContext.selectedNode !== null &&
-            globalContext.selectedNode.type === NodeType.HUB
-        ) {
+        if (selectedNode.type == nodeType && selectedNode.id == nodeID) {
             selected = "selected";
         }
-
-        /**
-         * Triggers the handling logic in CommandControl and dispatches the event to GlobalContext
-         *
-         * @returns {void}
-         *
-         * @notes
-         * This is an instance where we are beginning to migrate from CommandControl state to context
-         */
-        const handleClick = () => {
-            props.didClickHub(hub.hub_id);
-            globalDispatch({
-                type: GlobalActions.CLICKED_NODE,
-                nodeType: NodeType.HUB,
-                nodeID: hub.hub_id,
-            });
-        };
-
-        //For now we are naming HUB, HUB with no id
-        //In the future we will have to revisit this
-        return (
-            <div
-                key={key}
-                onClick={handleClick}
-                className={`${bothubClass} ${faultLevelClass} ${selected}`}
-            >
-                {"HUB"}
-            </div>
-        );
+        let faultLevelClass = "faultLevel" + faultLevel.get(healthState);
+        return `${botHubClass} ${faultLevelClass} ${selected}`;
     }
+
+    // NodeListPanel
+    const jaiaSystemContext = useContext(JaiaSystemContext);
+    const globalContext: GlobalContextType = useContext(GlobalContext);
+    const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
+
+    if (jaiaSystemContext === null || globalContext === null) {
+        return <div></div>;
+    }
+
+    const hubs = sortBy(Array.from(jaiaSystemContext.hubs.values() ?? []), ["hubID"]);
+    const bots = sortBy(Array.from(jaiaSystemContext.bots.values() ?? []), ["botID"]);
+    const selectedNode = globalContext.selectedNode;
 
     return (
         <div id="nodesList">
-            {hubs.map(HubTab)}
-            {bots.map(BotTab)}
+            {hubs.map((hub) => (
+                <div
+                    key={`hub-${hub.getHubID()}`}
+                    onClick={() => handleClick(NodeType.HUB, hub.getHubID())}
+                    className={getClassName(
+                        NodeType.HUB,
+                        hub.getHubID(),
+                        selectedNode,
+                        hub.getHealthState(),
+                    )}
+                >
+                    {"HUB"}
+                </div>
+            ))}
+            {bots.map((bot) => (
+                <div
+                    key={`bot-${bot.getBotID()}`}
+                    onClick={() => handleClick(NodeType.BOT, bot.getBotID())}
+                    className={getClassName(
+                        NodeType.BOT,
+                        bot.getBotID(),
+                        selectedNode,
+                        bot.getHealthState(),
+                    )}
+                >
+                    {bot.getBotID()}
+                </div>
+            ))}
         </div>
     );
 }

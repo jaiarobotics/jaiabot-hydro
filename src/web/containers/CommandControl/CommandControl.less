@@ -178,8 +178,25 @@ td {
                 text-align: center;
                 vertical-align: middle;
             }
+            .node-item {
+                .unselectable;
+                cursor: pointer;
+                display: inline-block;
+                border: 1px solid white;
+                .bgcolor(@good-color);
+                border-radius: @panel-corner-radius;
+                font-size: 17pt;
+                height: 50px;
+                line-height: 38pt;
+                width: 50px;
+                margin: @layout-margin-px / 2;
+                padding: 0;
+                text-align: center;
+                vertical-align: middle;
+            }
 
             // The order of these matters
+            // TODO: Removed these
             > div.bot-item.tracked {
                 .bgcolor(@tracked-color);
             }
@@ -201,6 +218,25 @@ td {
 
             > div.hub-item.selected {
                 outline: 5px solid @selected-color;
+            }
+            // New combined style
+            > div.node-item.tracked {
+                .bgcolor(@tracked-color);
+            }
+            > div.node-item.faultLevel1 {
+                .bgcolor(@warning-color);
+            }
+            > div.node-item.faultLevel2 {
+                .bgcolor(@error-color);
+            }
+            > div.node-item.disconnected {
+                .bgcolor(@disconnected);
+            }
+            > div.node-item.selected {
+                outline: 5px solid @selected-color;
+            }
+            > div.node-item.controlled {
+                .bgcolor(@controlled-color);
             }
         }
     }

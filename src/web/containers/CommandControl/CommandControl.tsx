@@ -4259,10 +4259,6 @@ export default class CommandControl extends React.Component {
 
                 <div id="nodesDrawer">
                     <NodeListPanel
-                        podStatus={this.getPodStatus()}
-                        selectedBotId={this.selectedBotId()}
-                        selectedHubId={this.selectedHubId()}
-                        trackedBotId={this.state.trackingTarget}
                         didClickBot={this.didClickBot.bind(this)}
                         didClickHub={this.didClickHub.bind(this)}
                     />
