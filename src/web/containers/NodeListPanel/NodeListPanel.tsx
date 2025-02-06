@@ -14,18 +14,13 @@ import { GlobalActions } from "../../context/Global/GlobalActions";
 import { HealthState } from "../../shared/JAIAProtobuf";
 import sortBy from "lodash/sortBy";
 
-interface Props {
-    didClickBot: (bot_id: number) => void;
-    didClickHub: (hub_id: number) => void;
-}
-
 const faultLevel: Map<HealthState, number> = new Map([
     [HealthState.HEALTH__OK, 0],
     [HealthState.HEALTH__DEGRADED, 1],
     [HealthState.HEALTH__FAILED, 2],
 ]);
 
-export function NodeListPanel(props: Props) {
+export function NodeListPanel() {
     /**
      * Triggered when a node is clicked.  Dispatches GlobalAction
      * to handle the event
@@ -35,7 +30,6 @@ export function NodeListPanel(props: Props) {
      *
      * @returns {void}
      *
-     * @notes Remove calls to functions from props once CommandControl is updated
      */
     const handleClick = (nodeType: NodeType, nodeID: number) => {
         globalDispatch({
@@ -43,23 +37,26 @@ export function NodeListPanel(props: Props) {
             nodeType: nodeType,
             nodeID: nodeID,
         });
-        if (nodeType == NodeType.BOT) props.didClickBot(nodeID);
-        if (nodeType == NodeType.HUB) props.didClickHub(nodeID);
     };
 
-    function getClassName(
-        nodeType: NodeType,
-        nodeID: number,
-        selectedNode: SelectedNode,
-        healthState: HealthState,
-    ) {
-        let botHubClass = "node-item";
+    /**
+     *
+     * @param {NodeType} nodeType indicates it it is a Bot or Hub
+     * @param {number} nodeID ID of hub or bot
+     * @param {HealthState} healthState Health of hub or bot
+     * @returns {string} className
+     */
+    function getClassName(nodeType: NodeType, nodeID: number, healthState: HealthState) {
+        const selectedNode = globalContext.selectedNode;
+
+        let nodeClass = "node-item";
+        let botHubClass = nodeType == NodeType.BOT ? "bot-item" : "hub-item";
         let selected = "";
         if (selectedNode.type == nodeType && selectedNode.id == nodeID) {
             selected = "selected";
         }
         let faultLevelClass = "faultLevel" + faultLevel.get(healthState);
-        return `${botHubClass} ${faultLevelClass} ${selected}`;
+        return `${nodeClass} ${botHubClass} ${faultLevelClass} ${selected}`;
     }
 
     // NodeListPanel
@@ -73,7 +70,6 @@ export function NodeListPanel(props: Props) {
 
     const hubs = sortBy(Array.from(jaiaSystemContext.hubs.values() ?? []), ["hubID"]);
     const bots = sortBy(Array.from(jaiaSystemContext.bots.values() ?? []), ["botID"]);
-    const selectedNode = globalContext.selectedNode;
 
     return (
         <div id="nodesList">
@@ -81,12 +77,7 @@ export function NodeListPanel(props: Props) {
                 <div
                     key={`hub-${hub.getHubID()}`}
                     onClick={() => handleClick(NodeType.HUB, hub.getHubID())}
-                    className={getClassName(
-                        NodeType.HUB,
-                        hub.getHubID(),
-                        selectedNode,
-                        hub.getHealthState(),
-                    )}
+                    className={getClassName(NodeType.HUB, hub.getHubID(), hub.getHealthState())}
                 >
                     {"HUB"}
                 </div>
@@ -95,12 +86,7 @@ export function NodeListPanel(props: Props) {
                 <div
                     key={`bot-${bot.getBotID()}`}
                     onClick={() => handleClick(NodeType.BOT, bot.getBotID())}
-                    className={getClassName(
-                        NodeType.BOT,
-                        bot.getBotID(),
-                        selectedNode,
-                        bot.getHealthState(),
-                    )}
+                    className={getClassName(NodeType.BOT, bot.getBotID(), bot.getHealthState())}
                 >
                     {bot.getBotID()}
                 </div>

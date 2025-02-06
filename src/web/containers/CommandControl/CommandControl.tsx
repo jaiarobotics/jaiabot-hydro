@@ -4258,10 +4258,7 @@ export default class CommandControl extends React.Component {
                 </div>
 
                 <div id="nodesDrawer">
-                    <NodeListPanel
-                        didClickBot={this.didClickBot.bind(this)}
-                        didClickHub={this.didClickHub.bind(this)}
-                    />
+                    <NodeListPanel />
                 </div>
 
                 <BotDetails

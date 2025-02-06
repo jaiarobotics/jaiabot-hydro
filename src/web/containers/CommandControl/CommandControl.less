@@ -145,81 +145,33 @@ td {
 
             overflow-y: auto;
 
-            .bot-item {
-                .unselectable;
-                cursor: pointer;
-                display: inline-block;
-                border: 1px solid white;
-                .bgcolor(@good-color);
-                border-radius: @panel-corner-radius;
-                font-size: 20pt;
-                height: 50px;
-                line-height: 38pt;
-                width: 50px;
-                margin: @layout-margin-px - 3;
-                padding: 0;
-                text-align: center;
-                vertical-align: middle;
-            }
-
-            .hub-item {
-                .unselectable;
-                cursor: pointer;
-                display: inline-block;
-                border: 1px solid white;
-                .bgcolor(@good-color);
-                border-radius: 20pt;
-                font-size: 17pt;
-                height: 50px;
-                line-height: 38pt;
-                width: 50px;
-                margin: @layout-margin-px / 2;
-                padding: 0;
-                text-align: center;
-                vertical-align: middle;
-            }
             .node-item {
                 .unselectable;
                 cursor: pointer;
                 display: inline-block;
                 border: 1px solid white;
                 .bgcolor(@good-color);
-                border-radius: @panel-corner-radius;
-                font-size: 17pt;
                 height: 50px;
                 line-height: 38pt;
                 width: 50px;
-                margin: @layout-margin-px / 2;
                 padding: 0;
                 text-align: center;
                 vertical-align: middle;
             }
 
-            // The order of these matters
-            // TODO: Removed these
-            > div.bot-item.tracked {
-                .bgcolor(@tracked-color);
-            }
-            > div.bot-item.faultLevel1 {
-                .bgcolor(@warning-color);
-            }
-            > div.bot-item.faultLevel2 {
-                .bgcolor(@error-color);
-            }
-            > div.bot-item.disconnected {
-                .bgcolor(@disconnected);
-            }
-            > div.bot-item.selected {
-                outline: 5px solid @selected-color;
-            }
-            > div.bot-item.controlled {
-                .bgcolor(@controlled-color);
+            .bot-item {
+                border-radius: @panel-corner-radius;
+                font-size: 20pt;
+                margin: @layout-margin-px - 3;
             }
 
-            > div.hub-item.selected {
-                outline: 5px solid @selected-color;
+            .hub-item {
+                border-radius: 20pt;
+                font-size: 17pt;
+                margin: @layout-margin-px / 2;
             }
-            // New combined style
+
+            // The order of these matters
             > div.node-item.tracked {
                 .bgcolor(@tracked-color);
             }
