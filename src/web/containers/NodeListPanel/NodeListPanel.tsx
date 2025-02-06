@@ -5,14 +5,12 @@ import {
     GlobalAction,
     NodeType,
     GlobalContextType,
-    SelectedNode,
 } from "../../context/Global/GlobalContext";
 import { JaiaSystemContext } from "../../context/JaiaSystem/JaiaSystemContext";
-
 import { GlobalActions } from "../../context/Global/GlobalActions";
-
 import { HealthState } from "../../shared/JAIAProtobuf";
 import sortBy from "lodash/sortBy";
+import "./NodeListPanel.less";
 
 const faultLevel: Map<HealthState, number> = new Map([
     [HealthState.HEALTH__OK, 0],
