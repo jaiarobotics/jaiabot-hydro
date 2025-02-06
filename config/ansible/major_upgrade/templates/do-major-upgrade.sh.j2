@@ -45,6 +45,7 @@ rsync -aP {{ upgrade_reuse_dir }}/ ${new_ro_rootfs_mountpoint}/
 # Write new boot dir
 ###############################
 
+mount -o remount,rw ${boot_mountpoint}
 rsync -aP --delete {{ upgrade_boot_dir }}/ ${boot_mountpoint}/ 
 
 ###############################
