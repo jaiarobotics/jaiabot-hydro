@@ -6,13 +6,18 @@ import { Feature } from "ol";
 import { Geometry } from "ol/geom";
 
 import Map from "../Map";
-import { map } from "../../../openlayers/maps/map";
+import { GlobalContextProvider } from "../../../context/Global/GlobalContext";
+
 import { bots } from "../../../data/bots/bots";
 import { hubs } from "../../../data/hubs/hubs";
+import { jaiaGlobal } from "../../../data/jaia_global/jaia-global";
+import { map } from "../../../openlayers/maps/map";
+
 import { MapFeatureTypes } from "../../../types/openlayers-types";
+import { NodeTypes } from "../../../types/jaia-system-types";
 import { PortalBotStatus, PortalHubStatus } from "../../../shared/PortalStatus";
+
 import { mapBrowserEventMock } from "../../../tests/__mocks__/openlayers/events/map-browser-click.mock";
-import { GlobalContextProvider } from "../../../context/Global/GlobalContext";
 
 const mapModule = jest.requireActual("../../../openlayers/maps/map");
 
@@ -47,11 +52,14 @@ test("Select and deselect Bot and Hub icons on map", () => {
     act(() => {
         map.dispatchEvent(mapBrowserEventMock);
     });
-    expect(bots.getSelectedBotID()).toBe(1);
+    expect(jaiaGlobal.getSelectedNode().type).toBe(NodeTypes.BOT);
+    expect(jaiaGlobal.getSelectedNode().id).toBe(1);
+
     act(() => {
         map.dispatchEvent(mapBrowserEventMock);
     });
-    expect(bots.getSelectedBotID()).toBe(null);
+    expect(jaiaGlobal.getSelectedNode().type).toBe(NodeTypes.NONE);
+    expect(jaiaGlobal.getSelectedNode().id).toBe(-1);
 
     // Hub
     mapModule.map.forEachFeatureAtPixel = jest.fn().mockReturnValue(hubFeatureMock);
@@ -59,9 +67,11 @@ test("Select and deselect Bot and Hub icons on map", () => {
     act(() => {
         map.dispatchEvent(mapBrowserEventMock);
     });
-    expect(hubs.getSelectedHubID()).toBe(1);
+    expect(jaiaGlobal.getSelectedNode().type).toBe(NodeTypes.HUB);
+    expect(jaiaGlobal.getSelectedNode().id).toBe(1);
     act(() => {
         map.dispatchEvent(mapBrowserEventMock);
     });
-    expect(hubs.getSelectedHubID()).toBe(null);
+    expect(jaiaGlobal.getSelectedNode().type).toBe(NodeTypes.NONE);
+    expect(jaiaGlobal.getSelectedNode().id).toBe(-1);
 });

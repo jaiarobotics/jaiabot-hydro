@@ -8,11 +8,13 @@ import { Coordinate } from "ol/coordinate";
 // Jaia
 import Hub from "../../data/hubs/hub";
 import { hubs } from "../../data/hubs/hubs";
+import { jaiaGlobal } from "../../data/jaia_global/jaia-global";
 import { view } from "../views/view";
-import { MapIconColors } from "../../utils/style";
 import { MapFeatureTypes } from "../../types/openlayers-types";
+import { NodeTypes } from "../../types/jaia-system-types";
 
 // Style
+import { MapIconColors } from "../../utils/style";
 const hubIcon = require("../../style/icons/hub.svg");
 
 const TEXT_OFFSET_RADIUS = 11;
@@ -59,7 +61,8 @@ function generateHubStyle(hub: Hub) {
 }
 
 function getHubIconColor(hub: Hub) {
-    if (hubs.getSelectedHubID() === hub.getHubID()) {
+    const selectedNode = jaiaGlobal.getSelectedNode();
+    if (selectedNode.type === NodeTypes.HUB && selectedNode.id === hub.getHubID()) {
         return MapIconColors.SELECTED;
     } else {
         return MapIconColors.DEFAULT;

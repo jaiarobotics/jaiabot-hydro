@@ -5,11 +5,11 @@ import { GlobalActions } from "../../context/Global/GlobalActions";
 import { Feature, MapBrowserEvent } from "ol";
 import { Geometry } from "ol/geom";
 
+import { jaiaGlobal } from "../../data/jaia_global/jaia-global";
 import { map } from "../../openlayers/maps/map";
-import { bots } from "../../data/bots/bots";
-import { hubs } from "../../data/hubs/hubs";
 import { hubLayer } from "../../openlayers/layers/vector/hub-layer";
 import { botLayer } from "../../openlayers/layers/vector/bot-layer";
+import { NodeTypes } from "../../types/jaia-system-types";
 import { MapFeatureTypes } from "../../types/openlayers-types";
 
 import "./Map.less";
@@ -30,10 +30,10 @@ export default function Map() {
         if (feature && feature.get("type")) {
             switch (feature.get("type")) {
                 case MapFeatureTypes.BOT:
-                    handleBotClick(feature);
+                    handleNodeClick(feature);
                     return;
                 case MapFeatureTypes.HUB:
-                    handleHubClick(feature);
+                    handleNodeClick(feature);
                     return;
                 default:
                     return;
@@ -41,46 +41,21 @@ export default function Map() {
         }
     };
 
-    const handleBotClick = (feature: Feature<Geometry>) => {
-        if (!bots.getBot(feature.get("id"))) {
-            return;
+    const handleNodeClick = (feature: Feature<Geometry>) => {
+        const nodeType = feature.get("type");
+        const nodeID = feature.get("id");
+
+        if (nodeType === NodeTypes.BOT || nodeType == NodeTypes.HUB) {
+            // Update data model
+            jaiaGlobal.setSelectedNode({ type: nodeType, id: nodeID });
+
+            // Update OpenLayers
+            botLayer.updateFeatures();
+            hubLayer.updateFeatures();
+
+            // Update React Context
+            globalDispatch({ type: GlobalActions.CLICKED_NODE });
         }
-
-        const botID = feature.get("id");
-
-        // Update data model
-        if (bots.getSelectedBotID() === botID) {
-            bots.setSelectedBotID(null);
-        } else {
-            bots.setSelectedBotID(botID);
-        }
-
-        // Update OpenLayers
-        botLayer.updateFeatures();
-
-        // Update React Context
-        globalDispatch({ type: GlobalActions.CLICKED_NODE, nodeID: botID });
-    };
-
-    const handleHubClick = (feature: Feature<Geometry>) => {
-        if (!hubs.getHub(feature.get("id"))) {
-            return;
-        }
-
-        const hubID = feature.get("id");
-
-        // Update data model
-        if (hubs.getSelectedHubID() === hubID) {
-            hubs.setSelectedHubID(null);
-        } else {
-            hubs.setSelectedHubID(hubID);
-        }
-
-        // Update OpenLayers
-        hubLayer.updateFeatures();
-
-        // Update React Context
-        globalDispatch({ type: GlobalActions.CLICKED_NODE, nodeID: hubID });
     };
 
     return <div id="map" data-testid="map"></div>;

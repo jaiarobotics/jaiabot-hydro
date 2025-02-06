@@ -8,9 +8,11 @@ import { Coordinate } from "ol/coordinate";
 // Jaia
 import Bot from "../../data/bots/bot";
 import { bots } from "../../data/bots/bots";
+import { jaiaGlobal } from "../../data/jaia_global/jaia-global";
 import { view } from "../views/view";
 import { MapIconColors } from "../../utils/style";
 import { MapFeatureTypes } from "../../types/openlayers-types";
+import { NodeTypes } from "../../types/jaia-system-types";
 
 // Util
 import { angleToXY } from "../../utils/style";
@@ -66,7 +68,8 @@ function generateBotStyle(bot: Bot) {
 }
 
 function getBotIconColor(bot: Bot) {
-    if (bots.getSelectedBotID() === bot.getBotID()) {
+    const selectedNode = jaiaGlobal.getSelectedNode();
+    if (selectedNode.type === NodeTypes.BOT && selectedNode.id === bot.getBotID()) {
         return MapIconColors.SELECTED;
     } else {
         return MapIconColors.DEFAULT;

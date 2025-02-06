@@ -3,11 +3,9 @@ import Hub from "./hub";
 
 class Hubs {
     private hubs: Map<number, Hub>;
-    private selectedHubID: number;
 
     constructor() {
         this.hubs = new Map<number, Hub>();
-        this.selectedHubID = null;
     }
 
     getHubs() {
@@ -16,14 +14,6 @@ class Hubs {
 
     getHub(hubID: number) {
         return this.getHubs().get(hubID);
-    }
-
-    getSelectedHubID() {
-        return this.selectedHubID;
-    }
-
-    setSelectedHubID(selectedHubID: number) {
-        this.selectedHubID = selectedHubID;
     }
 
     addHub(hubStatus: PortalHubStatus) {

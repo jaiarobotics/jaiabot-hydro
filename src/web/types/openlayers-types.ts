@@ -6,6 +6,7 @@ export enum LayerTitles {
 }
 
 export enum MapFeatureTypes {
+    NONE = "NONE",
     BOT = "BOT",
     HUB = "HUB",
 }
