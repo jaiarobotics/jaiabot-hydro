@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "I: add prompt when missing overlayfs"
+
+cat <<EOF >> /home/jaia/.profile
+rootfstype=\$(findmnt -n -o fstype /)
+if [[ "\${rootfstype}" != "overlay" ]]; then
+  # Write command prompt to show warning
+  export PS1="[\[\e[31m\]OVERLAY DISK NOT MOUNTED\[\e[m\]] \u@\h:\w\$ "
+fi
+EOF
+
