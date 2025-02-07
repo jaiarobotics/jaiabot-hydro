@@ -12,12 +12,6 @@ import { HealthState } from "../../shared/JAIAProtobuf";
 import sortBy from "lodash/sortBy";
 import "./NodeList.less";
 
-const faultLevel: Map<HealthState, number> = new Map([
-    [HealthState.HEALTH__OK, 0],
-    [HealthState.HEALTH__DEGRADED, 1],
-    [HealthState.HEALTH__FAILED, 2],
-]);
-
 export function NodeList() {
     // NodeList
     const jaiaSystemContext = useContext(JaiaSystemContext);
@@ -58,6 +52,11 @@ export function NodeList() {
      * @returns {string} className
      */
     function getClassName(nodeType: NodeType, nodeID: number, healthState: HealthState) {
+        const faultLevel: Map<HealthState, number> = new Map([
+            [HealthState.HEALTH__OK, 0],
+            [HealthState.HEALTH__DEGRADED, 1],
+            [HealthState.HEALTH__FAILED, 2],
+        ]);
         const selectedNode = globalContext.selectedNode;
         const nodeClass = "node-item";
         const botHubClass = nodeType === NodeType.BOT ? "bot-item" : "hub-item";
