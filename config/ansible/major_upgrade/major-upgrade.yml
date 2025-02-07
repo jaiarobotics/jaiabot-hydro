@@ -44,7 +44,7 @@
       
     - name: Check that upgrade version is greater than current version
       shell: |
-        if ! dpkg --compare-versions {{ jaiabot_major_version }} gt {{ jaiabot_current_version }}; then
+        if ! dpkg --compare-versions {{ jaiabot_major_version }} gt $(echo {{ jaiabot_current_version }} | cut -d '-' -f1) ; then
             echo "New major version ({{ jaiabot_major_version }}) is not greater than current version ({{ jaiabot_current_version }})"
             return 1
         fi
