@@ -6,7 +6,7 @@
   vars_files:
     - vars/disk-space.yml
   vars:
-    - upgrade_dir: /var/log/jaiabot/major_upgrade/v2
+    - upgrade_dir: '/var/log/jaiabot/major_upgrade/{{ ansible_date_time.iso8601_basic }}'
     - upgrade_tmp_dir: '{{ upgrade_dir }}/tmp'
     - upgrade_reuse_dir: '{{ upgrade_dir }}/reuse'
     - upgrade_backup_dir: '{{ upgrade_dir }}/backup'
