@@ -6,7 +6,7 @@ import { JaiaSystemContextProvider } from "../../../context/JaiaSystem/JaiaSyste
 import { PortalBotStatus } from "../../../shared/PortalStatus";
 import { PortalHubStatus } from "../../../shared/PortalStatus";
 
-import { NodeListPanel } from "../NodeListPanel";
+import { NodeList } from "../NodeList";
 import { bots } from "../../../data/bots/bots";
 import { HealthState } from "../../../shared/JAIAProtobuf";
 import { hubs } from "../../../data/hubs/hubs";
@@ -48,7 +48,7 @@ beforeEach(() => {
     render(
         <GlobalContextProvider>
             <JaiaSystemContextProvider>
-                <NodeListPanel />
+                <NodeList />
             </JaiaSystemContextProvider>
         </GlobalContextProvider>,
     );

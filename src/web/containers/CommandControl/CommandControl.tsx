@@ -20,7 +20,7 @@ import { ContactLayers } from "../../openlayers/map/layers/contact-layers";
 import { HubDetails } from "../HubDetails/HubDetails";
 import { CommandList } from "../../missions/missions";
 import { SurveyLines } from "../../missions/survey/survey-lines";
-import { NodeListPanel } from "../NodeListPanel/NodeListPanel";
+import { NodeList } from "../NodeList/NodeList";
 import { Interactions } from "../../openlayers/map/interactions";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 import { SettingsPanel } from "../SettingsPanel/SettingsPanel";
@@ -4258,7 +4258,7 @@ export default class CommandControl extends React.Component {
                 </div>
 
                 <div id="nodesDrawer">
-                    <NodeListPanel />
+                    <NodeList />
                 </div>
 
                 <BotDetails

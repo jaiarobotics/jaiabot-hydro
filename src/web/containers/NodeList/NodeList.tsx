@@ -10,7 +10,7 @@ import { JaiaSystemContext } from "../../context/JaiaSystem/JaiaSystemContext";
 import { GlobalActions } from "../../context/Global/GlobalActions";
 import { HealthState } from "../../shared/JAIAProtobuf";
 import sortBy from "lodash/sortBy";
-import "./NodeListPanel.less";
+import "./NodeList.less";
 
 const faultLevel: Map<HealthState, number> = new Map([
     [HealthState.HEALTH__OK, 0],
@@ -18,7 +18,7 @@ const faultLevel: Map<HealthState, number> = new Map([
     [HealthState.HEALTH__FAILED, 2],
 ]);
 
-export function NodeListPanel() {
+export function NodeList() {
     /**
      * Triggered when a node is clicked.  Dispatches GlobalAction
      * to handle the event
