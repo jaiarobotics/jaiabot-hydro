@@ -70,7 +70,7 @@ export function NodeListPanel() {
     const bots = sortBy(Array.from(jaiaSystemContext.bots.values() ?? []), ["botID"]);
 
     return (
-        <div id="nodesList">
+        <div id="nodesList" data-testid="nodesList">
             {hubs.map((hub) => (
                 <div
                     key={`hub-${hub.getHubID()}`}
