@@ -30,8 +30,6 @@ runcmd:
   - mkdir -p /var/log/apache2
   # Set up I2C
   - /etc/jaiabot/init/setup-i2c.sh
-  # Set up wlan password
-  - sed -i "s/jaia_network_fleet_password=.*/jaia_network_fleet_password=\"${wlan_password}\"/" /etc/jaiabot/network.env
   # Install jaiabot embedded for unprivileged jaia user
   - env USER=jaia DEBIAN_FRONTEND=noninteractive dpkg -i --force-confdef /opt/jaiabot-embedded*.deb
   # Append first boot date to version file
