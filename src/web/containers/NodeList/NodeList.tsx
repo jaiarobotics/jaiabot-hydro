@@ -19,6 +19,18 @@ const faultLevel: Map<HealthState, number> = new Map([
 ]);
 
 export function NodeList() {
+    // NodeList
+    const jaiaSystemContext = useContext(JaiaSystemContext);
+    const globalContext: GlobalContextType = useContext(GlobalContext);
+    const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
+
+    if (jaiaSystemContext === null || globalContext === null) {
+        return <div></div>;
+    }
+
+    const hubs = sortBy(Array.from(jaiaSystemContext.hubs.values() ?? []), ["hubID"]);
+    const bots = sortBy(Array.from(jaiaSystemContext.bots.values() ?? []), ["botID"]);
+
     /**
      * Triggered when a node is clicked.  Dispatches GlobalAction
      * to handle the event
@@ -38,6 +50,7 @@ export function NodeList() {
     };
 
     /**
+     * Creates the className string for the node
      *
      * @param {NodeType} nodeType indicates it it is a Bot or Hub
      * @param {number} nodeID ID of hub or bot
@@ -46,28 +59,15 @@ export function NodeList() {
      */
     function getClassName(nodeType: NodeType, nodeID: number, healthState: HealthState) {
         const selectedNode = globalContext.selectedNode;
-
-        let nodeClass = "node-item";
-        let botHubClass = nodeType == NodeType.BOT ? "bot-item" : "hub-item";
+        const nodeClass = "node-item";
+        const botHubClass = nodeType === NodeType.BOT ? "bot-item" : "hub-item";
         let selected = "";
-        if (selectedNode.type == nodeType && selectedNode.id == nodeID) {
+        if (selectedNode.type == nodeType && selectedNode.id === nodeID) {
             selected = "selected";
         }
-        let faultLevelClass = "faultLevel" + faultLevel.get(healthState);
+        const faultLevelClass = "faultLevel" + faultLevel.get(healthState);
         return `${nodeClass} ${botHubClass} ${faultLevelClass} ${selected}`;
     }
-
-    // NodeListPanel
-    const jaiaSystemContext = useContext(JaiaSystemContext);
-    const globalContext: GlobalContextType = useContext(GlobalContext);
-    const globalDispatch: React.Dispatch<GlobalAction> = useContext(GlobalDispatchContext);
-
-    if (jaiaSystemContext === null || globalContext === null) {
-        return <div></div>;
-    }
-
-    const hubs = sortBy(Array.from(jaiaSystemContext.hubs.values() ?? []), ["hubID"]);
-    const bots = sortBy(Array.from(jaiaSystemContext.bots.values() ?? []), ["botID"]);
 
     return (
         <div id="nodesList" data-testid="nodesList">
