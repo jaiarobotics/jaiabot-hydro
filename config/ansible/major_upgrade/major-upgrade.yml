@@ -43,9 +43,11 @@
         msg: "Found major upgrade version: {{ jaiabot_major_version }}, current version: {{ jaiabot_current_version }}"
       
     - name: Check that upgrade version is greater than current version
-      assert:
-        that: "{{ jaiabot_major_version is version(jaiabot_current_version, '>') }}"
-        fail_msg: "New major version ({{ jaiabot_major_version }}) is not greater than current version ({{ jaiabot_current_version }})"
+      shell: |
+        if ! dpkg --compare-versions {{ jaiabot_major_version }} gt {{ jaiabot_current_version }}; then
+            echo "New major version ({{ jaiabot_major_version }}) is not greater than current version ({{ jaiabot_current_version }})"
+            return 1
+        fi
       
     - include_tasks: tasks/check-disk-space.yml
 
@@ -56,7 +58,7 @@
     - name: Download the fleet config
       get_url:
         url: "http://{{ hub_ip }}/updates/major_upgrade/fleet{{ jaiabot_embedded_fleet_id }}.cfg"
-        dest: '{{ upgrade_dir }}'
+        dest: "{{ upgrade_dir }}"
 
     - include_tasks: tasks/fetch-reuse-files.yml
     # - include_tasks: tasks/backup-old-rootfs-overlay.yml
@@ -66,7 +68,6 @@
         mkdir -p {{ upgrade_boot_dir }}
         tar -xz -f {{ upgrade_dir }}/{{ rootfs_major_version }}.boot.tar.gz -C {{ upgrade_boot_dir }}
         jaia admin fleet generate --bootdir {{ upgrade_boot_dir }} {{ upgrade_dir }}/fleet{{ jaiabot_embedded_fleet_id }}.cfg {{ jaiabot_embedded_type }} {{ jaiabot_embedded_hub_id if jaiabot_embedded_type == 'hub' else jaiabot_embedded_bot_id }}
-        # Don't configure VPN from scratch
         rm {{ upgrade_boot_dir }}/jaiabot/init/id_vpn_tmp*
     
     - name: Generate upgrade script
@@ -75,5 +76,6 @@
         dest: '{{ upgrade_dir }}/do-major-upgrade.sh'
         mode: a=rwx
 
-
-        
+    - name: Run upgrade script
+      shell: |
+        {{ upgrade_dir }}/do-major-upgrade.sh >& {{ upgrade_dir }}/major_upgrade_final.log
