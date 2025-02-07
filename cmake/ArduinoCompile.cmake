@@ -1,6 +1,6 @@
 set(ARDUINO_SOURCE_DIR ${project_SRC_DIR}/arduino)
 set(ARDUINO_BINARY_DIR ${project_SHARE_DIR}/jaiabot/arduino)
-set(ARDUINO_SERIAL_PORT /etc/jaiabot/dev/arduino CACHE STRING 
+set(ARDUINO_SERIAL_PORT /dev/arduino CACHE STRING 
   "Serial port for Arduino flashing" )
 set(ARDUINO_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/jaiabot/arduino)
 

@@ -33,9 +33,6 @@ version=${jaiabot_version:-${default_version}}
 version_lower=$(echo "$version" | tr '[:upper:]' '[:lower:]')
 distro=${jaiabot_distro:-${jaia_version_ubuntu_codename}}
 
-# install clang-format hook if not installed
-[ ! -e ${script_dir}/../.git/hooks/pre-commit ] && ${script_dir}/../scripts/git-hooks/clang-format-hooks/git-pre-commit-format install
-
 if [[ "$jaiabot_machine_type" == "virtualbox" ]]; then
     cd ${script_dir}/..
 
@@ -50,8 +47,8 @@ if [[ "$jaiabot_machine_type" == "virtualbox" ]]; then
         ./scripts/docker-build-build-system.sh
     fi
 
-    echo "🟢 Building jaiabot apps using docker ${image_name} image"
-    docker run --env JAIA_BUILD_NPROC -v `pwd`:/home/${botuser}/jaiabot -w /home/${botuser}/jaiabot -t ${image_name} bash -c "./scripts/amd64-build-vbox.sh"
+    echo "🟢 Building jaiabot apps using docker ${image_name} image to ${build_dir}"
+    docker run --env JAIA_BUILD_NPROC -v `pwd`:/home/${botuser}/jaiabot -w /home/${botuser}/jaiabot -t ${image_name} bash -c "./scripts/amd64-build-vbox.sh ${build_dir}"
 
 else    
     cd ${script_dir}/..
@@ -67,8 +64,8 @@ else
         ./scripts/docker-build-build-system.sh
     fi
 
-    echo "🟢 Building jaiabot apps using docker ${image_name} image"
-    docker run --env JAIA_BUILD_NPROC -v `pwd`:/home/${botuser}/jaiabot -w /home/${botuser}/jaiabot -t ${image_name} bash -c "./scripts/arm64-build.sh"
+    echo "🟢 Building jaiabot apps using docker ${image_name} image to ${build_dir}"
+    docker run --env JAIA_BUILD_NPROC -v `pwd`:/home/${botuser}/jaiabot -w /home/${botuser}/jaiabot -t ${image_name} bash -c "./scripts/arm64-build.sh ${build_dir}"
 fi
 
 # Get goby and dccl versions currently installed into the build image

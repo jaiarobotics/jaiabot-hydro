@@ -22,12 +22,8 @@ pushd ${HOME}/jaiabot/${build_dir}/share/jaiabot/python
     /usr/bin/python3 -m venv venv/
     source venv/bin/activate
     # /tmp does not necessarily have enough space on the embedded boards, but /var/log is large
-    sudo mkdir -p /var/log/tmp
-    sudo chmod a+rwx /var/log/tmp
-    export TMPDIR=/var/log/tmp
     python3 -m pip -q install wheel
     python3 -m pip install -q -r requirements.txt
-    sudo rm -rf /var/log/tmp
 popd
 
 sudo apt-get -qq -y remove "*jaiabot*"
@@ -48,9 +44,9 @@ if [ ! -z "$jaiabot_systemd_type" ]; then
     echo "🟢 Installing and enabling $jaiabot_systemd_type systemd services (you can safely ignore bash 'Inappropriate ioctl for device' and 'no job control in this shell' errors)"
 
     if [[ "$jaiabot_systemd_type" == *"bot"* ]]; then
-
         cd ${HOME}/jaiabot/config/gen
-        ./systemd-local.sh ${jaiabot_systemd_type} --bot_index $jaia_bot_index --fleet_index $jaia_fleet_index --electronics_stack $jaia_electronics_stack --imu_type $jaia_imu_type --imu_install_type $jaia_imu_install_type --arduino_type $jaia_arduino_type --bot_type ${jaia_bot_type,,} $jaia_simulation --enable --motor_harness_type ${jaia_motor_harness_type,,}
+        (set -x; export PATH=${HOME}/jaiabot/${build_dir}/bin:$PATH;
+        ./systemd-local.sh ${jaiabot_systemd_type} --bot_index $jaia_bot_index --fleet_index $jaia_fleet_index --electronics_stack $jaia_electronics_stack --imu_type $jaia_imu_type --imu_install_type $jaia_imu_install_type --arduino_type $jaia_arduino_type --bot_type ${jaia_bot_type,,} $jaia_simulation --enable --motor_harness_type ${jaia_motor_harness_type,,})
 
     else
 
