@@ -32,12 +32,6 @@ const mockHubStatus1: PortalHubStatus = {
     portalStatusAge: 0,
 };
 
-const mockHubStatus3: PortalHubStatus = {
-    hub_id: 3,
-    health_state: HealthState.HEALTH__FAILED,
-    portalStatusAge: 0,
-};
-
 // Add Bots in non-numerical order to verify sorting
 bots.addBot(mockBotStatus5);
 bots.addBot(mockBotStatus1);
@@ -84,7 +78,7 @@ test("Verify Node Selection Updates Style", async () => {
     expect(nodes[3].className).toContain("selected");
     expect(nodes[0].className).not.toContain("selected");
 
-    // Deselect the Bot verify nothing is selectec
+    // Deselect the Bot verify nothing is selected
     await userEvent.click(nodes[3]);
     expect(nodes.map((div) => div.className)).not.toContain("selected");
 });
