@@ -78,4 +78,4 @@
 
     - name: Run upgrade script
       shell: |
-        {{ upgrade_dir }}/do-major-upgrade.sh >& {{ upgrade_dir }}/major_upgrade_final.log
+        {{ upgrade_dir }}/do-major-upgrade.sh > {{ upgrade_dir }}/major_upgrade_final.log 2>&1
