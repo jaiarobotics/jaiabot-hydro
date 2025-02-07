@@ -34,28 +34,13 @@ write_files:
 {%- for pk in ssh.permanentAuthorizedKeys %}
       {{ pk }}
 {%- endfor %}
-  ## Wifi
-  # SSID, address and gateway XXX and YYY will be automatically updated by jaiabot-embedded postinst
-  - path: /etc/network/interfaces.d/wlan0
-    content: |
-      auto wlan0
-      iface wlan0 inet static
-{%- if wlanPassword != "dummy" %}    
-        wpa-essid SSID
-        wpa-psk {{ wlanPassword }}
-{%- endif %}
-        address 10.23.XXX.YYY
-        netmask 255.255.255.0
-        gateway 10.23.XXX.1
-  - path: /etc/network/interfaces.d/eth0
-    content: |
-      # auto eth0
-      # iface eth0 inet static
-      #   address 10.23.XXX.YYY
-      #   netmask 255.255.255.0
-      #   gateway 10.23.XXX.1
+
 
 runcmd:
   - if [ ! -e /etc/jaiabot/inventory.yml ]; then /etc/jaiabot/init/jaia-create-ansible-inventory.sh -b "{{ bots | join(",") }}" -h "{{ hubs | join(",") }}" > /etc/jaiabot/inventory.yml; fi
   # Enable or disable service VPN 
   - sudo systemctl {{ "enable" if serviceVpnEnabled else "disable" }} wg-quick@wg_jaia
+  # Set up wlan
+  - sed -i "s/jaia_network_fleet_password=.*/jaia_network_fleet_password=\"{{ wlanPassword }}\"/" /etc/jaiabot/network.env
+  - /usr/bin/jaia_update_network.sh
+  - systemctl enable wpa_supplicant@wlan0

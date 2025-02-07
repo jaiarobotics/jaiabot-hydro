@@ -20,11 +20,6 @@ users:
 growpart:
   mode: auto
   devices: [/var/log]
-
-bootcmd:
-  # Disable networkd wait as we're using /etc/network/interfaces on Rasp Pi
-  # REMOVE IN V2
-  - if [ "$(cloud-init query cloud_id)" = "nocloud" ]; then systemctl mask systemd-networkd-wait-online.service; fi
   
 runcmd:
   # Set up log disk
@@ -35,12 +30,8 @@ runcmd:
   - mkdir -p /var/log/apache2
   # Set up I2C
   - /etc/jaiabot/init/setup-i2c.sh
-  # For backwards compatibility
-  # REMOVE IN V2
-  - mkdir -p /etc/jaiabot/dev
-  - ln -s -f /dev/gps0 /etc/jaiabot/dev/gps
-  - ln -s -f /dev/arduino /etc/jaiabot/dev/arduino
-  - ln -s -f /dev/xbee /etc/jaiabot/dev/xbee
+  # Set up wlan password
+  - sed -i "s/jaia_network_fleet_password=.*/jaia_network_fleet_password=\"${wlan_password}\"/" /etc/jaiabot/network.env
   # Install jaiabot embedded for unprivileged jaia user
   - env USER=jaia DEBIAN_FRONTEND=noninteractive dpkg -i --force-confdef /opt/jaiabot-embedded*.deb
   # Append first boot date to version file
