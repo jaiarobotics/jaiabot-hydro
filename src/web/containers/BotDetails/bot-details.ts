@@ -129,29 +129,32 @@ export function isBotLogging(missionState: MissionState) {
 }
 
 /**
- * Provides active wapoint number and the Bot's distance to that point
+ * Provides active wapoint number string
  *
- * @param {MissionStatus} missionStatus Contains the active waypoint and Bot's distance to that waypoint
- * @returns {string, string} Tuple containg the active waypoint and distance to it
- *
- * @notes When Mission Status is reworked to remove Runs from the vocabulary
- * we should add logic to the new Mission Status to make this simpler
- * alleviating need to return a tuple
+ * @param {MissionStatus} missionStatus Contains the active waypoint and distance to that waypoint
+ * @returns {string} waypoint
  */
-export function getActiveWptStrings(missionStatus: MissionStatus) {
-    let activeWptString = missionStatus.activeGoal ?? "N/A";
-    let distToWpt = missionStatus.distanceToActiveGoal ?? "N/A";
-
-    if (activeWptString !== "N/A" && distToWpt === "N/A") {
-        distToWpt = "Distance To Goal > 1000";
-    } else if (activeWptString !== "N/A" && distToWpt !== "N/A") {
-        distToWpt = distToWpt + " m";
-    } else if (activeWptString === "N/A" && distToWpt !== "N/A") {
-        activeWptString = "Recovery";
-        distToWpt = distToWpt + " m";
+export function getActiveWpt(missionStatus: MissionStatus) {
+    // if there is no active goal but there is a distance we are in Recovery
+    if (!missionStatus.activeGoal && missionStatus.distanceToActiveGoal) {
+        return "Recovery";
+    } else {
+        return missionStatus.activeGoal ?? "N/A";
     }
+}
 
-    return { activeWptString, distToWpt };
+/**
+ * Provides distance to active waypoint string
+ *
+ * @param {MissionStatus} missionStatus Contains the active waypoint and distance to that waypoint
+ * @returns {string} waypoint
+ */
+export function getDistToWaypoint(missionStatus: MissionStatus) {
+    if (missionStatus.distanceToActiveGoal) {
+        return missionStatus.distanceToActiveGoal + " m";
+    } else {
+        return "Distance To Goal > 1000";
+    }
 }
 
 /**

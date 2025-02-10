@@ -23,7 +23,8 @@ import {
     getWaypontHelperText,
     getBotOffloadPercent,
     getRepeatProgress,
-    getActiveWptStrings,
+    getActiveWpt,
+    getDistToWaypoint,
     isBotLogging,
     disableButton,
     disableClearRunButton,
@@ -774,13 +775,13 @@ export function BotDetails(props: BotDetailsProps) {
                                         <tr>
                                             <td>Active Goal</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {getActiveWptStrings(missionStatus).activeWptString}
+                                                {getActiveWpt(missionStatus)}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>Distance to Goal</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {getActiveWptStrings(missionStatus).distToWpt}
+                                                {getDistToWaypoint(missionStatus)}
                                             </td>
                                         </tr>
                                         <tr>

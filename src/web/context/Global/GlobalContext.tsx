@@ -190,6 +190,7 @@ function handleClickedNode(mutableState: GlobalContextType) {
         mutableState.visibleDetails = NodeTypes.NONE;
     } else {
         // Clicked non-selected node
+        mutableState.selectedNode = selectedNode;
         mutableState.visibleDetails = selectedNode.type;
     }
     return mutableState;
