@@ -23,7 +23,6 @@ import {
     getWaypontHelperText,
     getBotOffloadPercent,
     getRepeatProgress,
-    getActiveWpt,
     getDistToWaypoint,
     isBotLogging,
     disableButton,
@@ -775,7 +774,7 @@ export function BotDetails(props: BotDetailsProps) {
                                         <tr>
                                             <td>Active Goal</td>
                                             <td style={{ whiteSpace: "pre-line" }}>
-                                                {getActiveWpt(missionStatus)}
+                                                {missionStatus.activeGoal ?? "N/A"}
                                             </td>
                                         </tr>
                                         <tr>

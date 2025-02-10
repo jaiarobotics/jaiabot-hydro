@@ -129,32 +129,19 @@ export function isBotLogging(missionState: MissionState) {
 }
 
 /**
- * Provides active wapoint number string
- *
- * @param {MissionStatus} missionStatus Contains the active waypoint and distance to that waypoint
- * @returns {string} waypoint
- */
-export function getActiveWpt(missionStatus: MissionStatus) {
-    // if there is no active goal but there is a distance we are in Recovery
-    if (!missionStatus.activeGoal && missionStatus.distanceToActiveGoal) {
-        return "Recovery";
-    } else {
-        return missionStatus.activeGoal ?? "N/A";
-    }
-}
-
-/**
  * Provides distance to active waypoint string
  *
  * @param {MissionStatus} missionStatus Contains the active waypoint and distance to that waypoint
  * @returns {string} waypoint
  */
 export function getDistToWaypoint(missionStatus: MissionStatus) {
+    if (!missionStatus.activeGoal) {
+        return "N/A";
+    }
     if (missionStatus.distanceToActiveGoal) {
         return missionStatus.distanceToActiveGoal + " m";
-    } else {
-        return "Distance To Goal > 1000";
     }
+    return "Distance To Goal > 1000";
 }
 
 /**
