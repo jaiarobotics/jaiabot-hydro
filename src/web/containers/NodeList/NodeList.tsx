@@ -60,6 +60,7 @@ export function NodeList() {
             [HealthState.HEALTH__FAILED, 2],
         ]);
         const selectedNode = globalContext.selectedNode;
+
         const nodeClass = "node-item";
         const botHubClass = nodeType === NodeTypes.BOT ? "bot-item" : "hub-item";
         let selected = "";
