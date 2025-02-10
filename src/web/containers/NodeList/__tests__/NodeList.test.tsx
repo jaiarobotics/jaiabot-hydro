@@ -49,7 +49,7 @@ beforeEach(() => {
 });
 
 test("Verfiy all Nodes are displayed correctly", () => {
-    const nodeList = screen.getByTestId("nodesList");
+    const nodeList = screen.getByTestId("nodeList");
     const nodes = within(nodeList).getAllByRole("generic");
     expect(nodes).toHaveLength(4);
     expect(nodes.map((div) => div.textContent)).toEqual(["HUB", "1", "2", "5"]);
@@ -62,7 +62,7 @@ test("Verfiy all Nodes are displayed correctly", () => {
 });
 
 test("Verify Node Selection Updates Style", async () => {
-    const nodeList = screen.getByTestId("nodesList");
+    const nodeList = screen.getByTestId("nodeList");
     const nodes = within(nodeList).getAllByRole("generic");
     expect(nodes).toHaveLength(4);
 

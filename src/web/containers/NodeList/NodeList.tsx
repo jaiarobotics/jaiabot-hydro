@@ -76,7 +76,7 @@ export function NodeList() {
     }
 
     return (
-        <div id="nodesList" data-testid="nodesList">
+        <div id="nodeList" data-testid="nodeList">
             {hubs.map((hub) => (
                 <div
                     key={`hub-${hub.getHubID()}`}
