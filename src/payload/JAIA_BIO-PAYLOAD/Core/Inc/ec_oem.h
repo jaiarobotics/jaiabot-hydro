@@ -56,13 +56,13 @@ typedef struct {
  * INITIALIZATION
  */
 HAL_StatusTypeDef EC_OEM_Initialize( EC_OEM *dev, I2C_HandleTypeDef *i2cHandle );
+HAL_StatusTypeDef EC_OEM_Activate( EC_OEM *dev );
+HAL_StatusTypeDef EC_OEM_Hibernate( EC_OEM *dev );
 
 
 /*
  * DATA ACQUISITION
  */
-HAL_StatusTypeDef EC_OEM_Activate( EC_OEM *dev );
-HAL_StatusTypeDef EC_OEM_Hibernate( EC_OEM *dev );
 HAL_StatusTypeDef EC_OEM_GetDevType( EC_OEM *dev );
 HAL_StatusTypeDef EC_OEM_ReadEC( EC_OEM *dev );
 
@@ -72,7 +72,6 @@ HAL_StatusTypeDef EC_OEM_ReadEC( EC_OEM *dev );
  */
 HAL_StatusTypeDef EC_OEM_ReadRegister( EC_OEM *dev, uint8_t reg, uint8_t *data );
 HAL_StatusTypeDef EC_OEM_ReadRegisters( EC_OEM *dev, uint8_t reg, uint8_t *data, uint8_t len );
-
 HAL_StatusTypeDef EC_OEM_WriteRegister( EC_OEM *dev, uint8_t reg, uint8_t *data );
 
 #endif /* INC_EC_OEM_H_ */

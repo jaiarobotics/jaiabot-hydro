@@ -58,7 +58,6 @@ struct boot_vectable_ {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void JumpToBootLoader(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -96,11 +95,6 @@ void JumpToBootLoader(void);
 #define PPS_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
-#define BOOT_ADDR 0x1fff0000 // my MCU boot code base address
-#define MCU_IRQS 70u // number of NVIC IRQ inputs
-
-#define BOOTVTAB ((struct boot_vectable_ *)BOOT_ADDR)
 
 /* USER CODE END Private defines */
 

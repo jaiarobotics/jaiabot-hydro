@@ -10,13 +10,15 @@ HAL_StatusTypeDef OEM_Init(OEM_CHIP *dev , I2C_HandleTypeDef *i2cHandle) {
 
     /* Get device type */
     HAL_StatusTypeDef status = OEM_GetDeviceType(dev);
-    if (dev->devType != EC_OEM_DEV_TYPE && dev->devType != PH_OEM_DEV_TYPE && dev->devType != DO_OEM_DEV_TYPE) {
-        return 255;
+    if (dev->devType != EC_REG_DEV_TYPE && 
+        dev->devType != PH_OEM_DEV_TYPE && 
+        dev->devType != DO_OEM_DEV_TYPE) {
+        return HAL_ERROR;
     } else if (status != HAL_OK) {
         return status;
     }
 
-    // Activate all OEM chips in order to begin taking readings.
+    // Activate OEM chip in order to begin taking readings.
     status = OEM_Activate(dev);
 
     return status;
@@ -27,10 +29,12 @@ HAL_StatusTypeDef OEM_Activate(OEM_CHIP *dev) {
     return OEM_WriteRegister(dev, OEM_REG_ACTIVATE, &activate_command);
 }
 
-HAL_StatusTypeDef OEM_Hiobernate(OEM_CHIP *dev) {
-    uint8_t activate_command = 0x00;
-    return OEM_WriteRegister(dev, OEM_REG_ACTIVATE, &activate_command);
+HAL_StatusTypeDef OEM_Hibernate(OEM_CHIP *dev) {
+    uint8_t hibernate_command = 0x00;
+    return OEM_WriteRegister(dev, OEM_REG_ACTIVATE, &hibernate_command);
 }
+
+
 /* COLLECT DATA */
 HAL_StatusTypeDef OEM_GetDeviceType(OEM_CHIP *dev) {
     return OEM_ReadRegister(dev, OEM_REG_DEV_TYPE, &dev->devType);
@@ -63,6 +67,21 @@ HAL_StatusTypeDef OEM_ReadData(OEM_CHIP *dev) {
 
     return status;
 }
+
+
+
+/* 
+ * CALIBRATION DATA
+ */
+
+HAL_StatusTypeDef OEM_SetCalibration(OEM_CHIP *dev) {
+    // return
+}
+
+HAL_StatusTypeDef OEM_GetCalibration(OEM_CHIP *dev) {
+    // return
+}
+
 
 /* LOW-LEVEL FUNCTIONS */
 HAL_StatusTypeDef OEM_ReadRegister(OEM_CHIP *dev, uint8_t reg, uint8_t *data) {
